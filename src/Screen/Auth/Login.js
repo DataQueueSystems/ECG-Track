@@ -89,6 +89,18 @@ export default function Login() {
 
   return (
     <>
+      <View
+        style={{
+          position: 'absolute',
+          top: 15,
+          zIndex: 100,
+          right: 15,
+        }}>
+        <Image
+          source={require('../../../assets/Logo/logo.png')}
+          style={styles.image}
+        />
+      </View>
       <Header screenName={screenName} />
       <View
         style={[
@@ -237,5 +249,10 @@ const styles = StyleSheet.create({
   btn: {
     padding: 4,
     marginTop: 20,
+  },
+  image: {
+    width: 70,
+    height: 70,
+    borderRadius: 100,
   },
 });
