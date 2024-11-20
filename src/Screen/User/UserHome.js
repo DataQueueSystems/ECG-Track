@@ -249,6 +249,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 10,
   },
+
+  
   profileImage: {
     padding: 10,
     borderRadius: 100,
