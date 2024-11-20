@@ -29,10 +29,22 @@ export default function Home() {
     return () => backHandler.remove();
   }, []);
   return (
-    <View>
-      <Text>AdminHome</Text>
+    <>
+    <View style={styles.maincontainer}>
+      <View style={styles.headerView}>
+      </View>
+      
     </View>
+    </>
   );
 }
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({
+  maincontainer:{
+    flex:1,
+    backgroundColor:'green'
+  },
+  headerView:{
+    backgroundColor:''
+  }
+});

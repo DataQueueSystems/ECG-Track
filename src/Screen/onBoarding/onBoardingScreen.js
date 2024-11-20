@@ -23,9 +23,30 @@ const OnboardingScreen = ({}) => {
       navigation.navigate('Home');
     }
   };
+  
   let iconSize = 210;
   return (
     <Onboarding
+      skipLabel={
+        <CustomText
+          style={{
+            fontSize: 16,
+            color: theme.colors.appColor,
+            fontFamily: fonts.SemiBold,
+          }}>
+          Skip
+        </CustomText>
+      }
+      nextLabel={
+        <CustomText
+          style={{
+            fontSize: 16,
+            color: theme.colors.appColor,
+            fontFamily: fonts.SemiBold,
+          }}>
+          Next
+        </CustomText>
+      }
       onSkip={handleBtnPress} // Replace 'HomeScreen' with your desired navigation target
       onDone={handleBtnPress} // Navigate after the last onboarding screen
       pages={[

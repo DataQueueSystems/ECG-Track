@@ -153,6 +153,18 @@ export default function Register() {
 
   return (
     <>
+      <View
+        style={{
+          position: 'absolute',
+          top: 15,
+          zIndex: 100,
+          right: 15,
+        }}>
+        <Image
+          source={require('../../../assets/Logo/logo.png')}
+          style={styles.image}
+        />
+      </View>
       <Header screenName={screenName} />
       <View
         style={[
@@ -289,14 +301,13 @@ export default function Register() {
                   </CustomText>
                 )}
               </Button>
-
               <View
                 style={{
                   marginVertical: 2,
                   alignSelf: 'center',
                   flexDirection: 'row',
                   alignItems: 'center',
-                  marginTop: 4,
+                  marginTop: 10,
                 }}>
                 <CustomText style={{fontFamily: fonts.LightItalic}}>
                   Already have an account?{' '}
@@ -322,16 +333,6 @@ export default function Register() {
 const styles = StyleSheet.create({
   mainContainer: {
     flex: 1,
-  },
-  imageView: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: 2,
-  },
-  image: {
-    width: 100,
-    height: 100,
-    borderRadius: 100,
   },
   headingContainer: {
     paddingVertical: 15,
@@ -362,5 +363,10 @@ const styles = StyleSheet.create({
   errorText: {
     fontSize: 12,
     bottom: 10,
+  },
+  image: {
+    width: 70,
+    height: 70,
+    borderRadius: 100,
   },
 });
