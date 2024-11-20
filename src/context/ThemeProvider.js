@@ -9,7 +9,7 @@ const lightTheme = {
   ...DefaultTheme,
   colors: {
     ...DefaultTheme.colors,
-    background: '#f7f7f7',
+    background: '#Fff',
     // background: '#e0e0e0',
     error: '#d9534f',
     onboardingBackground1: '#A6D9B3', // Very Light Green, symbolizing health and safety
@@ -17,15 +17,14 @@ const lightTheme = {
     onboardingBackground3: '#E0F3EC', // Very Light Pastel Green, soothing and gentle
     blue: '#4a51a3', // Deep Blue
     blackGrey: '#2F2F2F',
-
     lightGrey: 'rgba(246, 246, 245, 0.835)',
     onlightGrey: 'rgba(57, 57, 57, 0.752)',
     transpgrey: 'rgba(228, 228, 227, 0.835)',
-
     green: '#388E3C',
     red: '#D32F2F',
     sheetGreen: '#c8e9ca',
     appColor: '#78B3CE',
+    appLight: '#cde5f5',
   },
   roundness: 6,
 };
@@ -41,7 +40,6 @@ const darkTheme = {
     onboardingBackground3: '#9fbba2', // Mint Green
     blue: '#4a51a3', // Deep Blue
     blackGrey: '#2F2F2F',
-
     lightGrey: 'rgba(57, 57, 57, 0.752)',
     transpgrey: 'rgba(57, 57, 57, 0.752)',
     onlightGrey: 'rgba(246, 246, 245, 0.835)',
@@ -49,6 +47,7 @@ const darkTheme = {
     red: '#D32F2F',
     sheetGreen: '#163717',
     appColor: '#78B3CE',
+    appLight: '#cde5f5',
   },
   roundness: 6,
 };
@@ -57,7 +56,6 @@ const ThemeContext = createContext();
 
 const ThemeProvider = ({children}) => {
   const [theme, setTheme] = useState(Appearance.getColorScheme());
-
   useEffect(() => {
     // Update theme when system theme changes
     const subscription = Appearance.addChangeListener(({colorScheme}) => {

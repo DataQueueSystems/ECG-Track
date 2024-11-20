@@ -4,15 +4,11 @@ import NetInfo, {useNetInfoInstance} from '@react-native-community/netinfo';
 import firestore from '@react-native-firebase/firestore';
 import {showToast} from '../../utils/Toast.js';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import Geolocation from '@react-native-community/geolocation'; // Import Geolocation
-import {request, PERMISSIONS, RESULTS} from 'react-native-permissions';
 
 const Authcontext = createContext();
 export const AuthContextProvider = ({children}) => {
   const [isLogin, setIsLogin] = useState(false);
   const [userDetail, setUserDetail] = useState(null);
-  // const [allusers, setAllusers] = useState(null);
-  // const [psUser, setPSuser] = useState(null);
 
   const Checknetinfo = async () => {
     const state = await NetInfo.fetch(); // Get the current network state
@@ -51,8 +47,6 @@ export const AuthContextProvider = ({children}) => {
     GetUserDetail();
   }, []);
 
-  const [location, setLocation] = useState(null);
-
   const gotoSetting = () => {
     Alert.alert(
       'Notification Permission Denied',
@@ -70,100 +64,6 @@ export const AuthContextProvider = ({children}) => {
       ],
     );
   };
-
-  // const handlePermissionStatus = result => {
-  //   switch (result) {
-  //     case RESULTS.GRANTED:
-  //       // showToast('Location permission granted');
-  //       break;
-  //     case RESULTS.DENIED:
-  //       // showToast('Location permission denied');
-  //       gotoSetting();
-  //       break;
-  //     case RESULTS.BLOCKED:
-  //       showToast(
-  //         'Location permission is blocked; ask the user to enable it in settings',
-  //       );
-  //       gotoSetting();
-  //       break;
-  //     case RESULTS.UNAVAILABLE:
-  //       showToast('Location permission is unavailable on this device');
-  //       gotoSetting();
-  //       break;
-  //     default:
-  //       break;
-  //   }
-  // };
-
-  // Request Location Permission
-  // const hasLocationPermission = async () => {
-  //   let permissions = await request(
-  //     Platform.select({
-  //       android: PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION,
-  //       ios: PERMISSIONS.IOS.LOCATION_WHEN_IN_USE,
-  //     }),
-  //   );
-  //   handlePermissionStatus(permissions);
-  //   return permissions === 'granted';
-  // };
-
-  // const fetchLocation = async () => {
-  //   const granted = await hasLocationPermission();
-  //   if (granted) {
-  //     // Get the user's current location
-  //     Geolocation.getCurrentPosition(
-  //       async position => {
-  //         await setLocation(position.coords); // Update location state
-  //       },
-  //       error => {
-  //         console.error('Error:', error.code, error.message);
-  //         Alert.alert('Location Error', error.message);
-  //       },
-  //       {enableHighAccuracy: true, timeout: 15000, maximumAge: 10000},
-  //     );
-  //   } else {
-  //     showToast('To use this app location is must');
-  //   }
-  // };
-
-  // Fetch Location on Component Mount
-  // useEffect(() => {
-  //   fetchLocation();
-  // }, []);
-
-  // const GetAllUser = async () => {
-  //   try {
-  //     const subscriber = firestore()
-  //       .collection('users')
-  //       .where('role', '==', 'user')
-  //       .where('Status', '==', 'Active')
-  //       .onSnapshot(snapshot => {
-  //         let alluserDetail = snapshot.docs.map(snapdata => ({
-  //           id: snapdata.id,
-  //           ...snapdata.data(),
-  //         }));
-  //         setAllusers(alluserDetail);
-  //         // Filter users with Positive diagnosis status
-  //         const positiveStatusUser = alluserDetail.filter(
-  //           user =>
-  //             user.diagnosis?.status === 'Positive' &&
-  //             user?.id != userDetail?.id,
-  //         );
-  //         setPSuser(positiveStatusUser); // Set the filtered list as needed
-  //       });
-  //     // Clean up the listener when the component unmounts
-  //     return () => subscriber();
-  //   } catch (error) {
-  //     console.log('Error is:', error);
-  //   }
-  // };
-
-  // useEffect(() => {
-  //   const unsubscribe = GetAllUser();
-  //   return () => {
-  //     if (unsubscribe) unsubscribe(); // Clean up to prevent memory leaks
-  //   };
-  // }, []);
 
   const handleLogout = () => {
     Alert.alert(
@@ -205,9 +105,6 @@ export const AuthContextProvider = ({children}) => {
         // logout func
         handleLogout,
 
-        // App user Location
-        location,
-        setLocation,
         gotoSetting,
       }}>
       {children}

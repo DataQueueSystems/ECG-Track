@@ -1,9 +1,9 @@
 import {StyleSheet, Text, View} from 'react-native';
 import React from 'react';
 import {useAuthContext} from '../context/GlobaContext';
-import UserHome from './User/Home';
-import AdminHome from './Admin/Home';
-import DoctorHome from './Doctor/Home';
+import UserHome from './User/UserHome';
+import AdminHome from './Admin/AdminHome';
+import DoctorHome from './Doctor/DoctorHome';
 
 export default function Parent() {
   const {userDetail} = useAuthContext();

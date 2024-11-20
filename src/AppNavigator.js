@@ -10,6 +10,10 @@ import {ActivityIndicator, useTheme} from 'react-native-paper';
 import Parent from './Screen/Parent';
 import Login from './Screen/Auth/Login';
 import Register from './Screen/Auth/Register';
+import DoctorList from './Screen/Admin/DoctorList';
+import UserList from './Screen/Admin/UserList';
+import ControlDoctor from './Screen/Admin/ControlDoctor';
+import ControlUser from './Screen/Admin/ControlUser';
 const Stack = createNativeStackNavigator();
 
 export default function AppNavigator() {
@@ -78,6 +82,32 @@ export default function AppNavigator() {
               component={Parent}
               options={{headerShown: false}}
             />
+
+            {/* Admin */}
+
+            <Stack.Screen
+              name="DoctorList"
+              component={DoctorList}
+              options={{headerShown: false}}
+            />
+            <Stack.Screen
+              name="ControlDoctor"
+              component={ControlDoctor}
+              options={{headerShown: false}}
+            />
+
+            <Stack.Screen
+              name="UserList"
+              component={UserList}
+              options={{headerShown: false}}
+            />
+
+            <Stack.Screen
+              name="ControlUser"
+              component={ControlUser}
+              options={{headerShown: false}}
+            />
+
           </>
         )}
       </Stack.Navigator>
