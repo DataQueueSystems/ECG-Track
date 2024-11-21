@@ -17,33 +17,33 @@ import CustomText from '../../customText/CustomText';
 import {fonts} from '../../customText/fonts';
 import {useAuthContext} from '../../context/GlobaContext';
 import Icon from 'react-native-vector-icons/Ionicons'; // Use Ionicons
+import Appointment from '../../Component/Appointment';
 
 const {width} = Dimensions.get('window');
 const cardWidth = width / 2 - 24; // For a two-column grid with padding
 
-const renderCard = ({item}) => (
-  <LinearGradient
-    colors={['#cde5f5', '#78B3CE']}
-    style={[styles.card, {width: cardWidth}]}>
-    <Icon name={item.icon} size={40} color="#000" style={styles.cardIcon} />
-    <CustomText style={[styles.cardTitle, {fontFamily: fonts.Black}]}>
-      {item.title}
-    </CustomText>
-    <CustomText style={[styles.cardDescription, {fontFamily: fonts.Regular}]}>
-      {item.description}
-    </CustomText>
-    <CustomText style={[styles.cardSolution, {fontFamily: fonts.SemiBold}]}>
-      Solution: {item.solution}
-    </CustomText>
-  </LinearGradient>
-);
-
 export default function Home() {
   const {handleLogout} = useAuthContext();
+
   let theme = useTheme();
   let navigation = useNavigation();
   const isFocused = useIsFocused();
   const backPressedOnce = useRef(false);
+
+  const Doctor = {
+    name: 'Dr. Sarah Johnson',
+    specialty: 'Cardiologist',
+    availableTime: '9:00 AM - 5:00 PM',
+    contact: '+1 234 567 890',
+    email: 'n@gmail.com',
+    address: 'Mangalore',
+    password: '123',
+  };
+
+  const handleNavigate = () => {
+    navigation.navigate('EditProfile', {userData: Doctor});
+  };
+
   useEffect(() => {
     const backHandler = BackHandler.addEventListener(
       'hardwareBackPress',
@@ -67,6 +67,30 @@ export default function Home() {
 
     return () => backHandler.remove();
   }, []);
+
+  const renderCard = ({item}) => (
+    <View
+      style={[
+        styles.card,
+        {width: cardWidth, backgroundColor: theme.colors.transpgrey},
+      ]}>
+      <Icon
+        name={item.icon}
+        size={40}
+        color={theme.colors.onBackground}
+        style={styles.cardIcon}
+      />
+      <CustomText style={[styles.cardTitle, {fontFamily: fonts.Black}]}>
+        {item.title}
+      </CustomText>
+      <CustomText style={[styles.cardDescription, {fontFamily: fonts.Regular}]}>
+        {item.description}
+      </CustomText>
+      <CustomText style={[styles.cardSolution, {fontFamily: fonts.SemiBold}]}>
+        Solution: {item.solution}
+      </CustomText>
+    </View>
+  );
 
   let TextColor = {color: 'rgb(22, 21, 21)'};
 
@@ -115,149 +139,242 @@ export default function Home() {
     },
   ];
 
+  const users = [
+    {
+      id: '1',
+      name: 'John Doe',
+      age: 30,
+      email: 'john.doe@gmail.com',
+      contact: '+1 123 456 789',
+      address: '123 Main Street, New York, NY',
+    },
+    {
+      id: '2',
+      name: 'Jane Smith',
+      age: 28,
+      email: 'jane.smith@gmail.com',
+      contact: '+1 987 654 321',
+      address: '456 Elm Street, Los Angeles, CA',
+    },
+    {
+      id: '3',
+      name: 'Michael Brown',
+      age: 35,
+      email: 'michael.brown@gmail.com',
+      contact: '+1 555 123 456',
+      address: '789 Maple Avenue, Chicago, IL',
+    },
+    {
+      id: '4',
+      name: 'Emily White',
+      age: 25,
+      email: 'emily.white@gmail.com',
+      contact: '+1 234 567 890',
+      address: '101 Oak Street, Houston, TX',
+    },
+    {
+      id: '5',
+      name: 'Robert Johnson',
+      age: 40,
+      email: 'robert.johnson@gmail.com',
+      contact: '+1 321 654 987',
+      address: '202 Pine Avenue, San Francisco, CA',
+    },
+    {
+      id: '6',
+      name: 'Sophia Davis',
+      age: 22,
+      email: 'sophia.davis@gmail.com',
+      contact: '+1 876 543 210',
+      address: '303 Cedar Street, Seattle, WA',
+    },
+    {
+      id: '7',
+      name: 'William Garcia',
+      age: 32,
+      email: 'william.garcia@gmail.com',
+      contact: '+1 654 321 987',
+      address: '404 Birch Road, Boston, MA',
+    },
+    {
+      id: '8',
+      name: 'Olivia Martinez',
+      age: 27,
+      email: 'olivia.martinez@gmail.com',
+      contact: '+1 789 123 456',
+      address: '505 Spruce Lane, Miami, FL',
+    },
+    {
+      id: '9',
+      name: 'James Wilson',
+      age: 29,
+      email: 'james.wilson@gmail.com',
+      contact: '+1 543 210 987',
+      address: '606 Redwood Boulevard, Atlanta, GA',
+    },
+  ];
+
   return (
     <>
       <View
         style={[
           styles.maincontainer,
-          {backgroundColor: theme.colors.appLight},
+          {backgroundColor: theme.colors.background},
         ]}>
-        <LinearGradient style={{flex: 1}} colors={['#cde5f5', '#78B3CE']}>
-          <View style={styles.mainHeader}>
-            <CustomText
-              style={{fontFamily: fonts.Bold, fontSize: 22, color: 'black'}}>
-              Welcome, Dr. Murshid
-            </CustomText>
+        <View style={styles.mainHeader}>
+          <CustomText numberOfLines={1}  style={{fontFamily: fonts.Bold, fontSize: 22}}>
+            Welcome, {Doctor?.name}
+          </CustomText>
 
-            <View style={{flexDirection: 'row', gap: 4}}>
-              <Iconify
-                icon="mynaui:edit"
-                size={32}
-                color={'black'}
-                onPress={handleLogout}
-              />
-              <Iconify
-                icon="majesticons:logout-half-circle-line"
-                size={32}
-                color={'black'}
-                onPress={handleLogout}
-              />
-            </View>
+          <View style={{flexDirection: 'row', gap: 4}}>
+            <Iconify
+              icon="mynaui:edit"
+              size={28}
+              color={theme.colors.onBackground}
+              onPress={handleNavigate}
+            />
+            <Iconify
+              icon="majesticons:logout-half-circle-line"
+              size={28}
+              color={theme.colors.onBackground}
+              onPress={handleLogout}
+            />
           </View>
+        </View>
 
-          <View style={[styles.maindoctorCard]}>
-            <View
-              style={{
-                flexDirection: 'row',
-                gap: 10,
-              }}>
-              <View style={styles.profileImage}>
-                <Iconify icon="fa-solid:user" size={35} color={'black'} />
-              </View>
+        <FlatList
+          showsHorizontalScrollIndicator={false}
+          showsVerticalScrollIndicator={false}
+          data={cards}
+          keyExtractor={item => item.id}
+          renderItem={renderCard}
+          numColumns={2}
+          ListHeaderComponent={
+            <>
+              <View style={[styles.maindoctorCard]}>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    gap: 10,
+                  }}>
+                  <View style={styles.profileImage}>
+                    <Iconify icon="fa-solid:user" size={35} color={'black'} />
+                  </View>
 
-              <View style={styles.NameContent}>
-                <CustomText
-                  style={[
-                    {
-                      fontFamily: fonts.Bold,
-                      fontSize: 16,
-                    },
-                    TextColor,
-                  ]}>
-                  Doctor Richard
-                </CustomText>
-                <View style={styles.specialist}>
-                  <Iconify
-                    icon="material-symbols-light:special-character"
-                    size={22}
-                    color={'black'}
-                  />
-                  <CustomText
-                    style={[
-                      {
-                        fontFamily: fonts.SemiBold,
-                        fontSize: 14,
-                      },
-                      TextColor,
-                    ]}>
-                    Psychiatrist
-                  </CustomText>
+                  <View style={styles.NameContent}>
+                    <CustomText
+                      style={[
+                        {
+                          fontFamily: fonts.Bold,
+                          fontSize: 16,
+                        },
+                        TextColor,
+                      ]}>
+                      Dr.{Doctor?.name}
+                    </CustomText>
+                    <View style={styles.specialist}>
+                      <Iconify
+                        icon="material-symbols-light:special-character"
+                        size={22}
+                        color={'black'}
+                      />
+                      <CustomText
+                        style={[
+                          {
+                            fontFamily: fonts.SemiBold,
+                            fontSize: 14,
+                          },
+                          TextColor,
+                        ]}>
+                        {Doctor?.specialty}
+                      </CustomText>
+                    </View>
+                  </View>
+                </View>
+
+                {/* Additional Details */}
+                <View style={{marginTop: 10, marginHorizontal: 10}}>
+                  {/* Contact Number */}
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      gap: 8,
+                    }}>
+                    <Iconify icon="mdi:phone" size={20} color={'black'} />
+                    <CustomText
+                      style={[
+                        {fontFamily: fonts.Regular, fontSize: 14},
+                        TextColor,
+                      ]}>
+                      {Doctor?.contact}
+                    </CustomText>
+                  </View>
+
+                  {/* Email */}
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      gap: 8,
+                    }}>
+                    <Iconify icon="mdi:email" size={20} color={'black'} />
+                    <CustomText
+                      style={[
+                        {fontFamily: fonts.Regular, fontSize: 14},
+                        TextColor,
+                      ]}>
+                      {Doctor?.email}
+                    </CustomText>
+                  </View>
+
+                  {/* Available Time */}
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      gap: 8,
+                    }}>
+                    <Iconify
+                      icon="mdi:clock-time-four-outline"
+                      size={20}
+                      color={'black'}
+                    />
+                    <CustomText
+                      style={[
+                        {fontFamily: fonts.Regular, fontSize: 14},
+                        TextColor,
+                      ]}>
+                      {Doctor?.availableTime}
+                    </CustomText>
+                  </View>
+
+                  {/* Address */}
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      gap: 8,
+                    }}>
+                    <Iconify icon="mdi:map-marker" size={20} color={'black'} />
+                    <CustomText
+                      numberOfLines={3}
+                      style={[
+                        {fontFamily: fonts.Regular, fontSize: 14},
+                        TextColor,
+                      ]}>
+                      {Doctor?.address}
+                    </CustomText>
+                  </View>
                 </View>
               </View>
-            </View>
 
-            {/* Additional Details */}
-            <View style={{marginTop: 10, marginHorizontal: 10}}>
-              {/* Contact Number */}
-              <View
-                style={{flexDirection: 'row', alignItems: 'center', gap: 8}}>
-                <Iconify icon="mdi:phone" size={20} color={'black'} />
-                <CustomText
-                  style={[
-                    {fontFamily: fonts.Regular, fontSize: 14},
-                    TextColor,
-                  ]}>
-                  +1 234 567 890
-                </CustomText>
-              </View>
-
-              {/* Email */}
-              <View
-                style={{flexDirection: 'row', alignItems: 'center', gap: 8}}>
-                <Iconify icon="mdi:email" size={20} color={'black'} />
-                <CustomText
-                  style={[
-                    {fontFamily: fonts.Regular, fontSize: 14},
-                    TextColor,
-                  ]}>
-                  dr.richard@example.com
-                </CustomText>
-              </View>
-
-              {/* Available Time */}
-              <View
-                style={{flexDirection: 'row', alignItems: 'center', gap: 8}}>
-                <Iconify
-                  icon="mdi:clock-time-four-outline"
-                  size={20}
-                  color={'black'}
-                />
-                <CustomText
-                  style={[
-                    {fontFamily: fonts.Regular, fontSize: 14},
-                    TextColor,
-                  ]}>
-                  9:00 AM - 5:00 PM
-                </CustomText>
-              </View>
-
-              {/* Address */}
-              <View
-                style={{flexDirection: 'row', alignItems: 'center', gap: 8}}>
-                <Iconify icon="mdi:map-marker" size={20} color={'black'} />
-                <CustomText
-                  numberOfLines={3}
-                  style={[
-                    {fontFamily: fonts.Regular, fontSize: 14},
-                    TextColor,
-                  ]}>
-                  123 Medical Avenue,
-                </CustomText>
-              </View>
-            </View>
-          </View>
-
-          <FlatList
-            showsHorizontalScrollIndicator={false}
-            showsVerticalScrollIndicator={false}
-            data={cards}
-            keyExtractor={item => item.id}
-            renderItem={renderCard}
-            numColumns={2}
-            contentContainerStyle={styles.container}
-            columnWrapperStyle={{justifyContent: 'space-between'}}
-          />
-        </LinearGradient>
+              <Appointment data={users} />
+            </>
+          }
+          contentContainerStyle={styles.container}
+          columnWrapperStyle={{justifyContent: 'space-between'}}
+        />
       </View>
     </>
   );
@@ -273,6 +390,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     flexDirection: 'row',
     justifyContent: 'space-between',
+    borderRadius: 100,
   },
   profileImage: {
     padding: 10,
@@ -303,11 +421,6 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 12,
     marginBottom: 16,
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
   },
   cardIcon: {
     marginBottom: 12,
@@ -317,17 +430,14 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginBottom: 8,
     textAlign: 'center',
-    color: '#fff',
   },
   cardDescription: {
     fontSize: 14,
-    color: '#ddds',
     marginBottom: 8,
     textAlign: 'center',
   },
   cardSolution: {
     fontSize: 14,
-    color: '#ddd',
     textAlign: 'center',
   },
 });

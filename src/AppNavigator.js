@@ -14,6 +14,7 @@ import DoctorList from './Screen/Admin/DoctorList';
 import UserList from './Screen/Admin/UserList';
 import ControlDoctor from './Screen/Admin/ControlDoctor';
 import ControlUser from './Screen/Admin/ControlUser';
+import EditProfile from './Component/EditProfile';
 const Stack = createNativeStackNavigator();
 
 export default function AppNavigator() {
@@ -105,6 +106,12 @@ export default function AppNavigator() {
             <Stack.Screen
               name="ControlUser"
               component={ControlUser}
+              options={{headerShown: false}}
+            />
+
+            <Stack.Screen
+              name="EditProfile"
+              component={EditProfile}
               options={{headerShown: false}}
             />
 

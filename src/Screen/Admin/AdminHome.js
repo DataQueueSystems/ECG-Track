@@ -7,11 +7,11 @@ import CustomText from '../../customText/CustomText';
 import {fonts} from '../../customText/fonts';
 import {Iconify} from 'react-native-iconify';
 import GradientCards from '../../Component/Admin/GradientCards';
-import { useAuthContext } from '../../context/GlobaContext';
+import {useAuthContext} from '../../context/GlobaContext';
 
 export default function Home() {
   let theme = useTheme();
-  const {handleLogout}=useAuthContext();
+  const {handleLogout} = useAuthContext();
   const isFocused = useIsFocused();
   const backPressedOnce = useRef(false);
   useEffect(() => {
@@ -39,20 +39,23 @@ export default function Home() {
 
   let TextColor = {color: 'rgb(22, 21, 21)'};
 
-
   return (
     <>
       <View
         style={[
           styles.maincontainer,
-          {backgroundColor: theme.colors.appLight},
+          {backgroundColor: theme.colors.background},
         ]}>
         {/* Header */}
         <View style={styles.headerView}>
           {/* ProfileDetail */}
           <View style={styles.userProfile}>
             <View style={styles.profileImage}>
-              <Iconify icon="fa-solid:user" size={35} color={'black'} />
+              <Iconify
+                icon="fa-solid:user"
+                size={35}
+                color={theme.colors.onBackground}
+              />
             </View>
 
             <View style={styles.NameDate}>
@@ -62,7 +65,6 @@ export default function Home() {
                     fontFamily: fonts.SemiBold,
                     fontSize: 14,
                   },
-                  TextColor,
                 ]}>
                 Hi,Murshid
               </CustomText>
@@ -72,7 +74,6 @@ export default function Home() {
                     fontFamily: fonts.Regular,
                     fontSize: 12,
                   },
-                  TextColor,
                 ]}>
                 Mon,22 July
               </CustomText>
@@ -83,7 +84,7 @@ export default function Home() {
             <Iconify
               icon="majesticons:logout-half-circle-line"
               size={37}
-              color={'black'}
+              color={theme.colors.onBackground}
               onPress={handleLogout}
             />
           </View>
@@ -92,21 +93,19 @@ export default function Home() {
         {/* MainHead Text */}
         <View style={styles.manageView}>
           <View style={styles.manageExplore}>
-            <CustomText
-              style={[styles.manageText, {fontFamily: fonts.Bold}, TextColor]}>
+            <CustomText style={[styles.manageText, {fontFamily: fonts.Bold}]}>
               Explore
             </CustomText>
             <Iconify
               icon="fluent-mdl2:recruitment-management"
-              size={37}
-              color={'black'}
+              size={30}
+              color={theme.colors.onBackground}
             />
           </View>
           <CustomText
             style={[
               styles.manageText,
               {fontFamily: fonts.Bold, lineHeight: 35},
-              TextColor,
             ]}>
             User & Doctor
           </CustomText>

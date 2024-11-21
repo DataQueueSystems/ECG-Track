@@ -1,12 +1,14 @@
-import {BackHandler, StyleSheet, Text, View} from 'react-native';
+import {BackHandler, ScrollView, StyleSheet, Text, View} from 'react-native';
 import React, {useEffect, useRef} from 'react';
 import {useAuthContext} from '../../context/GlobaContext';
-import {useIsFocused} from '@react-navigation/native';
+import {useIsFocused, useNavigation} from '@react-navigation/native';
 import {showToast} from '../../../utils/Toast';
 import {Iconify} from 'react-native-iconify';
 import CustomText from '../../customText/CustomText';
 import {useTheme} from 'react-native-paper';
 import {fonts} from '../../customText/fonts';
+import Appointment from '../../Component/Appointment';
+import RecommandedDoctor from '../../Component/User/RecommandedDoctor';
 
 export default function Home() {
   let theme = useTheme();
@@ -39,6 +41,39 @@ export default function Home() {
     return () => backHandler.remove();
   }, []);
 
+  const doctors = [
+    {
+      id: '1',
+      name: 'Dr. Sarah Johnson',
+      specialty: 'Cardiologist',
+      availableTime: '9:00 AM - 5:00 PM',
+      contact: '+1 234 567 890',
+      email: 'n@gmail.com',
+    },
+    {
+      id: '2',
+      name: 'Dr. Michael Smith',
+      specialty: 'Neurologist',
+      availableTime: '10:00 AM - 4:00 PM',
+      contact: '+1 987 654 321',
+      email: 'n@gmail.com',
+    },
+  ];
+
+
+  const UserDetail= {
+    name: 'John Doe',
+    age: 30,
+    email: 'john.doe@gmail.com',
+    contact: '+1 123 456 789',
+    address: '123 Main Street, New York, NY',
+    password:'123'
+  };
+
+  let navigation=useNavigation();
+  const handleNavigate = () => {
+    navigation.navigate('EditProfile', {userData: UserDetail});
+  };
   return (
     <>
       <View
@@ -50,16 +85,14 @@ export default function Home() {
         <View style={styles.headerView}>
           {/* Greeting */}
           <View>
-            <CustomText
-              style={{fontFamily: fonts.Bold, fontSize: 22, color: 'black'}}>
-              Hello, Murshid
+            <CustomText style={{fontFamily: fonts.Bold, fontSize: 22}}>
+              Hello, {UserDetail?.name}
             </CustomText>
 
             <CustomText
               style={{
                 fontFamily: fonts.Light,
                 fontSize: 13,
-                color: 'black',
                 top: -4,
               }}>
               How do you feel today?
@@ -71,162 +104,199 @@ export default function Home() {
               <Iconify
                 icon="majesticons:logout-half-circle-line"
                 size={30}
-                color={'black'}
+                color={theme.colors.onBackground}
                 onPress={handleLogout}
               />
             </View>
 
             <View style={styles.profileImage}>
-              <Iconify icon="fa-solid:user" size={27} color={'black'} />
+              <Iconify
+               
+                icon="mynaui:edit"
+                size={28}
+                color={theme.colors.onBackground}
+                onPress={handleNavigate}
+              />
             </View>
           </View>
         </View>
 
-        <View style={styles.trackHeader}>
-          <View style={styles.trackIcon}>
-            <Iconify icon="mingcute:run-line" size={55} color={'black'} />
-          </View>
-          <CustomText
-            style={{fontFamily: fonts.Bold, fontSize: 26, textAlign: 'center'}}>
-            Health Tracking
-          </CustomText>
-          <CustomText
-            style={{
-              fontFamily: fonts.Light,
-              fontSize: 13,
-              textAlign: 'center',
-              top: -5,
-            }}>
-            Track your walk, fitness and all activity you do!
-          </CustomText>
-        </View>
+        <ScrollView
+          showsHorizontalScrollIndicator={false}
+          showsVerticalScrollIndicator={false}>
+          {/* User AppointMent */}
 
-        {/* Recommanded */}
+          <Appointment data={doctors} fromUser={true}/>
 
-        <View style={styles.RecommandedView}>
-          <View>
+          {/* Recommanded Doctor */}
+          <RecommandedDoctor />
+
+          <View style={styles.trackHeader}>
+            <View style={styles.trackIcon}>
+              <Iconify
+                icon="mingcute:run-line"
+                size={55}
+                color={theme.colors.onBackground}
+              />
+            </View>
             <CustomText
               style={{
-                fontFamily: fonts.SemiBold,
-                fontSize: 19,
-                color: 'black',
+                fontFamily: fonts.Bold,
+                fontSize: 26,
+                textAlign: 'center',
               }}>
-              Recommended
+              Health Tracking
             </CustomText>
             <CustomText
               style={{
-                fontFamily: fonts.SemiBold,
-                fontSize: 17,
-                color: 'black',
-                top: -4,
+                fontFamily: fonts.Light,
+                fontSize: 13,
+                textAlign: 'center',
+                top: -5,
               }}>
-              activity
+              Track your walk, fitness and all activity you do!
             </CustomText>
           </View>
-          <View style={{flexDirection: 'row', alignItems: 'center', gap: 4}}>
-            <Iconify icon="wi:time-8" size={20} color={'black'} />
-            <CustomText
-              style={{
-                fontFamily: fonts.SemiBold,
-                fontSize: 12,
-              }}>
-              Time activity
-            </CustomText>
-          </View>
+
+          {/* Recommanded */}
           <View
-            style={{
-              flexDirection: 'column',
-              gap: 4,
-              left: 10,
-              marginVertical: 8,
-            }}>
-            <CustomText
+            style={[
+              styles.RecommandedView,
+              {backgroundColor: theme.colors.transpgrey},
+            ]}>
+            <View>
+              <CustomText
+                style={{
+                  fontFamily: fonts.SemiBold,
+                  fontSize: 19,
+                }}>
+                Recommended
+              </CustomText>
+              <CustomText
+                style={{
+                  fontFamily: fonts.SemiBold,
+                  fontSize: 17,
+                  top: -4,
+                }}>
+                activity
+              </CustomText>
+            </View>
+            <View style={{flexDirection: 'row', alignItems: 'center', gap: 4}}>
+              <Iconify
+                icon="wi:time-8"
+                size={20}
+                color={theme.colors.onBackground}
+              />
+              <CustomText
+                style={{
+                  fontFamily: fonts.SemiBold,
+                  fontSize: 12,
+                }}>
+                Time activity
+              </CustomText>
+            </View>
+            <View
               style={{
-                fontFamily: fonts.SemiBold,
-                fontSize: 12,
+                flexDirection: 'column',
+                gap: 4,
+                left: 10,
+                marginVertical: 8,
               }}>
-              - 60m
-            </CustomText>
-            <CustomText
-              style={{
-                fontFamily: fonts.SemiBold,
-                fontSize: 12,
-              }}>
-              - 30m
-            </CustomText>
-            <CustomText
-              style={{
-                fontFamily: fonts.SemiBold,
-                fontSize: 12,
-              }}>
-              - 30m
-            </CustomText>
-          </View>
+              <CustomText
+                style={{
+                  fontFamily: fonts.SemiBold,
+                  fontSize: 12,
+                }}>
+                - 60m
+              </CustomText>
+              <CustomText
+                style={{
+                  fontFamily: fonts.SemiBold,
+                  fontSize: 12,
+                }}>
+                - 30m
+              </CustomText>
+              <CustomText
+                style={{
+                  fontFamily: fonts.SemiBold,
+                  fontSize: 12,
+                }}>
+                - 30m
+              </CustomText>
+            </View>
 
-          <View
-            style={{
-              position: 'absolute',
-              bottom: 10,
-              right: 20,
-              flexDirection: 'row',
-              gap: 10,
-            }}>
             <View
               style={{
                 position: 'absolute',
-                bottom: -10,
-                right: -20,
-                backgroundColor: '#cde5f5',
-                padding: 10,
-                height: 190,
-                borderTopLeftRadius: 120,
-                width: 190,
-    borderWidth:1,
-    borderColor:'#fff',
-    borderBottomRightRadius:20
-
-              }}
-            />
-            <View style={{gap: 10}}>
+                bottom: 10,
+                right: 20,
+                flexDirection: 'row',
+                gap: 10,
+              }}>
               <View
-                style={[
-                  styles.profileImage,
-                  {right: 20, width: 65, height: 65,
-                    backgroundColor:"rgba(255, 220, 99, 1)"},
-                ]}>
-                <Iconify
-                  icon="ph:person-simple-swim-fill"
-                  size={50}
-                  color={'black'}
-                />
+                style={{
+                  position: 'absolute',
+                  bottom: -10,
+                  right: -20,
+                  backgroundColor: '#cde5f5',
+                  padding: 10,
+                  height: 190,
+                  borderTopLeftRadius: 120,
+                  width: 190,
+                  borderWidth: 1,
+                  borderColor: '#fff',
+                  borderBottomRightRadius: 20,
+                }}
+              />
+              <View style={{gap: 10}}>
+                <View
+                  style={[
+                    styles.profileImage,
+                    {
+                      right: 20,
+                      width: 65,
+                      height: 65,
+                      backgroundColor: 'rgba(255, 220, 99, 1)',
+                    },
+                  ]}>
+                  <Iconify
+                    icon="ph:person-simple-swim-fill"
+                    size={50}
+                    color={'black'}
+                  />
+                </View>
+                <View
+                  style={[
+                    styles.profileImage,
+                    {
+                      bottom: 10,
+                      left: 20,
+                      backgroundColor: 'rgba(244, 160, 223, 1)',
+                    },
+                  ]}>
+                  <Iconify icon="cbi:roomsgym" size={27} color={'black'} />
+                </View>
               </View>
-              <View style={[styles.profileImage, {bottom: 10, left: 20,
-                    backgroundColor:"rgba(244, 160, 223, 1)"
-
-              }]}>
-                <Iconify icon="cbi:roomsgym" size={27} color={'black'} />
-              </View>
-            </View>
-            <View style={{gap: 10}}>
-              <View style={[styles.profileImage, {top: -35,
-                    backgroundColor:"#e5e5e5"
-
-              }]}>
-                <Iconify icon="fa-solid:running" size={27} color={'black'} />
-              </View>
-              <View style={[styles.profileImage,
-                   { backgroundColor:"#85bbfc"}
-                
-              ]}>
-                <Iconify
-                  icon="icon-park-solid:play-volleyball"
-                  size={27}
-                  color={'black'}
-                />
+              <View style={{gap: 10}}>
+                <View
+                  style={[
+                    styles.profileImage,
+                    {top: -35, backgroundColor: '#e5e5e5'},
+                  ]}>
+                  <Iconify icon="fa-solid:running" size={27} color={'black'} />
+                </View>
+                <View
+                  style={[styles.profileImage, {backgroundColor: '#85bbfc'}]}>
+                  <Iconify
+                    icon="icon-park-solid:play-volleyball"
+                    size={27}
+                    color={'black'}
+                  />
+                </View>
               </View>
             </View>
           </View>
-        </View>
+        </ScrollView>
       </View>
     </>
   );
@@ -249,8 +319,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 10,
   },
-
-  
   profileImage: {
     padding: 10,
     borderRadius: 100,
@@ -277,10 +345,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   RecommandedView: {
-    backgroundColor: '#fff',
     padding: 20,
     borderRadius: 20,
     marginTop: 10,
-    elevation:2
+    marginBottom: 30,
   },
 });
