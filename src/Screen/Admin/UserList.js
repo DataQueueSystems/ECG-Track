@@ -140,8 +140,6 @@ const UserList = () => {
 
   const bottomSheetRef = useRef(null);
   const [selectedUser, setSelectedUser] = useState(null);
-  console.log(selectedUser, 'selectedUser');
-
   const handlePress = async User => {
     bottomSheetRef.current?.expand(); // Use expand instead of open
     await setSelectedUser(User);

@@ -13,7 +13,6 @@ import RecommandedDoctor from '../../Component/User/RecommandedDoctor';
 export default function Home() {
   let theme = useTheme();
   const {handleLogout} = useAuthContext();
-  let TextColor = {color: 'rgb(22, 21, 21)'};
 
   const isFocused = useIsFocused();
   const backPressedOnce = useRef(false);

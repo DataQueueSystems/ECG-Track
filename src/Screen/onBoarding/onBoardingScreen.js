@@ -23,7 +23,7 @@ const OnboardingScreen = ({}) => {
       navigation.navigate('Home');
     }
   };
-  
+
   let iconSize = 210;
   return (
     <Onboarding
