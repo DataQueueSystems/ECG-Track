@@ -9,6 +9,8 @@ const Authcontext = createContext();
 export const AuthContextProvider = ({children}) => {
   const [isLogin, setIsLogin] = useState(false);
   const [userDetail, setUserDetail] = useState(null);
+  const [allDoctor, setAllDoctor] = useState(null);
+  const [allpatient, setAllPatient] = useState(null);
 
   const Checknetinfo = async () => {
     const state = await NetInfo.fetch(); // Get the current network state
@@ -18,7 +20,6 @@ export const AuthContextProvider = ({children}) => {
     }
     return true; // Internet connection is available
   };
-
   const GetUserDetail = async () => {
     const userToken = await AsyncStorage.getItem('token');
 
@@ -42,11 +43,6 @@ export const AuthContextProvider = ({children}) => {
       console.error('Error fetching user details:', error);
     }
   };
-
-  useEffect(() => {
-    GetUserDetail();
-  }, []);
-
   const gotoSetting = () => {
     Alert.alert(
       'Notification Permission Denied',
@@ -91,6 +87,84 @@ export const AuthContextProvider = ({children}) => {
     );
   };
 
+  useEffect(() => {
+    GetUserDetail();
+  }, []);
+
+  const GetListDetail = async () => {
+    try {
+      const subscriber = firestore()
+        .collection('users')
+        .where('Status', '==', 'Active')
+        .onSnapshot(async snapshot => {
+          let alluser = snapshot.docs.map(snapdata => ({
+            id: snapdata.id,
+            ...snapdata.data(),
+          }));
+          const alldoctor = alluser?.filter(user => user?.role === 'doctor');
+          const allpatient = alluser?.filter(user => user?.role === 'user');
+          setAllDoctor(alldoctor); // Set the filtered list as needed
+          setAllPatient(allpatient); // Set the filtered list as needed
+        });
+      // Clean up the listener when the component unmounts
+      return () => subscriber();
+    } catch (error) {
+      console.log('Error is:', error);
+    }
+  };
+
+  useEffect(() => {
+    const unsubscribe = GetListDetail();
+    return () => {
+      if (unsubscribe) unsubscribe(); // Clean up to prevent memory leaks
+    };
+  }, []);
+
+  const CheckDataBase = async (setSpinner, setErrors, form) => {
+    setSpinner(true);
+    let isConnected = await Checknetinfo();
+    if (!isConnected) {
+      setSpinner(false);
+      return false;
+    }
+
+    try {
+      const snapShot = await firestore()
+        .collection('users')
+        .where('id', '!=', userDetail?.id)
+        .get();
+      // if (snapShot.empty) {
+      //   showToast('No user found');
+      //   setSpinner(false);
+      //   return false;
+      // };
+
+      // Flags to track existence of each field
+      let emailExists = false;
+      let contactExists = false;
+
+      // Check each document for matches on the given fields
+      snapShot.docs.forEach(doc => {
+        const data = doc.data();
+        if (data.email === form.email) emailExists = true;
+        if (data.contact === form.contact) contactExists = true;
+      });
+      let newErrors = {};
+      // Display relevant messages for each existing field
+      if (emailExists) newErrors.email = 'Email already exists.';
+      if (contactExists) newErrors.contact = 'Contact number already exists.';
+      setErrors(newErrors);
+
+      setSpinner(false);
+      // If any of the fields exist, return false; otherwise, return true
+      return !(emailExists || contactExists);
+    } catch (error) {
+      showToast('Something went wrong');
+      setSpinner(false);
+      return false;
+    }
+  };
+
   return (
     <Authcontext.Provider
       value={{
@@ -101,11 +175,14 @@ export const AuthContextProvider = ({children}) => {
         // User Detail
         userDetail,
         setUserDetail,
-
         // logout func
         handleLogout,
-
         gotoSetting,
+
+        // list of patient and doctor
+        allDoctor,
+        allpatient,
+        CheckDataBase,
       }}>
       {children}
     </Authcontext.Provider>

@@ -23,25 +23,16 @@ const {width} = Dimensions.get('window');
 const cardWidth = width / 2 - 24; // For a two-column grid with padding
 
 export default function Home() {
-  const {handleLogout} = useAuthContext();
+  const {handleLogout, userDetail} = useAuthContext();
 
   let theme = useTheme();
   let navigation = useNavigation();
   const isFocused = useIsFocused();
   const backPressedOnce = useRef(false);
-
-  const Doctor = {
-    name: 'Dr. Sarah Johnson',
-    specialty: 'Cardiologist',
-    availableTime: '9:00 AM - 5:00 PM',
-    contact: '+1 234 567 890',
-    email: 'n@gmail.com',
-    address: 'Mangalore',
-    password: '123',
-  };
+ 
 
   const handleNavigate = () => {
-    navigation.navigate('EditProfile', {userData: Doctor});
+    navigation.navigate('EditProfile', {fromuser:true});
   };
 
   useEffect(() => {
@@ -222,8 +213,10 @@ export default function Home() {
           {backgroundColor: theme.colors.background},
         ]}>
         <View style={styles.mainHeader}>
-          <CustomText numberOfLines={1}  style={{fontFamily: fonts.Bold, fontSize: 22}}>
-            Welcome, {Doctor?.name}
+          <CustomText
+            numberOfLines={1}
+            style={{fontFamily: fonts.Bold, fontSize: 22}}>
+            Welcome back ,
           </CustomText>
 
           <View style={{flexDirection: 'row', gap: 4}}>
@@ -270,7 +263,7 @@ export default function Home() {
                         },
                         TextColor,
                       ]}>
-                      Dr.{Doctor?.name}
+                      Dr.{userDetail?.name}
                     </CustomText>
                     <View style={styles.specialist}>
                       <Iconify
@@ -286,7 +279,7 @@ export default function Home() {
                           },
                           TextColor,
                         ]}>
-                        {Doctor?.specialty}
+                        {userDetail?.specialist}
                       </CustomText>
                     </View>
                   </View>
@@ -307,7 +300,7 @@ export default function Home() {
                         {fontFamily: fonts.Regular, fontSize: 14},
                         TextColor,
                       ]}>
-                      {Doctor?.contact}
+                      {userDetail?.contact}
                     </CustomText>
                   </View>
 
@@ -324,48 +317,56 @@ export default function Home() {
                         {fontFamily: fonts.Regular, fontSize: 14},
                         TextColor,
                       ]}>
-                      {Doctor?.email}
+                      {userDetail?.email}
                     </CustomText>
                   </View>
 
                   {/* Available Time */}
-                  <View
-                    style={{
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      gap: 8,
-                    }}>
-                    <Iconify
-                      icon="mdi:clock-time-four-outline"
-                      size={20}
-                      color={'black'}
-                    />
-                    <CustomText
-                      style={[
-                        {fontFamily: fonts.Regular, fontSize: 14},
-                        TextColor,
-                      ]}>
-                      {Doctor?.availableTime}
-                    </CustomText>
-                  </View>
+                  {userDetail?.availableTime && (
+                    <View
+                      style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        gap: 8,
+                      }}>
+                      <Iconify
+                        icon="mdi:clock-time-four-outline"
+                        size={20}
+                        color={'black'}
+                      />
+                      <CustomText
+                        style={[
+                          {fontFamily: fonts.Regular, fontSize: 14},
+                          TextColor,
+                        ]}>
+                        {userDetail?.availableTime}
+                      </CustomText>
+                    </View>
+                  )}
 
                   {/* Address */}
-                  <View
-                    style={{
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      gap: 8,
-                    }}>
-                    <Iconify icon="mdi:map-marker" size={20} color={'black'} />
-                    <CustomText
-                      numberOfLines={3}
-                      style={[
-                        {fontFamily: fonts.Regular, fontSize: 14},
-                        TextColor,
-                      ]}>
-                      {Doctor?.address}
-                    </CustomText>
-                  </View>
+                  {userDetail?.address && (
+                    <View
+                      style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        gap: 8,
+                      }}>
+                      <Iconify
+                        icon="mdi:map-marker"
+                        size={20}
+                        color={'black'}
+                      />
+                      <CustomText
+                        numberOfLines={3}
+                        style={[
+                          {fontFamily: fonts.Regular, fontSize: 14},
+                          TextColor,
+                        ]}>
+                        {userDetail?.address}
+                      </CustomText>
+                    </View>
+                  )}
                 </View>
               </View>
 
@@ -403,7 +404,7 @@ const styles = StyleSheet.create({
   },
   maindoctorCard: {
     padding: 20,
-    borderRadius: 30,
+    borderRadius: 17,
     marginTop: 10,
     backgroundColor: '#fff',
     elevation: 10,

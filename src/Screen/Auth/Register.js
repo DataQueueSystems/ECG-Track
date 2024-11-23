@@ -19,12 +19,12 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useAuthContext} from '../../context/GlobaContext';
 import axios from 'axios';
 import {showToast} from '../../../utils/Toast';
-import firestore, {doc} from '@react-native-firebase/firestore';
+import firestore from '@react-native-firebase/firestore';
 import {fonts} from '../../customText/fonts';
 
 export default function Register() {
   let theme = useTheme();
-  const {setIsLogin, Checknetinfo, location, fetchLocation} = useAuthContext();
+  const {setIsLogin, Checknetinfo} = useAuthContext();
   let navigation = useNavigation();
   const [spinner, setSpinner] = useState(false);
   const [errors, setErrors] = useState({});
@@ -33,7 +33,7 @@ export default function Register() {
     name: '',
     email: '',
     password: '',
-    contactNumber: '',
+    contact: '',
   });
 
   const handleChange = (field, value) => {
@@ -53,11 +53,11 @@ export default function Register() {
 
     try {
       const snapShot = await firestore().collection('users').get();
-      if (snapShot.empty) {
-        showToast('No user found');
-        setSpinner(false);
-        return false;
-      }
+      // if (snapShot.empty) {
+      //   showToast('No user found');
+      //   setSpinner(false);
+      //   return false;
+      // };
 
       // Flags to track existence of each field
       let emailExists = false;
@@ -67,14 +67,14 @@ export default function Register() {
       snapShot.docs.forEach(doc => {
         const data = doc.data();
         if (data.email === form.email) emailExists = true;
-        if (data.contactNumber === form.contactNumber) contactExists = true;
+        if (data.contact === form.contact) contactExists = true;
       });
 
       let newErrors = {};
       // Display relevant messages for each existing field
       if (emailExists) newErrors.email = 'Email already exists.';
       if (contactExists)
-        newErrors.contactNumber = 'Contact number already exists.';
+        newErrors.contact = 'Contact number already exists.';
 
       setErrors(newErrors);
 
@@ -87,62 +87,50 @@ export default function Register() {
       return false;
     }
   };
-
   const validateForm = () => {
     const newErrors = {};
     if (!form.name) newErrors.name = 'Name is required';
     if (!form.email) newErrors.email = 'Email is required';
     if (!form.password) newErrors.password = 'Password is required';
 
-    if (!form.contactNumber)
-      newErrors.contactNumber = 'Contact number is required';
-    else if (!/^\d{10}$/.test(form.contactNumber))
-      newErrors.contactNumber = 'Contact number must be 10 digits';
+    if (!form.contact)
+      newErrors.contact = 'Contact number is required';
+    else if (!/^\d{10}$/.test(form.contact))
+      newErrors.contact = 'Contact number must be 10 digits';
     setErrors(newErrors);
     setSpinner(false);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleRegister = async () => {
-    navigation.goBack();
     setSpinner(false);
-
-    // if (validateForm()) {
-    //   let CanAdd = await CheckDataBase(); // Checks for existing user
-
-    //   if (!location) {
-    //     showToast('To use this app location is must ');
-    //     await fetchLocation();
-    //     return;
-    //   }
-
-    //   if (CanAdd) {
-    //     try {
-    //       // Prepare default data for new user
-    //       let defaultData = {
-    //         ...form,
-    //         role: 'user',
-    //         Status: 'Active',
-    //         create_date: new Date().toISOString(), // Current date and time in ISO format
-
-    //       };
-
-    //       // Add new user to Firestore
-    //       await firestore().collection('users').add(defaultData);
-    //       showToast('Registration successful!');
-    //       navigation.goBack();
-    //     } catch (error) {
-    //       showToast('Error creating user');
-    //     } finally {
-    //       setSpinner(false);
-    //     }
-    //   } else {
-    //     showToast('User already exists');
-    //     setSpinner(false);
-    //   }
-    // } else {
-    //   showToast('Some invalid data');
-    // }
+    if (validateForm()) {
+      let CanAdd = await CheckDataBase(); // Checks for existing user
+      if (CanAdd) {
+        try {
+          // Prepare default data for new user
+          let defaultData = {
+            ...form,
+            role: 'user',
+            Status: 'Active',
+            create_date: new Date().toISOString(), // Current date and time in ISO format
+          };
+          // Add new user to Firestore
+          await firestore().collection('users').add(defaultData);
+          showToast('Registration successful!');
+          navigation.goBack();
+        } catch (error) {
+          showToast('Error creating user');
+        } finally {
+          setSpinner(false);
+        }
+      } else {
+        showToast('User already exists');
+        setSpinner(false);
+      }
+    } else {
+      showToast('Some invalid data');
+    }
   };
 
   const handleLogin = () => {
@@ -153,18 +141,6 @@ export default function Register() {
 
   return (
     <>
-      <View
-        style={{
-          position: 'absolute',
-          top: 15,
-          zIndex: 100,
-          right: 15,
-        }}>
-        <Image
-          source={require('../../../assets/Logo/logo.png')}
-          style={styles.image}
-        />
-      </View>
       <Header screenName={screenName} />
       <View
         style={[
@@ -250,13 +226,13 @@ export default function Register() {
               ]}
               placeholder="Contact Number"
               placeholderTextColor="#888"
-              value={form.contactNumber}
-              onChangeText={value => handleChange('contactNumber', value)}
+              value={form.contact}
+              onChangeText={value => handleChange('contact', value)}
             />
 
-            {errors.contactNumber && (
+            {errors.contact && (
               <CustomText style={[styles.errorText, {color: theme.colors.red}]}>
-                {errors.contactNumber}
+                {errors.contact}
               </CustomText>
             )}
 

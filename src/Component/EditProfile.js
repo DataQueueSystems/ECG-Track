@@ -15,22 +15,33 @@ import CustomText from '../customText/CustomText';
 import {useNavigation} from '@react-navigation/native';
 import {showToast} from '../../utils/Toast';
 import {fonts} from '../customText/fonts';
+import {useAuthContext} from '../context/GlobaContext';
+import firestore from '@react-native-firebase/firestore';
 
 export default function EditProfile({route}) {
-  const { userData} = route.params || {};
+  const {propsData, fromuser} = route.params || {};
+  const {userDetail, CheckDataBase} = useAuthContext();
+  const [userData, setUserData] = useState(fromuser ? userDetail : propsData);
   const theme = useTheme();
   let navigation = useNavigation();
   const [spinner, setSpinner] = useState(false);
   const [errors, setErrors] = useState({});
-  let screenName ='Edit Detail';
+  let screenName = 'Edit Detail';
 
-  const [form, setForm] = useState({
+  // Prepare the initial form state
+  const initialForm = {
     name: userData?.name || '',
     email: userData?.email || '',
     password: userData?.password || '',
     contact: userData?.contact || '',
-  });
-
+    address: userData?.address || '',
+  };
+  // Conditionally add the 'specialist' field if the user is a doctor
+  if (userDetail?.role === 'doctor') {
+    initialForm.specialist = userData?.specialist || '';
+  }
+  // Initialize state with the prepared object
+  const [form, setForm] = useState(initialForm);
   // Handle input changes for both top-level and nested fields
   const handleInputChange = (field, value, nestedField = null) => {
     if (nestedField) {
@@ -50,24 +61,44 @@ export default function EditProfile({route}) {
       }));
     }
   };
+  // Simple validation function
+  const validateForm = () => {
+    const newErrors = {};
+    if (!form.name) newErrors.name = 'Name is required';
+    if (form.specialist && !form.specialist)
+      newErrors.specialist = 'Specialist is required';
+    if (!form.email) newErrors.email = 'Email is required';
+    if (!form.password) newErrors.password = 'Password is required';
+    if (!form.address) newErrors.address = 'Address is required';
+    if (!form.contact) newErrors.contact = 'Contact number is required';
+    else if (!/^\d{10}$/.test(form.contact))
+      newErrors.contact = 'Contact number must be 10 digits';
+    setErrors(newErrors);
+    setSpinner(false);
+    return Object.keys(newErrors).length === 0;
+  };
+  console.log(errors, 'errr');
 
   const handleSubmit = async () => {
-    showToast('Submitting .....');
-  };
+    setSpinner(true);
+    try {
+      if (validateForm()) {
+        let CanEdit = await CheckDataBase(setSpinner, setErrors, form);
+        if (!CanEdit) {
+          showToast('Invalid data');
+          return;
+        }
+        await firestore().collection('users').doc(userData?.id).update(form);
+        showToast('Updated successfully ...');
 
-  // Update the status in the form
-  const handleStatus = status => {
-    setForm(prevForm => ({
-      ...prevForm,
-      diagnosis: {
-        ...prevForm.diagnosis,
-        status: status,
-      },
-    }));
-  };
+        setSpinner(false);
+        // navigation.goBack();
+      }
+    } catch (error) {
+      setSpinner(false);
 
-  const handleuserPress = () => {
-    showToast("You can't change the Status");
+      console.log('Error is :', error);
+    }
   };
 
   return (
@@ -86,9 +117,36 @@ export default function EditProfile({route}) {
         />
 
         {errors.name && (
-          <CustomText style={[styles.errorText, {color: theme.colors.red}]}>
+          <CustomText
+            style={[
+              styles.errorText,
+              {color: theme.colors.red, fontFamily: fonts.Light},
+            ]}>
             {errors.name}
           </CustomText>
+        )}
+
+        {userDetail?.role == 'doctor' && (
+          <>
+            <TextInput
+              label="Specialist"
+              value={form?.specialist}
+              onChangeText={value => handleInputChange('specialist', value)}
+              style={styles.input}
+              contentStyle={styles.inputContent}
+              mode="outlined"
+            />
+
+            {errors.specialist && (
+              <CustomText
+                style={[
+                  styles.errorText,
+                  {color: theme.colors.red, fontFamily: fonts.Light},
+                ]}>
+                {errors.specialist}
+              </CustomText>
+            )}
+          </>
         )}
 
         <TextInput
@@ -102,26 +160,34 @@ export default function EditProfile({route}) {
         />
 
         {errors.email && (
-          <CustomText style={[styles.errorText, {color: theme.colors.red}]}>
+          <CustomText
+            style={[
+              styles.errorText,
+              {color: theme.colors.red, fontFamily: fonts.Light},
+            ]}>
             {errors.email}
           </CustomText>
         )}
 
-            <TextInput
-              label="Password"
-              value={form.password}
-              onChangeText={value => handleInputChange('password', value)}
-              style={styles.input}
-              contentStyle={styles.inputContent}
-              mode="outlined"
-              secureTextEntry
-            />
+        <TextInput
+          label="Password"
+          value={form.password}
+          onChangeText={value => handleInputChange('password', value)}
+          style={styles.input}
+          contentStyle={styles.inputContent}
+          mode="outlined"
+          secureTextEntry
+        />
 
-            {errors.password && (
-              <CustomText style={[styles.errorText, {color: theme.colors.red}]}>
-                {errors.password}
-              </CustomText>
-            )}
+        {errors.password && (
+          <CustomText
+            style={[
+              styles.errorText,
+              {color: theme.colors.red, fontFamily: fonts.Light},
+            ]}>
+            {errors.password}
+          </CustomText>
+        )}
 
         <TextInput
           label="Contact Number"
@@ -134,8 +200,31 @@ export default function EditProfile({route}) {
         />
 
         {errors.contact && (
-          <CustomText style={[styles.errorText, {color: theme.colors.red}]}>
+          <CustomText
+            style={[
+              styles.errorText,
+              {color: theme.colors.red, fontFamily: fonts.Light},
+            ]}>
             {errors.contact}
+          </CustomText>
+        )}
+
+        <TextInput
+          numberOfLines={3}
+          label="Address"
+          value={form.address}
+          onChangeText={value => handleInputChange('address', value)}
+          style={[styles.input, {height: 100}]}
+          contentStyle={styles.inputContent}
+          mode="outlined"
+        />
+        {errors.address && (
+          <CustomText
+            style={[
+              styles.errorText,
+              {color: theme.colors.red, fontFamily: fonts.Light},
+            ]}>
+            {errors.address}
           </CustomText>
         )}
 

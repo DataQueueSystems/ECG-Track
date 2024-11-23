@@ -13,8 +13,11 @@ import CustomText from '../../customText/CustomText';
 import {fonts} from '../../customText/fonts';
 import {useTheme} from 'react-native-paper';
 import {useNavigation} from '@react-navigation/native';
+import {useAuthContext} from '../../context/GlobaContext';
 
 const GradientCards = () => {
+  const {allDoctor, allpatient} = useAuthContext();
+
   let iconsize = 40;
   let theme = useTheme();
   let navigation = useNavigation();
@@ -40,7 +43,7 @@ const GradientCards = () => {
             styles.countText,
             {fontFamily: fonts.Regular, color: 'black'},
           ]}>
-          45
+          {allDoctor?.length}
         </CustomText>
 
         <TouchableOpacity
@@ -64,7 +67,7 @@ const GradientCards = () => {
             styles.countText,
             {fontFamily: fonts.Regular, color: 'black'},
           ]}>
-          120
+          {allpatient?.length}
         </CustomText>
 
         <TouchableOpacity

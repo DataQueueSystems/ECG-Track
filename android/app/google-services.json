@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "134030347012",
+    "project_id": "recycle-vision-92591",
+    "storage_bucket": "recycle-vision-92591.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:134030347012:android:9fd8857bea97d24d745e51",
+        "android_client_info": {
+          "package_name": "com.ecgtrack"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCiHXiBvEAyOD0hgS6rAU86tCvbtNllRzg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

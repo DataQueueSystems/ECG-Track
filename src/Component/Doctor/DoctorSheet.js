@@ -27,7 +27,6 @@ const DoctorSheet = ({bottomSheetRef, doctor}) => {
   let iconColor = themeColor == 'dark' ? '#fff' : 'black';
   let navigation = useNavigation();
   const handleEdit = () => {
-    console.log('fdsbjk');
     bottomSheetRef.current.close();
     navigation.navigate('ControlDoctor', {
       screenName: 'Edit Doctor',
@@ -79,31 +78,43 @@ const DoctorSheet = ({bottomSheetRef, doctor}) => {
               ]}>
               {doctor?.name || 'Doctor Name'}
             </CustomText>
-            <CustomText
-              style={[
-                styles.doctorSpecialty,
-                {color: theme.colors.primary, fontFamily: fonts.SemiBold},
-              ]}>
-              {doctor?.specialty || 'Specialty'}
-            </CustomText>
+            {doctor?.specialist && (
+              <CustomText
+                style={[
+                  styles.doctorspecialist,
+                  {color: theme.colors.primary, fontFamily: fonts.SemiBold},
+                ]}>
+                {doctor?.specialist}
+              </CustomText>
+            )}
           </View>
 
           {/* Additional Information */}
           <View style={styles.infoContainer}>
-            <CustomText
-              style={[
-                styles.infoLabel,
-                {color: theme.colors.onBackground, fontFamily: fonts.SemiBold},
-              ]}>
-              Available Time:
-            </CustomText>
-            <CustomText
-              style={[
-                styles.infoValue,
-                {color: theme.colors.onBackground, fontFamily: fonts.Regular},
-              ]}>
-              {doctor?.availableTime || '9:00 AM - 5:00 PM'}
-            </CustomText>
+            {doctor?.availableTime && (
+              <>
+                <CustomText
+                  style={[
+                    styles.infoLabel,
+                    {
+                      color: theme.colors.onBackground,
+                      fontFamily: fonts.SemiBold,
+                    },
+                  ]}>
+                  Available Time:
+                </CustomText>
+                <CustomText
+                  style={[
+                    styles.infoValue,
+                    {
+                      color: theme.colors.onBackground,
+                      fontFamily: fonts.Regular,
+                    },
+                  ]}>
+                  {doctor?.availableTime}
+                </CustomText>
+              </>
+            )}
 
             <CustomText
               style={[
@@ -134,20 +145,30 @@ const DoctorSheet = ({bottomSheetRef, doctor}) => {
               {doctor?.email}
             </CustomText>
 
-            <CustomText
-              style={[
-                styles.infoLabel,
-                {color: theme.colors.onBackground, fontFamily: fonts.SemiBold},
-              ]}>
-              Address:
-            </CustomText>
-            <CustomText
-              style={[
-                styles.infoValue,
-                {color: theme.colors.onBackground, fontFamily: fonts.Regular},
-              ]}>
-              {doctor?.address || '123 Clinic Street, New York, NY'}
-            </CustomText>
+            {doctor?.address && (
+              <>
+                <CustomText
+                  style={[
+                    styles.infoLabel,
+                    {
+                      color: theme.colors.onBackground,
+                      fontFamily: fonts.SemiBold,
+                    },
+                  ]}>
+                  Address:
+                </CustomText>
+                <CustomText
+                  style={[
+                    styles.infoValue,
+                    {
+                      color: theme.colors.onBackground,
+                      fontFamily: fonts.Regular,
+                    },
+                  ]}>
+                  {doctor?.address}
+                </CustomText>
+              </>
+            )}
           </View>
         </View>
       </BottomSheet>
@@ -173,7 +194,7 @@ const styles = StyleSheet.create({
   doctorName: {
     fontSize: 20,
   },
-  doctorSpecialty: {
+  doctorspecialist: {
     fontSize: 16,
     fontWeight: '600',
     marginTop: 5,

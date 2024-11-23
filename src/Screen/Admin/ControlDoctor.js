@@ -15,6 +15,7 @@ import CustomText from '../../customText/CustomText';
 import {useNavigation} from '@react-navigation/native';
 import {showToast} from '../../../utils/Toast';
 import {fonts} from '../../customText/fonts';
+import firestore from '@react-native-firebase/firestore';
 
 export default function ControlDoctor({route}) {
   const {screenName, userData} = route.params || {};
@@ -27,9 +28,11 @@ export default function ControlDoctor({route}) {
 
   const [form, setForm] = useState({
     name: userData?.name || '',
+    specialist: userData?.specialist || '',
     email: userData?.email || '',
     password: userData?.password || '',
     contact: userData?.contact || '',
+    address: userData?.address || '',
   });
 
   // Handle input changes for both top-level and nested fields
@@ -52,23 +55,54 @@ export default function ControlDoctor({route}) {
     }
   };
 
+  // Simple validation function
+  const validateForm = () => {
+    const newErrors = {};
+    if (!form.name) newErrors.name = 'Name is required';
+    if (!form.specialist) newErrors.specialist = 'Specialist is required';
+    if (!form.email) newErrors.email = 'Email is required';
+    if (!form.password) newErrors.password = 'Password is required';
+    if (!form.address) newErrors.address = 'Address is required';
+    if (!form.contact) newErrors.contact = 'Contact number is required';
+    else if (!/^\d{10}$/.test(form.contact))
+      newErrors.contact = 'Contact number must be 10 digits';
+    setErrors(newErrors);
+    setSpinner(false);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleSubmit = async () => {
-    showToast('Submitting .....');
-  };
+    setSpinner(true);
+    try {
+      if (validateForm()) {
+        // Add new user
+        let defaultData = {
+          ...form,
+          role: 'doctor',
+          Status: 'Active',
+          create_date: new Date().toISOString(), // Current date and time in ISO format
+        };
 
-  // Update the status in the form
-  const handleStatus = status => {
-    setForm(prevForm => ({
-      ...prevForm,
-      diagnosis: {
-        ...prevForm.diagnosis,
-        status: status,
-      },
-    }));
-  };
+        //If Edit Screen then update the detail otherwise Add new user
+        if (isEdit) {
+          // await firestore().collection('users');
+          await firestore()
+            .collection('users')
+            .doc(userData?.id)
+            .update(defaultData);
+          showToast('Updated successfully ...');
+        } else {
+          await firestore().collection('users').add(defaultData);
+          showToast('Doctor Added  ...');
+        }
+        setSpinner(false);
+        // navigation.goBack();
+      }
+    } catch (error) {
+      setSpinner(false);
 
-  const handleuserPress = () => {
-    showToast("You can't change the Status");
+      console.log('Error is :', error);
+    }
   };
 
   return (
@@ -87,8 +121,30 @@ export default function ControlDoctor({route}) {
         />
 
         {errors.name && (
-          <CustomText style={[styles.errorText, {color: theme.colors.red}]}>
+          <CustomText
+            style={[
+              styles.errorText,
+              {color: theme.colors.red, fontFamily: fonts.Light},
+            ]}>
             {errors.name}
+          </CustomText>
+        )}
+        <TextInput
+          label="Specialist"
+          value={form.specialist}
+          onChangeText={value => handleInputChange('specialist', value)}
+          style={styles.input}
+          contentStyle={styles.inputContent}
+          mode="outlined"
+        />
+
+        {errors.specialist && (
+          <CustomText
+            style={[
+              styles.errorText,
+              {color: theme.colors.red, fontFamily: fonts.Light},
+            ]}>
+            {errors.specialist}
           </CustomText>
         )}
 
@@ -103,7 +159,11 @@ export default function ControlDoctor({route}) {
         />
 
         {errors.email && (
-          <CustomText style={[styles.errorText, {color: theme.colors.red}]}>
+          <CustomText
+            style={[
+              styles.errorText,
+              {color: theme.colors.red, fontFamily: fonts.Light},
+            ]}>
             {errors.email}
           </CustomText>
         )}
@@ -120,7 +180,11 @@ export default function ControlDoctor({route}) {
               secureTextEntry
             />
             {errors.password && (
-              <CustomText style={[styles.errorText, {color: theme.colors.red}]}>
+              <CustomText
+                style={[
+                  styles.errorText,
+                  {color: theme.colors.red, fontFamily: fonts.Light},
+                ]}>
                 {errors.password}
               </CustomText>
             )}
@@ -136,10 +200,32 @@ export default function ControlDoctor({route}) {
           mode="outlined"
           keyboardType="phone-pad"
         />
-
         {errors.contact && (
-          <CustomText style={[styles.errorText, {color: theme.colors.red}]}>
+          <CustomText
+            style={[
+              styles.errorText,
+              {color: theme.colors.red, fontFamily: fonts.Light},
+            ]}>
             {errors.contact}
+          </CustomText>
+        )}
+
+        <TextInput
+          numberOfLines={3}
+          label="Address"
+          value={form.address}
+          onChangeText={value => handleInputChange('address', value)}
+          style={[styles.input, {height: 100}]}
+          contentStyle={styles.inputContent}
+          mode="outlined"
+        />
+        {errors.address && (
+          <CustomText
+            style={[
+              styles.errorText,
+              {color: theme.colors.red, fontFamily: fonts.Light},
+            ]}>
+            {errors.address}
           </CustomText>
         )}
 
