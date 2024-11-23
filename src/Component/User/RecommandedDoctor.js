@@ -12,85 +12,12 @@ import {fonts} from '../../customText/fonts';
 import {Iconify} from 'react-native-iconify';
 import {Divider, useTheme} from 'react-native-paper';
 import CustomText from '../../customText/CustomText';
+import {useAuthContext} from '../../context/GlobaContext';
+import Icon from 'react-native-vector-icons/FontAwesome';
 
 const RecommandedDoctor = () => {
+  const {allDoctor} = useAuthContext();
   let theme = useTheme();
-
-  const doctors = [
-    {
-      id: '1',
-      name: 'Dr. Sarah Johnson',
-      specialty: 'Cardiologist',
-      availableTime: '9:00 AM - 5:00 PM',
-      contact: '+1 234 567 890',
-      email: 'n@gmail.com',
-    },
-    {
-      id: '2',
-      name: 'Dr. Michael Smith',
-      specialty: 'Neurologist',
-      email: 'n@gmail.com',
-      availableTime: '10:00 AM - 4:00 PM',
-      contact: '+1 987 654 321',
-    },
-    {
-      id: '3',
-      name: 'Dr. Emma Brown',
-      specialty: 'Dermatologist',
-      availableTime: '11:00 AM - 3:00 PM',
-      contact: '+1 555 123 456',
-      email: 'n@gmail.com',
-    },
-    {
-      id: '1',
-      name: 'Dr. Sarah Johnson',
-      specialty: 'Cardiologist',
-      availableTime: '9:00 AM - 5:00 PM',
-      contact: '+1 234 567 890',
-      email: 'n@gmail.com',
-    },
-    {
-      id: '2',
-      name: 'Dr. Michael Smith',
-      specialty: 'Neurologist',
-      availableTime: '10:00 AM - 4:00 PM',
-      contact: '+1 987 654 321',
-      email: 'n@gmail.com',
-    },
-
-    {
-      id: '3',
-      name: 'Dr. Emma Brown',
-      specialty: 'Dermatologist',
-      availableTime: '11:00 AM - 3:00 PM',
-      contact: '+1 555 123 456',
-      email: 'n@gmail.com',
-    },
-    {
-      id: '1',
-      name: 'Dr. Sarah Johnson',
-      specialty: 'Cardiologist',
-      availableTime: '9:00 AM - 5:00 PM',
-      contact: '+1 234 567 890',
-      email: 'n@gmail.com',
-    },
-    {
-      id: '2',
-      name: 'Dr. Michael Smith',
-      specialty: 'Neurologist',
-      availableTime: '10:00 AM - 4:00 PM',
-      contact: '+1 987 654 321',
-      email: 'n@gmail.com',
-    },
-    {
-      id: '3',
-      name: 'Dr. Emma Brown',
-      specialty: 'Dermatologist',
-      availableTime: '11:00 AM - 3:00 PM',
-      contact: '+1 555 123 456',
-      email: 'n@gmail.com',
-    },
-  ];
 
   const handleCallPress = contactNumber => {
     const phoneURL = `tel:${contactNumber}`;
@@ -118,39 +45,45 @@ const RecommandedDoctor = () => {
       .catch(err => console.error('An error occurred', err));
   };
 
+  const filledStars = Math.floor(2); // Number of fully filled stars
+
   const renderItem = ({item}) => (
     <View style={[styles.card, {backgroundColor: theme.colors.error}]}>
-      <View
-        style={[styles.iconView, {backgroundColor: theme.colors.transpgrey}]}>
+      <View style={[styles.iconView]}>
         <Iconify
           icon="fontisto:doctor"
           size={40}
           color={theme.colors.onBackground}
         />
 
-        <View style={{flexDirection: 'row', gap: 12, right: 4}}>
-          <Iconify
-            icon="fluent:call-28-filled"
-            size={30}
-            color={theme.colors.onBackground}
-            onPress={() => handleCallPress(item?.contact)}
-          />
-          <Iconify
-            icon="mdi:email-fast"
-            size={30}
-            color={theme.colors.onBackground}
-            onPress={() => handleEmailPress(item?.email)}
-          />
+        <View
+          style={{
+            flexDirection: 'row', // Arrange items in a row
+            gap: 6, // Add spacing between items (React Native 0.71+)
+            right: 4, // Adjust the position of the container (optional)
+            justifyContent: 'flex-start', // Align items to the start (left)
+            alignItems: 'center', // Align items vertically in the center
+          }}>
+          {/* Filled Stars */}
+          {[...Array(filledStars)].map((_, index) => (
+            <Icon
+              key={`filled-${index}`}
+              name="star"
+              size={19}
+              color={theme.colors.background}
+            />
+          ))}
         </View>
       </View>
+
       <View style={{paddingBottom: 10, gap: 4}}>
         <View style={{marginTop: 10, marginHorizontal: 10}}>
           <CustomText style={[{fontFamily: fonts.Bold, fontSize: 15}]}>
-            {item.name}
+            {item?.name}
           </CustomText>
           <CustomText
-            style={[styles.specialtyText, {fontFamily: fonts.Regular}]}>
-            {item.specialty}
+            style={[styles.specialistText, {fontFamily: fonts.Regular}]}>
+            {item?.specialist}
           </CustomText>
           {/* Contact Number */}
           <View style={{flexDirection: 'row', alignItems: 'center', gap: 8}}>
@@ -160,7 +93,7 @@ const RecommandedDoctor = () => {
               color={theme.colors.onBackground}
             />
             <CustomText style={[{fontFamily: fonts.Regular, fontSize: 12}]}>
-              +1 234 567 890
+              {item?.contact}
             </CustomText>
           </View>
 
@@ -203,8 +136,41 @@ const RecommandedDoctor = () => {
           </View>
         </View>
       </View>
+
+      <View
+        style={{
+          flexDirection: 'column',
+          gap: 10,
+          padding: 10,
+          right: 0,
+          position: 'absolute',
+          bottom: 0,
+          backgroundColor: theme.colors.onlightGrey,
+          borderRadius: 10,
+        }}>
+        <Iconify
+          icon="mdi:email-fast"
+          size={30}
+          color={theme.colors.background}
+          onPress={() => handleEmailPress(item?.email)}
+        />
+        <Iconify
+          icon="fluent:call-28-filled"
+          size={30}
+          color={theme.colors.background}
+          onPress={() => handleCallPress(item?.contact)}
+        />
+      </View>
     </View>
   );
+
+  let centerStyle =
+    allDoctor?.length == 1
+      ? {
+          justifyContent: 'center', // Center horizontally
+          alignItems: 'center', // Center vertically if needed}
+        }
+      : {};
 
   return (
     <View style={styles.mainContainer}>
@@ -217,9 +183,18 @@ const RecommandedDoctor = () => {
           showsHorizontalScrollIndicator={false}
           showsVerticalScrollIndicator={false}
           horizontal
-          data={doctors}
+          data={allDoctor}
           renderItem={renderItem}
-          keyExtractor={item => item.id}
+          keyExtractor={item => item?.id}
+          contentContainerStyle={[
+            {
+              flexGrow: 1, // Ensure the container grows to fill available space
+            },
+            centerStyle,
+          ]}
+          style={{
+            flexGrow: 0, // Prevent the list from growing beyond its content
+          }}
         />
       </View>
     </View>

@@ -8,10 +8,11 @@ import {fonts} from '../../customText/fonts';
 import {Iconify} from 'react-native-iconify';
 import GradientCards from '../../Component/Admin/GradientCards';
 import {useAuthContext} from '../../context/GlobaContext';
+import moment from 'moment';
 
 export default function Home() {
   let theme = useTheme();
-  const {handleLogout} = useAuthContext();
+  const {handleLogout, userDetail} = useAuthContext();
   const isFocused = useIsFocused();
   const backPressedOnce = useRef(false);
   useEffect(() => {
@@ -37,7 +38,7 @@ export default function Home() {
     return () => backHandler.remove();
   }, []);
 
-  let TextColor = {color: 'rgb(22, 21, 21)'};
+  let todaysDate = moment().format('ddd ,DD MMM');
 
   return (
     <>
@@ -66,16 +67,16 @@ export default function Home() {
                     fontSize: 14,
                   },
                 ]}>
-                Hi,Murshid
+                Hi,{userDetail?.name}
               </CustomText>
               <CustomText
                 style={[
                   {
                     fontFamily: fonts.Regular,
-                    fontSize: 12,
+                    fontSize: 13,
                   },
                 ]}>
-                Mon,22 July
+                {todaysDate}
               </CustomText>
             </View>
           </View>
@@ -155,6 +156,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   manageText: {
-    fontSize: 32,
+    fontSize: 30,
   },
 });

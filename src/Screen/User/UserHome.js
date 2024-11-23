@@ -12,8 +12,7 @@ import RecommandedDoctor from '../../Component/User/RecommandedDoctor';
 
 export default function Home() {
   let theme = useTheme();
-  const {handleLogout} = useAuthContext();
-
+  const {handleLogout, userDetail} = useAuthContext();
   const isFocused = useIsFocused();
   const backPressedOnce = useRef(false);
   useEffect(() => {
@@ -59,19 +58,10 @@ export default function Home() {
     },
   ];
 
-
-  const UserDetail= {
-    name: 'John Doe',
-    age: 30,
-    email: 'john.doe@gmail.com',
-    contact: '+1 123 456 789',
-    address: '123 Main Street, New York, NY',
-    password:'123'
-  };
-
-  let navigation=useNavigation();
+  let navigation = useNavigation();
   const handleNavigate = () => {
-    navigation.navigate('EditProfile', {userData: UserDetail});
+    navigation.navigate('EditProfile', {fromuser:true});
+    
   };
   return (
     <>
@@ -85,7 +75,7 @@ export default function Home() {
           {/* Greeting */}
           <View>
             <CustomText style={{fontFamily: fonts.Bold, fontSize: 22}}>
-              Hello, {UserDetail?.name}
+              Hello, {userDetail?.name}
             </CustomText>
 
             <CustomText
@@ -110,7 +100,6 @@ export default function Home() {
 
             <View style={styles.profileImage}>
               <Iconify
-               
                 icon="mynaui:edit"
                 size={28}
                 color={theme.colors.onBackground}
@@ -125,7 +114,7 @@ export default function Home() {
           showsVerticalScrollIndicator={false}>
           {/* User AppointMent */}
 
-          <Appointment data={doctors} fromUser={true}/>
+          <Appointment data={doctors} fromUser={true} />
 
           {/* Recommanded Doctor */}
           <RecommandedDoctor />

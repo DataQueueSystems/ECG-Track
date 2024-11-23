@@ -20,8 +20,10 @@ const lightTheme = {
     lightGrey: 'rgba(246, 246, 245, 0.835)',
     onlightGrey: 'rgba(57, 57, 57, 0.752)',
     transpgrey: 'rgba(228, 228, 227, 0.835)',
-    green: '#388E3C',
-    red: '#D32F2F',
+
+    green: '#C8E6C9',
+    error: '#FFCDD2',
+
     sheetGreen: '#c8e9ca',
     appColor: '#78B3CE',
     appLight: '#cde5f5',
@@ -34,17 +36,14 @@ const darkTheme = {
   colors: {
     ...DarkTheme.colors,
     background: '#1a1c1e',
-    error: '#d9534f',
-    onboardingBackground1: '#E8F5E9', // Mint Green
-    onboardingBackground2: '#d1eed4', // Mint Green
-    onboardingBackground3: '#9fbba2', // Mint Green
     blue: '#4a51a3', // Deep Blue
     blackGrey: '#2F2F2F',
     lightGrey: 'rgba(57, 57, 57, 0.752)',
     transpgrey: 'rgba(57, 57, 57, 0.752)',
     onlightGrey: 'rgba(246, 246, 245, 0.835)',
     green: '#388E3C',
-    red: '#D32F2F',
+    error: '#d9534f',
+
     sheetGreen: '#163717',
     appColor: '#78B3CE',
     appLight: '#cde5f5',

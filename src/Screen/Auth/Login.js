@@ -19,7 +19,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useAuthContext} from '../../context/GlobaContext';
 import {showToast} from '../../../utils/Toast';
 import {fonts} from '../../customText/fonts';
-// import firestore, {doc} from '@react-native-firebase/firestore';
+import firestore from '@react-native-firebase/firestore';
 
 export default function Login() {
   let theme = useTheme();
@@ -42,8 +42,7 @@ export default function Login() {
       if (snapShot.empty) {
         showToast('No user found');
         return;
-      }
-
+      };
       let userDoc = snapShot.docs.find(doc => {
         const data = doc.data();
         return data.email == email && data.password == password;
@@ -66,21 +65,21 @@ export default function Login() {
 
   const handleLogin = async () => {
     // AsyncStorage.setItem('IsLogin', 'true');
-    setIsLogin(false);
-    // setSpinner(true);
-    // if (!email || !password) {
-    //   showToast('All fields are required !');
-    //   setSpinner(false);
-    //   return;
-    // }
+    // setIsLogin(false);
+    setSpinner(true);
+    if (!email || !password) {
+      showToast('All fields are required !');
+      setSpinner(false);
+      return;
+    }
 
-    // const isConnected = await Checknetinfo();
-    // if (!isConnected) {
-    //   setSpinner(false);
-    //   return;
-    // }
+    const isConnected = await Checknetinfo();
+    if (!isConnected) {
+      setSpinner(false);
+      return;
+    }
 
-    // await CheckDataBase();
+    await CheckDataBase();
   };
   let screenName = 'Login';
   const handleRegister = () => {
@@ -89,18 +88,6 @@ export default function Login() {
 
   return (
     <>
-      <View
-        style={{
-          position: 'absolute',
-          top: 15,
-          zIndex: 100,
-          right: 15,
-        }}>
-        <Image
-          source={require('../../../assets/Logo/logo.png')}
-          style={styles.image}
-        />
-      </View>
       <Header screenName={screenName} />
       <View
         style={[
@@ -162,19 +149,6 @@ export default function Login() {
               value={password}
               onChangeText={setPassword}
             />
-
-            <View style={{flexDirection: 'row', justifyContent: 'center'}}>
-              <Button onPress={() => setUserDetail({role: 'admin'})}>
-                Admin
-              </Button>
-              <Button onPress={() => setUserDetail({role: 'user'})}>
-                User
-              </Button>
-              <Button onPress={() => setUserDetail({role: 'doctor'})}>
-                Doctor
-              </Button>
-            </View>
-
             <Button
               onPress={spinner ? () => {} : handleLogin}
               mode="contained"

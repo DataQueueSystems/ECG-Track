@@ -15,89 +15,7 @@ import {Iconify} from 'react-native-iconify';
 import {useNavigation} from '@react-navigation/native';
 import {Appbar, useTheme} from 'react-native-paper';
 import DoctorSheet from '../../Component/Doctor/DoctorSheet';
-
-const doctors = [
-  {
-    id: '1',
-    name: 'Dr. Sarah Johnson',
-    specialty: 'Cardiologist',
-    availableTime: '9:00 AM - 5:00 PM',
-    contact: '+1 234 567 890',
-    email: 'n@gmail.com',
-
-  },
-  {
-    id: '2',
-    name: 'Dr. Michael Smith',
-    specialty: 'Neurologist',
-    email: 'n@gmail.com',
-    availableTime: '10:00 AM - 4:00 PM',
-    contact: '+1 987 654 321',
-  },
-  {
-    id: '3',
-    name: 'Dr. Emma Brown',
-    specialty: 'Dermatologist',
-    availableTime: '11:00 AM - 3:00 PM',
-    contact: '+1 555 123 456',
-    email: 'n@gmail.com',
-
-  },
-  {
-    id: '1',
-    name: 'Dr. Sarah Johnson',
-    specialty: 'Cardiologist',
-    availableTime: '9:00 AM - 5:00 PM',
-    contact: '+1 234 567 890',
-    email: 'n@gmail.com',
-
-  },
-  {
-    id: '2',
-    name: 'Dr. Michael Smith',
-    specialty: 'Neurologist',
-    availableTime: '10:00 AM - 4:00 PM',
-    contact: '+1 987 654 321',
-    email: 'n@gmail.com',
-
-  },
-
-  {
-    id: '3',
-    name: 'Dr. Emma Brown',
-    specialty: 'Dermatologist',
-    availableTime: '11:00 AM - 3:00 PM',
-    contact: '+1 555 123 456',
-    email: 'n@gmail.com',
-
-  },
-  {
-    id: '1',
-    name: 'Dr. Sarah Johnson',
-    specialty: 'Cardiologist',
-    availableTime: '9:00 AM - 5:00 PM',
-    contact: '+1 234 567 890',
-    email: 'n@gmail.com',
-
-  },
-  {
-    id: '2',
-    name: 'Dr. Michael Smith',
-    specialty: 'Neurologist',
-    availableTime: '10:00 AM - 4:00 PM',
-    contact: '+1 987 654 321',
-    email: 'n@gmail.com',
-  },
-  {
-    id: '3',
-    name: 'Dr. Emma Brown',
-    specialty: 'Dermatologist',
-    availableTime: '11:00 AM - 3:00 PM',
-    contact: '+1 555 123 456',
-    email: 'n@gmail.com',
-
-  },
-];
+import {useAuthContext} from '../../context/GlobaContext';
 
 const DoctorList = () => {
   const renderDoctorItem = ({item, iconsize, iconColor, handlePress}) => {
@@ -120,23 +38,25 @@ const DoctorList = () => {
 
           <View style={styles.doctorDetails}>
             <CustomText style={[styles.doctorName, {fontFamily: fonts.Bold}]}>
-              {item.name}
+              {item?.name}
             </CustomText>
             <CustomText
-              style={[styles.doctorSpecialty, {fontFamily: fonts.SemiBold}]}>
-              {item.specialty}
+              style={[styles.doctorspecialist, {fontFamily: fonts.SemiBold}]}>
+              {item?.specialist}
             </CustomText>
+            {item?.availableTime && (
+              <CustomText
+                style={[styles.doctorTime, {fontFamily: fonts.Regular}]}>
+                Available: {item?.availableTime}
+              </CustomText>
+            )}
             <CustomText
-              style={[styles.doctorTime, {fontFamily: fonts.Regular}]}>
-              Available: {item.availableTime}
+              style={[styles.doctorContact, {fontFamily: fonts.Light}]}>
+              Contact: {item?.contact}
             </CustomText>
             <CustomText
               style={[styles.doctorContact, {fontFamily: fonts.Light}]}>
-              Contact: {item.contact}
-            </CustomText>
-            <CustomText
-              style={[styles.doctorContact, {fontFamily: fonts.Light}]}>
-              Email: {item.email}
+              Email: {item?.email}
             </CustomText>
           </View>
         </TouchableOpacity>
@@ -144,6 +64,7 @@ const DoctorList = () => {
     );
   };
 
+  const {allDoctor} = useAuthContext();
   let theme = useTheme();
   let navigation = useNavigation();
   let themeColor = Appearance.getColorScheme();
@@ -161,7 +82,9 @@ const DoctorList = () => {
   const renderAction = () => (
     <>
       <Appbar.Action
-        onPress={() => navigation.navigate('ControlDoctor',{screenName:"Add Doctor"})}
+        onPress={() =>
+          navigation.navigate('ControlDoctor', {screenName: 'Add Doctor'})
+        }
         animated={false}
         icon={() => (
           <Iconify
@@ -173,6 +96,7 @@ const DoctorList = () => {
       />
     </>
   );
+  console.log(allDoctor, 'allDoctor');
 
   return (
     <>
@@ -181,28 +105,49 @@ const DoctorList = () => {
       <View
         style={[styles.container, {backgroundColor: theme.colors.background}]}>
         {/* Doctor List */}
-        <FlatList
-          showsHorizontalScrollIndicator={false}
-          showsVerticalScrollIndicator={false}
-          data={doctors}
-          renderItem={({item}) =>
-            renderDoctorItem({item, iconColor, iconsize, handlePress})
-          }
-          keyExtractor={item => item.id}
-          contentContainerStyle={styles.listContainer}
-          ListHeaderComponent={
-            <View style={styles.header}>
+        {allDoctor?.length == 0 ? (
+          <>
+            <View
+              style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
               <CustomText
-                style={[styles.headerTitle, {fontFamily: fonts.Bold}]}>
-                About Doctors
-              </CustomText>
-              <CustomText
-                style={[styles.headerSubtitle, {fontFamily: fonts.Regular}]}>
-                Explore the list of available doctors
+                style={{
+                  fontFamily: fonts.Regular,
+                  fontSize: 18,
+                  textAlign: 'center',
+                }}>
+                No Doctor found
               </CustomText>
             </View>
-          }
-        />
+          </>
+        ) : (
+          <>
+            <FlatList
+              showsHorizontalScrollIndicator={false}
+              showsVerticalScrollIndicator={false}
+              data={allDoctor}
+              renderItem={({item}) =>
+                renderDoctorItem({item, iconColor, iconsize, handlePress})
+              }
+              keyExtractor={item => item.id}
+              contentContainerStyle={styles.listContainer}
+              ListHeaderComponent={
+                <View style={styles.header}>
+                  <CustomText
+                    style={[styles.headerTitle, {fontFamily: fonts.Bold}]}>
+                    About Doctors
+                  </CustomText>
+                  <CustomText
+                    style={[
+                      styles.headerSubtitle,
+                      {fontFamily: fonts.Regular},
+                    ]}>
+                    Explore the list of available doctors
+                  </CustomText>
+                </View>
+              }
+            />
+          </>
+        )}
       </View>
 
       {/* DoctorSheet */}
@@ -254,7 +199,7 @@ const styles = StyleSheet.create({
   doctorName: {
     fontSize: 18,
   },
-  doctorSpecialty: {
+  doctorspecialist: {
     fontSize: 16,
     color: '#555',
     marginTop: 2,
