@@ -93,7 +93,7 @@ export default function Home() {
           showsVerticalScrollIndicator={false}>
           {/* User AppointMent */}
 
-          {/* <Appointment data={doctors} fromUser={true} /> */}
+          <Appointment fromUser={true} />
 
           {/* Recommanded Doctor */}
           <RecommandedDoctor />

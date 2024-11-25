@@ -19,10 +19,13 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import {Iconify} from 'react-native-iconify';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import moment from 'moment';
+import {showToast} from '../../../utils/Toast';
+import firestore from '@react-native-firebase/firestore';
+import {useAuthContext} from '../../context/GlobaContext';
 
 export default function BookDoctor({route}) {
   let {doctorDetail} = route.params;
-  console.log(doctorDetail, 'doctorDetaildoctorDetaildoctorDetail');
+  const {Checknetinfo, userDetail} = useAuthContext();
   let theme = useTheme();
   let navigation = useNavigation();
   const filledStars = Math.floor(2); // Number of fully filled stars
@@ -73,10 +76,42 @@ export default function BookDoctor({route}) {
 
   let fromTime = moment(doctorDetail?.availableTime?.from);
   let toTime = moment(doctorDetail?.availableTime?.to);
-
   const timeSlots = generateTimeSlots(fromTime, toTime);
   const handleSlotPress = slot => {
     setSelectedSlot(slot);
+  };
+
+  const ConfirmBook = async () => {
+    setSpinner(true);
+    const isConnected = await Checknetinfo();
+    if (!isConnected) {
+      setSpinner(false);
+      return; // Do not proceed if there is no internet connection
+    }
+    let data = {
+      time: time,
+      timeSlot: selectedSlot,
+      doctorId: doctorDetail?.id,
+      createdAt: firestore.FieldValue.serverTimestamp(), // Add timestamp
+    };
+    if (userDetail?.role == 'user') {
+      data.userId = userDetail?.id;
+    }
+    if (!selectedSlot) {
+      showToast('Select the time Slot');
+      setSpinner(false);
+      return;
+    }
+    try {
+      await firestore().collection('bookings').add(data); // Push to 'bookings' collection
+      showToast('Booking confirmed successfully!');
+      // Navigate to the confirmation screen or back to previous screen
+    navigation.navigate('Parent'); // or navigation.goBack() if going back
+      setSpinner(false);
+    } catch (error) {
+      console.error('Error saving booking:', error);
+      showToast('Failed to confirm booking. Please try again.');
+    }
   };
 
   return (
@@ -226,6 +261,7 @@ export default function BookDoctor({route}) {
 
           <TouchableOpacity
             activeOpacity={0.8}
+            onPress={spinner ? () => {} : ConfirmBook}
             style={[
               styles.button,
               {backgroundColor: theme.colors.onBackground},
