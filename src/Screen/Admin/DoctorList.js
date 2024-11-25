@@ -16,6 +16,7 @@ import {useNavigation} from '@react-navigation/native';
 import {Appbar, useTheme} from 'react-native-paper';
 import DoctorSheet from '../../Component/Doctor/DoctorSheet';
 import {useAuthContext} from '../../context/GlobaContext';
+import moment from 'moment';
 
 const DoctorList = () => {
   const renderDoctorItem = ({item, iconsize, iconColor, handlePress}) => {
@@ -28,13 +29,29 @@ const DoctorList = () => {
             {backgroundColor: theme.colors.transpgrey},
           ]}
           activeOpacity={0.7}>
-          <View
-            style={[
-              styles.iconView,
-              {backgroundColor: theme.colors.background},
-            ]}>
-            <Iconify icon="fontisto:doctor" size={iconsize} color={iconColor} />
-          </View>
+          {item?.profile_image?.imageUri ? (
+            <Image
+              source={{uri: item?.profile_image?.imageUri}}
+              style={[
+                styles.profileImage,
+                {borderColor: theme.colors.appcolor},
+              ]}
+            />
+          ) : (
+            <>
+              <View
+                style={[
+                  styles.iconView,
+                  {backgroundColor: theme.colors.background},
+                ]}>
+                <Iconify
+                  icon="fontisto:doctor"
+                  size={iconsize}
+                  color={iconColor}
+                />
+              </View>
+            </>
+          )}
 
           <View style={styles.doctorDetails}>
             <CustomText style={[styles.doctorName, {fontFamily: fonts.Bold}]}>
@@ -47,7 +64,8 @@ const DoctorList = () => {
             {item?.availableTime && (
               <CustomText
                 style={[styles.doctorTime, {fontFamily: fonts.Regular}]}>
-                Available: {item?.availableTime}
+                Available:   {moment(item?.availableTime?.from).format('hh:mm A')}{' '}
+                - {moment(item?.availableTime?.to).format('hh:mm A')}
               </CustomText>
             )}
             <CustomText
@@ -96,7 +114,6 @@ const DoctorList = () => {
       />
     </>
   );
-  console.log(allDoctor, 'allDoctor');
 
   return (
     <>
@@ -186,7 +203,7 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.1,
     shadowRadius: 4,
-    gap: 13,
+    gap: 16,
   },
   doctorImage: {
     width: 50,
@@ -220,6 +237,13 @@ const styles = StyleSheet.create({
     width: 60,
     height: 60,
     alignItems: 'center',
+  },
+  profileImage: {
+    width: 65,
+    height: 65,
+    borderRadius: 50,
+    marginRight: 16,
+    borderWidth: 1,
   },
 });
 

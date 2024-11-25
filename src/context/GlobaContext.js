@@ -91,6 +91,7 @@ export const AuthContextProvider = ({children}) => {
     GetUserDetail();
   }, []);
 
+
   const GetListDetail = async () => {
     try {
       const subscriber = firestore()

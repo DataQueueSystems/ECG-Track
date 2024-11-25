@@ -15,6 +15,8 @@ import UserList from './Screen/Admin/UserList';
 import ControlDoctor from './Screen/Admin/ControlDoctor';
 import ControlUser from './Screen/Admin/ControlUser';
 import EditProfile from './Component/EditProfile';
+import SingleDoctor from './Screen/Doctor/SingleDoctor';
+import BookDoctor from './Screen/Doctor/BookDoctor';
 const Stack = createNativeStackNavigator();
 
 export default function AppNavigator() {
@@ -114,7 +116,16 @@ export default function AppNavigator() {
               component={EditProfile}
               options={{headerShown: false}}
             />
-
+            <Stack.Screen
+              name="SingleDoctor"
+              component={SingleDoctor}
+              options={{headerShown: false}}
+            />
+            <Stack.Screen
+              name="BookDoctor"
+              component={BookDoctor}
+              options={{headerShown: false}}
+            />
           </>
         )}
       </Stack.Navigator>

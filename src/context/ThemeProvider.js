@@ -11,10 +11,8 @@ const lightTheme = {
     ...DefaultTheme.colors,
     background: '#Fff',
     // background: '#e0e0e0',
-    error: '#d9534f',
-    onboardingBackground1: '#A6D9B3', // Very Light Green, symbolizing health and safety
-    onboardingBackground2: '#C8E6D8', // Soft Mint Green, giving a calm and clean feel
-    onboardingBackground3: '#E0F3EC', // Very Light Pastel Green, soothing and gentle
+    error: '#f49281',
+   
     blue: '#4a51a3', // Deep Blue
     blackGrey: '#2F2F2F',
     lightGrey: 'rgba(246, 246, 245, 0.835)',
@@ -42,8 +40,7 @@ const darkTheme = {
     transpgrey: 'rgba(57, 57, 57, 0.752)',
     onlightGrey: 'rgba(246, 246, 245, 0.835)',
     green: '#388E3C',
-    error: '#d9534f',
-
+    error: '#e48f80',
     sheetGreen: '#163717',
     appColor: '#78B3CE',
     appLight: '#cde5f5',
