@@ -1,11 +1,14 @@
-import React from 'react';
+import React, {useRef, useState} from 'react';
 import {
   Alert,
+  Animated,
   Dimensions,
   FlatList,
+  Image,
   Linking,
   StyleSheet,
   Text,
+  TouchableOpacity,
   View,
 } from 'react-native';
 import {fonts} from '../../customText/fonts';
@@ -14,10 +17,14 @@ import {Divider, useTheme} from 'react-native-paper';
 import CustomText from '../../customText/CustomText';
 import {useAuthContext} from '../../context/GlobaContext';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import {useNavigation} from '@react-navigation/native';
+import moment from 'moment';
+import ImageModal from '../Modal/ImageModal';
 
 const RecommandedDoctor = () => {
   const {allDoctor} = useAuthContext();
   let theme = useTheme();
+  let navigation = useNavigation();
 
   const handleCallPress = contactNumber => {
     const phoneURL = `tel:${contactNumber}`;
@@ -34,28 +41,61 @@ const RecommandedDoctor = () => {
 
   const handleEmailPress = email => {
     const emailURL = `mailto:${email}`;
-    Linking.canOpenURL(emailURL)
-      .then(supported => {
-        if (supported) {
-          Linking.openURL(emailURL);
-        } else {
-          Alert.alert('Error', 'Unable to send an email on this device.');
-        }
-      })
-      .catch(err => console.error('An error occurred', err));
+    Linking.openURL(emailURL);
   };
 
   const filledStars = Math.floor(2); // Number of fully filled stars
 
-  const renderItem = ({item}) => (
-    <View style={[styles.card, {backgroundColor: theme.colors.error}]}>
-      <View style={[styles.iconView]}>
-        <Iconify
-          icon="fontisto:doctor"
-          size={40}
-          color={theme.colors.onBackground}
-        />
+  const handleSinglePress = id => {
+    navigation.navigate('SingleDoctor', {notDoctor: true, doctorId: id});
+  };
 
+  const [visible, setVisible] = useState(false);
+  const opacityAnim = useRef(new Animated.Value(0)).current;
+  const [previmage, setPrevimage] = useState(null);
+  // Function to handle opening the modal with animation
+  const handlePrevImage = imageUri => {
+    setVisible(true);
+    setPrevimage(imageUri);
+    Animated.timing(opacityAnim, {
+      toValue: 1,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const renderItem = ({item}) => (
+    <TouchableOpacity
+      activeOpacity={0.9}
+      onPress={() => handleSinglePress(item.id)}
+      style={[styles.card, {backgroundColor: theme.colors.transpgrey}]}>
+      <View style={[styles.iconView]}>
+        {item?.profile_image?.imageUri ? (
+          <TouchableOpacity
+            onPress={() => handlePrevImage(item?.profile_image?.imageUri)}>
+            <Image
+              source={{uri: item?.profile_image?.imageUri}}
+              style={[
+                styles.profileImage,
+                {borderColor: theme.colors.appcolor},
+              ]}
+            />
+          </TouchableOpacity>
+        ) : (
+          <>
+            <View
+              style={[
+                styles.iconView,
+                {backgroundColor: theme.colors.background},
+              ]}>
+              <Iconify
+                icon="fontisto:doctor"
+                size={20}
+                color={theme.colors.onBackground}
+              />
+            </View>
+          </>
+        )}
         <View
           style={{
             flexDirection: 'row', // Arrange items in a row
@@ -70,7 +110,7 @@ const RecommandedDoctor = () => {
               key={`filled-${index}`}
               name="star"
               size={19}
-              color={theme.colors.background}
+              color={theme.colors.onBackground}
             />
           ))}
         </View>
@@ -105,11 +145,12 @@ const RecommandedDoctor = () => {
               color={theme.colors.onBackground}
             />
             <CustomText style={[{fontFamily: fonts.Regular, fontSize: 12}]}>
-              dr.richard@example.com
+              {item?.email}
             </CustomText>
           </View>
 
           {/* Available Time */}
+          {item?.availableTime&&(
           <View style={{flexDirection: 'row', alignItems: 'center', gap: 8}}>
             <Iconify
               icon="mdi:clock-time-four-outline"
@@ -117,23 +158,29 @@ const RecommandedDoctor = () => {
               color={theme.colors.onBackground}
             />
             <CustomText style={[{fontFamily: fonts.Regular, fontSize: 12}]}>
-              9:00 AM - 5:00 PM
+              {moment(item?.availableTime?.from).format('hh:mm A')} -{' '}
+              {moment(item?.availableTime?.to).format('hh:mm A')}
             </CustomText>
           </View>
+          )}
+
 
           {/* Address */}
-          <View style={{flexDirection: 'row', alignItems: 'center', gap: 8}}>
-            <Iconify
-              icon="mdi:map-marker"
-              size={20}
-              color={theme.colors.onBackground}
-            />
-            <CustomText
-              numberOfLines={3}
-              style={[{fontFamily: fonts.Regular, fontSize: 12}]}>
-              123 Medical Avenue,
-            </CustomText>
-          </View>
+          {item?.address && (
+            <View style={{flexDirection: 'row', alignItems: 'center', gap: 8}}>
+              <Iconify
+                icon="mdi:map-marker"
+                size={20}
+                color={theme.colors.onBackground}
+              />
+
+              <CustomText
+                numberOfLines={3}
+                style={[{fontFamily: fonts.Regular, fontSize: 12}]}>
+                {item?.address}
+              </CustomText>
+            </View>
+          )}
         </View>
       </View>
 
@@ -161,7 +208,7 @@ const RecommandedDoctor = () => {
           onPress={() => handleCallPress(item?.contact)}
         />
       </View>
-    </View>
+    </TouchableOpacity>
   );
 
   let centerStyle =
@@ -173,9 +220,10 @@ const RecommandedDoctor = () => {
       : {};
 
   return (
+    <>
     <View style={styles.mainContainer}>
       <CustomText style={[styles.apText, {fontFamily: fonts.Bold}]}>
-        Recommanded Doctors
+        Top Doctor for You
       </CustomText>
 
       <View style={styles.RecommandedDoctorContainer}>
@@ -198,6 +246,16 @@ const RecommandedDoctor = () => {
         />
       </View>
     </View>
+
+    <ImageModal
+        visible={visible}
+        image={previmage}
+        opacityAnim={opacityAnim}
+        setVisible={setVisible}
+      />
+
+    </>
+
   );
 };
 
@@ -237,6 +295,12 @@ const styles = StyleSheet.create({
   },
   dateView: {
     flexDirection: 'row',
+  },
+  profileImage: {
+    width: 60,
+    height: 60,
+    borderRadius: 50,
+    borderWidth: 0.5,
   },
 });
 

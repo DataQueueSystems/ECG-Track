@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useRef, useState} from 'react';
 import {
   KeyboardAvoidingView,
   Platform,
@@ -8,6 +8,8 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Alert,
+  Animated,
+  Image,
 } from 'react-native';
 import {TextInput, Button, useTheme} from 'react-native-paper';
 import Header from '../../Component/Header';
@@ -16,9 +18,15 @@ import {useNavigation} from '@react-navigation/native';
 import {showToast} from '../../../utils/Toast';
 import {fonts} from '../../customText/fonts';
 import firestore from '@react-native-firebase/firestore';
+import { launchImageLibrary } from 'react-native-image-picker';
+import ImageModal from '../../Component/Modal/ImageModal';
+import { Iconify } from 'react-native-iconify';
+import { uploadImageToCloudinary } from '../../cloudinary';
+import { useAuthContext } from '../../context/GlobaContext';
 
 export default function ControlDoctor({route}) {
   const {screenName, userData} = route.params || {};
+  const {Checknetinfo}=useAuthContext();
   const theme = useTheme();
   let navigation = useNavigation();
   const [spinner, setSpinner] = useState(false);
@@ -33,6 +41,7 @@ export default function ControlDoctor({route}) {
     password: userData?.password || '',
     contact: userData?.contact || '',
     address: userData?.address || '',
+    profile_image: userData?.profile_image || '',
   });
 
   // Handle input changes for both top-level and nested fields
@@ -73,6 +82,11 @@ export default function ControlDoctor({route}) {
 
   const handleSubmit = async () => {
     setSpinner(true);
+    const isConnected = await Checknetinfo();
+    if (!isConnected) {
+      setSpinner(false);
+      return; // Do not proceed if there is no internet connection
+    }
     try {
       if (validateForm()) {
         // Add new user
@@ -82,6 +96,25 @@ export default function ControlDoctor({route}) {
           Status: 'Active',
           create_date: new Date().toISOString(), // Current date and time in ISO format
         };
+
+        if (selectedImageUri) {
+          // Wait for the image upload to complete and get the image URL
+          const uploadedImageUrl = await uploadImageToCloudinary(
+            form?.name,
+            // form?.profile_image,
+            selectedImageUri,
+            `ECG-${userData?.role}` || 'ECGTRACK',
+          );
+          defaultData.profile_image = uploadedImageUrl;
+          // If the image upload failed, handle it
+          if (!uploadedImageUrl) {
+            console.error('Image upload failed');
+            setSpinner(true);
+            return;
+          }
+        };
+
+
 
         //If Edit Screen then update the detail otherwise Add new user
         if (isEdit) {
@@ -105,12 +138,92 @@ export default function ControlDoctor({route}) {
     }
   };
 
+
+
+  const [visible, setVisible] = useState(false);
+  const opacityAnim = useRef(new Animated.Value(0)).current;
+  const [previmage, setPrevimage] = useState(null);
+  // Function to handle opening the modal with animation
+  const handlePrevImage = () => {
+    setVisible(true);
+    setPrevimage(selectedImageUri);
+    Animated.timing(opacityAnim, {
+      toValue: 1,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const [selectedImageUri, setSelectedImageUri] = useState(null);
+  // Function to pick an image from the library
+  const selectImage = () => {
+    const options = {
+      mediaType: 'photo',
+      quality: 1,
+    };
+    launchImageLibrary(options, response => {
+      if (response.didCancel) {
+        console.log('User cancelled image picker');
+      } else if (response.error) {
+        console.log('ImagePicker Error: ', response.error);
+      } else {
+        const imageUri = response.assets[0].uri;
+        setSelectedImageUri(imageUri);
+      }
+    });
+  };
+
+  
+
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       style={{flex: 1, backgroundColor: theme.colors.background}}>
       <Header screenName={screenName} />
-      <ScrollView contentContainerStyle={styles.container}>
+      <ScrollView 
+      showsHorizontalScrollIndicator={false}
+      showsVerticalScrollIndicator={false}
+      contentContainerStyle={styles.container}>
+
+      <TouchableOpacity
+          onPress={handlePrevImage}
+          activeOpacity={0.8}
+          style={styles.imageView}>
+          {selectedImageUri ? (
+            <Image
+              source={{uri: selectedImageUri}}
+              style={[
+                styles.profileImage,
+                {borderColor: theme.colors.onBackground},
+              ]}
+            />
+          ) : form?.profile_image?.imageUri ? (
+            <Image
+              source={{uri: form?.profile_image?.imageUri}}
+              style={[
+                styles.profileImage,
+                {borderColor: theme.colors.appcolor},
+              ]}
+            />
+          ) : (
+            <Image
+              source={require('../../../assets/image/defaultAvtar.jpg')}
+              style={[
+                styles.profileImage,
+                {borderColor: theme.colors.onBackground},
+              ]}
+            />
+          )}
+
+          <TouchableOpacity onPress={selectImage} style={[styles.editView]}>
+            <Iconify
+              icon="basil:edit-outline"
+              size={25}
+              color={theme.colors.outline}
+            />
+          </TouchableOpacity>
+        </TouchableOpacity>
+
         <TextInput
           label="Name"
           value={form.name}
@@ -124,7 +237,7 @@ export default function ControlDoctor({route}) {
           <CustomText
             style={[
               styles.errorText,
-              {color: theme.colors.red, fontFamily: fonts.Light},
+              {color: theme.colors.error, fontFamily: fonts.Light},
             ]}>
             {errors.name}
           </CustomText>
@@ -137,12 +250,11 @@ export default function ControlDoctor({route}) {
           contentStyle={styles.inputContent}
           mode="outlined"
         />
-
         {errors.specialist && (
           <CustomText
             style={[
               styles.errorText,
-              {color: theme.colors.red, fontFamily: fonts.Light},
+              {color: theme.colors.error, fontFamily: fonts.Light},
             ]}>
             {errors.specialist}
           </CustomText>
@@ -162,7 +274,7 @@ export default function ControlDoctor({route}) {
           <CustomText
             style={[
               styles.errorText,
-              {color: theme.colors.red, fontFamily: fonts.Light},
+              {color: theme.colors.error, fontFamily: fonts.Light},
             ]}>
             {errors.email}
           </CustomText>
@@ -183,7 +295,7 @@ export default function ControlDoctor({route}) {
               <CustomText
                 style={[
                   styles.errorText,
-                  {color: theme.colors.red, fontFamily: fonts.Light},
+                  {color: theme.colors.error, fontFamily: fonts.Light},
                 ]}>
                 {errors.password}
               </CustomText>
@@ -204,7 +316,7 @@ export default function ControlDoctor({route}) {
           <CustomText
             style={[
               styles.errorText,
-              {color: theme.colors.red, fontFamily: fonts.Light},
+              {color: theme.colors.error, fontFamily: fonts.Light},
             ]}>
             {errors.contact}
           </CustomText>
@@ -223,7 +335,7 @@ export default function ControlDoctor({route}) {
           <CustomText
             style={[
               styles.errorText,
-              {color: theme.colors.red, fontFamily: fonts.Light},
+              {color: theme.colors.error, fontFamily: fonts.Light},
             ]}>
             {errors.address}
           </CustomText>
@@ -247,6 +359,14 @@ export default function ControlDoctor({route}) {
             <ActivityIndicator size={24} color={theme.colors.background} />
           )}
         </TouchableOpacity>
+
+        <ImageModal
+          visible={visible}
+          image={previmage}
+          opacityAnim={opacityAnim}
+          setVisible={setVisible}
+        />
+
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -254,7 +374,6 @@ export default function ControlDoctor({route}) {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     paddingHorizontal: 8,
     paddingTop: 10,
   },
@@ -274,5 +393,23 @@ const styles = StyleSheet.create({
   errorText: {
     fontSize: 12,
     bottom: 10,
+  },
+  imageView: {
+    flexDirection: 'column',
+    justifyContent: 'center',
+    paddingBottom: 15,
+    alignSelf: 'center',
+  },
+  editView: {
+    alignSelf: 'flex-end',
+    right: 14,
+    top: -10,
+  },
+  profileImage: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    marginRight: 16,
+    borderWidth: 1,
   },
 });

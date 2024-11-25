@@ -1,17 +1,18 @@
 import {
   Alert,
+  Animated,
   BackHandler,
   Dimensions,
   FlatList,
+  Image,
   StyleSheet,
-  Text,
+  TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useEffect, useRef} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {useIsFocused, useNavigation} from '@react-navigation/native';
 import {showToast} from '../../../utils/Toast';
 import {useTheme} from 'react-native-paper';
-import LinearGradient from 'react-native-linear-gradient';
 import {Iconify} from 'react-native-iconify';
 import CustomText from '../../customText/CustomText';
 import {fonts} from '../../customText/fonts';
@@ -29,11 +30,8 @@ export default function Home() {
   let navigation = useNavigation();
   const isFocused = useIsFocused();
   const backPressedOnce = useRef(false);
- 
 
-  const handleNavigate = () => {
-    navigation.navigate('EditProfile', {fromuser:true});
-  };
+  
 
   useEffect(() => {
     const backHandler = BackHandler.addEventListener(
@@ -57,7 +55,7 @@ export default function Home() {
     );
 
     return () => backHandler.remove();
-  }, []);
+  }, [isFocused]);
 
   const renderCard = ({item}) => (
     <View
@@ -205,6 +203,8 @@ export default function Home() {
     },
   ];
 
+  
+
   return (
     <>
       <View
@@ -212,170 +212,203 @@ export default function Home() {
           styles.maincontainer,
           {backgroundColor: theme.colors.background},
         ]}>
-        <View style={styles.mainHeader}>
-          <CustomText
-            numberOfLines={1}
-            style={{fontFamily: fonts.Bold, fontSize: 22}}>
-            Welcome back ,
-          </CustomText>
-
-          <View style={{flexDirection: 'row', gap: 4}}>
-            <Iconify
-              icon="mynaui:edit"
-              size={28}
-              color={theme.colors.onBackground}
-              onPress={handleNavigate}
-            />
-            <Iconify
-              icon="majesticons:logout-half-circle-line"
-              size={28}
-              color={theme.colors.onBackground}
-              onPress={handleLogout}
-            />
-          </View>
-        </View>
-
-        <FlatList
-          showsHorizontalScrollIndicator={false}
-          showsVerticalScrollIndicator={false}
-          data={cards}
-          keyExtractor={item => item.id}
-          renderItem={renderCard}
-          numColumns={2}
-          ListHeaderComponent={
-            <>
-              <View style={[styles.maindoctorCard]}>
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    gap: 10,
-                  }}>
-                  <View style={styles.profileImage}>
-                    <Iconify icon="fa-solid:user" size={35} color={'black'} />
-                  </View>
-
-                  <View style={styles.NameContent}>
-                    <CustomText
+     
+          <View style={styles.mainHeader}>
+           <View>
+           <CustomText
+              numberOfLines={1}
+              style={{fontFamily: fonts.Bold, fontSize: 22}}>
+              Welcome to ,
+            </CustomText>
+           <CustomText
+              numberOfLines={1}
+              style={{fontFamily: fonts.Black, fontSize: 26,top:-3,left:5}}>
+             ECG-Track
+            </CustomText>
+           </View>
+            <View style={{flexDirection: 'row', gap: 4}}>
+              <View style={styles.profileContainer}>
+                {userDetail?.profile_image?.imageUri ? (
+                  <TouchableOpacity onPress={()=>navigation.navigate("SingleDoctor",{doctorId:userDetail?.id})}>
+                    <Image
+                      source={{uri: userDetail?.profile_image?.imageUri}}
                       style={[
-                        {
-                          fontFamily: fonts.Bold,
-                          fontSize: 16,
-                        },
-                        TextColor,
+                        styles.profileImage,
+                        {borderColor: theme.colors.appcolor},
+                      ]}
+                    />
+                  </TouchableOpacity>
+                ) : (
+                  <>
+                    <View
+                      style={[
+                        styles.iconView,
+                        {backgroundColor: theme.colors.background},
+                        {padding: 0},
                       ]}>
-                      Dr.{userDetail?.name}
-                    </CustomText>
-                    <View style={styles.specialist}>
                       <Iconify
-                        icon="material-symbols-light:special-character"
-                        size={22}
-                        color={'black'}
+                        icon="fontisto:doctor"
+                        size={30}
+                        styl={{alignSelf: 'center'}}
+                        color={theme.colors.onBackground}
                       />
+                    </View>
+                  </>
+                )}
+              </View>
+              <View
+                style={[
+                  styles.iconView,
+                  {backgroundColor: theme.colors.background},
+                ]}>
+                <Iconify
+                  icon="majesticons:logout-half-circle-line"
+                  size={28}
+                  color={theme.colors.onBackground}
+                  onPress={handleLogout}
+                />
+              </View>
+            </View>
+          </View>
+
+          <FlatList
+            showsHorizontalScrollIndicator={false}
+            showsVerticalScrollIndicator={false}
+            data={cards}
+            keyExtractor={item => item.id}
+            renderItem={renderCard}
+            numColumns={2}
+            ListHeaderComponent={
+              <>
+                {/* <View style={[styles.maindoctorCard]}>
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      gap: 10,
+                    }}>
+                    <View style={styles.profileImage}>
+                      <Iconify icon="fa-solid:user" size={35} color={'black'} />
+                    </View>
+
+                    <View style={styles.NameContent}>
                       <CustomText
                         style={[
                           {
-                            fontFamily: fonts.SemiBold,
-                            fontSize: 14,
+                            fontFamily: fonts.Bold,
+                            fontSize: 16,
                           },
                           TextColor,
                         ]}>
-                        {userDetail?.specialist}
+                        Dr.{userDetail?.name}
                       </CustomText>
+                      <View style={styles.specialist}>
+                        <Iconify
+                          icon="material-symbols-light:special-character"
+                          size={22}
+                          color={'black'}
+                        />
+                        <CustomText
+                          style={[
+                            {
+                              fontFamily: fonts.SemiBold,
+                              fontSize: 14,
+                            },
+                            TextColor,
+                          ]}>
+                          {userDetail?.specialist}
+                        </CustomText>
+                      </View>
                     </View>
                   </View>
-                </View>
 
-                {/* Additional Details */}
-                <View style={{marginTop: 10, marginHorizontal: 10}}>
-                  {/* Contact Number */}
-                  <View
-                    style={{
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      gap: 8,
-                    }}>
-                    <Iconify icon="mdi:phone" size={20} color={'black'} />
-                    <CustomText
-                      style={[
-                        {fontFamily: fonts.Regular, fontSize: 14},
-                        TextColor,
-                      ]}>
-                      {userDetail?.contact}
-                    </CustomText>
-                  </View>
-
-                  {/* Email */}
-                  <View
-                    style={{
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      gap: 8,
-                    }}>
-                    <Iconify icon="mdi:email" size={20} color={'black'} />
-                    <CustomText
-                      style={[
-                        {fontFamily: fonts.Regular, fontSize: 14},
-                        TextColor,
-                      ]}>
-                      {userDetail?.email}
-                    </CustomText>
-                  </View>
-
-                  {/* Available Time */}
-                  {userDetail?.availableTime && (
+                  <View style={{marginTop: 10, marginHorizontal: 10}}>
                     <View
                       style={{
                         flexDirection: 'row',
                         alignItems: 'center',
                         gap: 8,
                       }}>
-                      <Iconify
-                        icon="mdi:clock-time-four-outline"
-                        size={20}
-                        color={'black'}
-                      />
+                      <Iconify icon="mdi:phone" size={20} color={'black'} />
                       <CustomText
                         style={[
                           {fontFamily: fonts.Regular, fontSize: 14},
                           TextColor,
                         ]}>
-                        {userDetail?.availableTime}
+                        {userDetail?.contact}
                       </CustomText>
                     </View>
-                  )}
 
-                  {/* Address */}
-                  {userDetail?.address && (
                     <View
                       style={{
                         flexDirection: 'row',
                         alignItems: 'center',
                         gap: 8,
                       }}>
-                      <Iconify
-                        icon="mdi:map-marker"
-                        size={20}
-                        color={'black'}
-                      />
+                      <Iconify icon="mdi:email" size={20} color={'black'} />
                       <CustomText
-                        numberOfLines={3}
                         style={[
                           {fontFamily: fonts.Regular, fontSize: 14},
                           TextColor,
                         ]}>
-                        {userDetail?.address}
+                        {userDetail?.email}
                       </CustomText>
                     </View>
-                  )}
-                </View>
-              </View>
 
-              <Appointment data={users} />
-            </>
-          }
-          contentContainerStyle={styles.container}
-          columnWrapperStyle={{justifyContent: 'space-between'}}
-        />
+                    {userDetail?.availableTime && (
+                      <View
+                        style={{
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          gap: 8,
+                        }}>
+                        <Iconify
+                          icon="mdi:clock-time-four-outline"
+                          size={20}
+                          color={'black'}
+                        />
+                        <CustomText
+                          style={[
+                            {fontFamily: fonts.Regular, fontSize: 14},
+                            TextColor,
+                          ]}>
+                          {userDetail?.availableTime}
+                        </CustomText>
+                      </View>
+                    )}
+
+                    {userDetail?.address && (
+                      <View
+                        style={{
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          gap: 8,
+                        }}>
+                        <Iconify
+                          icon="mdi:map-marker"
+                          size={20}
+                          color={'black'}
+                        />
+                        <CustomText
+                          numberOfLines={3}
+                          style={[
+                            {fontFamily: fonts.Regular, fontSize: 14},
+                            TextColor,
+                          ]}>
+                          {userDetail?.address}
+                        </CustomText>
+                      </View>
+                    )}
+                  </View>
+                </View> */}
+
+<View style={{}}>
+<Appointment data={users} />
+</View>              </>
+            }
+            contentContainerStyle={styles.container}
+            columnWrapperStyle={{justifyContent: 'space-between'}}
+          />
+         
       </View>
     </>
   );
@@ -393,15 +426,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     borderRadius: 100,
   },
-  profileImage: {
-    padding: 10,
-    borderRadius: 100,
-    height: 55,
-    width: 55,
-    alignItems: 'center',
-    borderWidth: 0.4,
-    borderColor: 'grey',
-  },
+
   maindoctorCard: {
     padding: 20,
     borderRadius: 17,
@@ -440,5 +465,18 @@ const styles = StyleSheet.create({
   cardSolution: {
     fontSize: 14,
     textAlign: 'center',
+  },
+  profileContainer: {},
+  iconView: {
+    borderRadius: 100,
+    padding: 8,
+  },
+  profileImage: {
+    padding: 10,
+    borderRadius: 100,
+    height: 40,
+    width: 40,
+    borderWidth: 0.4,
+    borderColor: 'grey',
   },
 });

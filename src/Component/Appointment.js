@@ -31,15 +31,7 @@ const Appointment = ({data, fromUser}) => {
 
   const handleEmailPress = email => {
     const emailURL = `mailto:${email}`;
-    Linking.canOpenURL(emailURL)
-      .then(supported => {
-        if (supported) {
-          Linking.openURL(emailURL);
-        } else {
-          Alert.alert('Error', 'Unable to send an email on this device.');
-        }
-      })
-      .catch(err => console.error('An error occurred', err));
+    Linking.openURL(emailURL);
   };
 
   const renderItem = ({item}) => (
@@ -150,8 +142,9 @@ const Appointment = ({data, fromUser}) => {
 
 const styles = StyleSheet.create({
   mainContainer: {
-    marginVertical: 10,
+    marginBottom: 20,
     paddingVertical: 10,
+    
   },
   apText: {
     fontSize: 20,

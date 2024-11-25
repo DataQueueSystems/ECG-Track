@@ -37,31 +37,11 @@ export default function Home() {
       },
     );
     return () => backHandler.remove();
-  }, []);
-
-  const doctors = [
-    {
-      id: '1',
-      name: 'Dr. Sarah Johnson',
-      specialty: 'Cardiologist',
-      availableTime: '9:00 AM - 5:00 PM',
-      contact: '+1 234 567 890',
-      email: 'n@gmail.com',
-    },
-    {
-      id: '2',
-      name: 'Dr. Michael Smith',
-      specialty: 'Neurologist',
-      availableTime: '10:00 AM - 4:00 PM',
-      contact: '+1 987 654 321',
-      email: 'n@gmail.com',
-    },
-  ];
+  }, [isFocused]);
 
   let navigation = useNavigation();
   const handleNavigate = () => {
-    navigation.navigate('EditProfile', {fromuser:true});
-    
+    navigation.navigate('EditProfile', {fromuser: true,fromdoctor:false});
   };
   return (
     <>
@@ -89,21 +69,20 @@ export default function Home() {
           </View>
           {/* ProfileDetail */}
           <View style={styles.userProfile}>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
-              <Iconify
-                icon="majesticons:logout-half-circle-line"
-                size={30}
-                color={theme.colors.onBackground}
-                onPress={handleLogout}
-              />
-            </View>
-
             <View style={styles.profileImage}>
               <Iconify
                 icon="mynaui:edit"
                 size={28}
                 color={theme.colors.onBackground}
                 onPress={handleNavigate}
+              />
+            </View>
+            <View style={{flexDirection: 'row', alignItems: 'center'}}>
+              <Iconify
+                icon="majesticons:logout-half-circle-line"
+                size={30}
+                color={theme.colors.onBackground}
+                onPress={handleLogout}
               />
             </View>
           </View>
@@ -114,7 +93,7 @@ export default function Home() {
           showsVerticalScrollIndicator={false}>
           {/* User AppointMent */}
 
-          <Appointment data={doctors} fromUser={true} />
+          {/* <Appointment data={doctors} fromUser={true} /> */}
 
           {/* Recommanded Doctor */}
           <RecommandedDoctor />
@@ -305,7 +284,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    gap: 10,
+    gap: 3,
   },
   profileImage: {
     padding: 10,
