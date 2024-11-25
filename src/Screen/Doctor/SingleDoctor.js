@@ -39,7 +39,7 @@ export default function SingleDoctor({route}) {
         .onSnapshot(async userDoc => {
           if (!userDoc.exists) {
             return;
-          }
+          };
           const singleDoctor = {id: userDoc.id, ...userDoc.data()};
           // Set user details if the account is active
           await setSingleDoctor(singleDoctor);

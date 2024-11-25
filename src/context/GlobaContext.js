@@ -91,6 +91,75 @@ export const AuthContextProvider = ({children}) => {
     GetUserDetail();
   }, []);
 
+  const [bookingData, setBookingData] = useState([]);
+  const GetAppointMent = async id => {
+    if (!id) return;
+
+    try {
+      let query = firestore().collection('bookings');
+
+      // Apply filter based on role
+      if (userDetail?.role === 'user') {
+        query = query.where('userId', '==', id);
+      } else if (userDetail?.role === 'doctor') {
+        query = query.where('doctorId', '==', id);
+      }
+
+      // Listen for real-time updates
+      const unsubscribe = query.onSnapshot(async snapshot => {
+        if (snapshot.empty) {
+          setBookingData([]); // No bookings found
+          return;
+        }
+
+        const bookings = await Promise.all(
+          snapshot.docs.map(async doc => {
+            const booking = {id: doc.id, ...doc.data()};
+
+            if (userDetail?.role === 'doctor') {
+              // Fetch user details for doctor role
+              const userDoc = await firestore()
+                .collection('users') // Assuming user details are stored in the 'users' collection
+                .doc(booking.userId)
+                .get();
+
+              if (userDoc.exists) {
+                booking.person = {id: userDoc.id, ...userDoc.data()};
+              }
+            } else if (userDetail?.role === 'user') {
+              // Fetch doctor details for user role
+              const doctorDoc = await firestore()
+                .collection('users') // Assuming doctor details are stored in the 'users' collection
+                .doc(booking.doctorId)
+                .get();
+
+              if (doctorDoc.exists) {
+                booking.person = {id: doctorDoc.id, ...doctorDoc.data()};
+              }
+            }
+
+            return booking;
+          }),
+        );
+
+        setBookingData(bookings); // Set enriched bookings data
+      });
+
+      return unsubscribe; // Clean up listener
+    } catch (error) {
+      console.error('Error fetching bookings:', error);
+    }
+  };
+
+  useEffect(() => {
+    // Fetch appointments only if the user is not an admin
+    if (userDetail && userDetail?.role !== 'admin') {
+      const unsubscribe = GetAppointMent(userDetail?.id);
+
+      // Clean up on component unmount
+      return () => unsubscribe?.();
+    }
+  }, [userDetail]);
 
   const GetListDetail = async () => {
     try {
@@ -184,6 +253,8 @@ export const AuthContextProvider = ({children}) => {
         allDoctor,
         allpatient,
         CheckDataBase,
+
+        bookingData,
       }}>
       {children}
     </Authcontext.Provider>

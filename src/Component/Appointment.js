@@ -12,10 +12,12 @@ import CustomText from '../customText/CustomText';
 import {fonts} from '../customText/fonts';
 import {Iconify} from 'react-native-iconify';
 import {Divider, useTheme} from 'react-native-paper';
+import {useAuthContext} from '../context/GlobaContext';
 
 const Appointment = ({data, fromUser}) => {
   let theme = useTheme();
-
+  const {bookingData} = useAuthContext();
+  console.log(bookingData, 'bookingData');
   const handleCallPress = contactNumber => {
     const phoneURL = `tel:${contactNumber}`;
     Linking.canOpenURL(phoneURL)
@@ -33,7 +35,6 @@ const Appointment = ({data, fromUser}) => {
     const emailURL = `mailto:${email}`;
     Linking.openURL(emailURL);
   };
-
   const renderItem = ({item}) => (
     <View style={[styles.card, {backgroundColor: theme.colors.green}]}>
       <View style={styles.iconView}>
@@ -131,7 +132,7 @@ const Appointment = ({data, fromUser}) => {
           showsHorizontalScrollIndicator={false}
           showsVerticalScrollIndicator={false}
           horizontal
-          data={data}
+          data={bookingData}
           renderItem={renderItem}
           keyExtractor={item => item.id}
         />
@@ -144,7 +145,6 @@ const styles = StyleSheet.create({
   mainContainer: {
     marginBottom: 20,
     paddingVertical: 10,
-    
   },
   apText: {
     fontSize: 20,
