@@ -24,6 +24,8 @@ import moment from 'moment';
 import {useAuthContext} from '../../context/GlobaContext';
 import firestore from '@react-native-firebase/firestore';
 import {showToast} from '../../../utils/Toast';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+
 const DoctorSheet = ({bottomSheetRef, doctor, fromApt, selectedaptDetail}) => {
   const {Checknetinfo, userDetail, bookingData, setRateCount} =
     useAuthContext();
@@ -203,16 +205,31 @@ const DoctorSheet = ({bottomSheetRef, doctor, fromApt, selectedaptDetail}) => {
 
                 {doctor?.averageRating && (
                   <View style={styles.starsContainer}>
-                    {[...Array(Math.floor(doctor?.averageRating))].map(
-                      (_, index) => (
-                        <Iconify
-                          key={`filled-${index}`}
-                          icon="solar:star-bold"
-                          size={30}
-                          color={theme.colors.rate}
+                    {[...Array(5)].map((_, index) => {
+                      const rating = doctor?.averageRating; // Current rating
+                      const isFullStar = index + 1 <= Math.floor(rating); // Check if it’s a full star
+                      const isHalfStar =
+                        index + 1 > Math.floor(rating) &&
+                        index < Math.ceil(rating); // Check if it’s a half star
+                      return (
+                        <MaterialIcons
+                          key={`star-${index}`}
+                          name={
+                            isFullStar
+                              ? 'star' // Full star icon
+                              : isHalfStar
+                              ? 'star-half' // Half star icon
+                              : 'star-border' // Empty star icon
+                          }
+                          size={22}
+                          color={
+                            isFullStar || isHalfStar
+                              ? theme.colors.rate
+                              : theme.colors.onBackground
+                          } // Highlight or grey color
                         />
-                      ),
-                    )}
+                      );
+                    })}
                   </View>
                 )}
               </View>

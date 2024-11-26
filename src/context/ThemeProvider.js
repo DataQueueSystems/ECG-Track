@@ -54,13 +54,16 @@ const ThemeContext = createContext();
 
 const ThemeProvider = ({children}) => {
   const [theme, setTheme] = useState(Appearance.getColorScheme());
+
   useEffect(() => {
-    // Update theme when system theme changes
     const subscription = Appearance.addChangeListener(({colorScheme}) => {
       setTheme(colorScheme);
     });
     return () => subscription.remove();
   }, []);
+
+  console.log('Theme updated:', theme);
+
 
   const currentTheme = useMemo(() => {
     return theme === 'dark' ? darkTheme : lightTheme;

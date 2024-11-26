@@ -22,7 +22,6 @@ function AppWithTheme() {
   if (!theme) {
     return null; // or a loading spinner if desired
   }
-
   return (
     <>
       <AuthContextProvider>

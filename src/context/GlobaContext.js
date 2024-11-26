@@ -158,54 +158,51 @@ export const AuthContextProvider = ({children}) => {
     let unsubscribe = () => {}; // Default to a no-op function.
     if (userDetail && userDetail?.role !== 'admin') {
       unsubscribe = GetAppointMent(userDetail?.id);
-    };
+    }
     // Clean up the listener on component unmount or dependency change.
     return () => {
       if (typeof unsubscribe === 'function') {
         unsubscribe();
       }
     };
-  }, [userDetail?.id,count]);
+  }, [userDetail?.id, count]);
 
-  
-const getDoctorFeedback = async (doctorId) => {
-  try {
-    const snapshot = await firestore()
-      .collection('feedback')
-      .where('doctorId', '==', doctorId)
-      .get();
+  const getDoctorFeedback = async doctorId => {
+    try {
+      const snapshot = await firestore()
+        .collection('feedback')
+        .where('doctorId', '==', doctorId)
+        .get();
 
-    if (snapshot.empty) {
-      console.log('No feedback found for this doctor.');
-      return 0; // No feedback yet
-    }
-    // Extract ratings
-    const ratings = snapshot.docs.map((doc) => doc.data().rating);
+      if (snapshot.empty) {
+        console.log('No feedback found for this doctor.');
+        return 0; // No feedback yet
+      }
+      // Extract ratings
+      const ratings = snapshot.docs.map(doc => doc.data().rating);
 
-    // Calculate average rating
-    const total = ratings.reduce((sum, rating) => sum + rating, 0);
-    const average = total / ratings.length;
+      // Calculate average rating
+      const total = ratings.reduce((sum, rating) => sum + rating, 0);
+      const average = total / ratings.length;
 
-    console.log(`Average Rating for Doctor ${doctorId}:`, average);
-    return average;
-  } catch (error) {
-    console.error('Error fetching feedback:', error);
-    return 0; // Return 0 in case of error
-  }
-};
-
-useEffect(() => {
-  const fetchFeedback = async () => {
-    if (userDetail) {
-      const doctorId = userDetail.id;
-      const averageRating = await getDoctorFeedback(doctorId);
-      console.log('Average Rating:', averageRating);
+      console.log(`Average Rating for Doctor ${doctorId}:`, average);
+      return average;
+    } catch (error) {
+      console.error('Error fetching feedback:', error);
+      return 0; // Return 0 in case of error
     }
   };
-  fetchFeedback(); // Call the async function
-}, [userDetail]); // Runs whenever userDetail changes
 
-
+  useEffect(() => {
+    const fetchFeedback = async () => {
+      if (userDetail) {
+        const doctorId = userDetail.id;
+        const averageRating = await getDoctorFeedback(doctorId);
+        console.log('Average Rating:', averageRating);
+      }
+    };
+    fetchFeedback(); // Call the async function
+  }, [userDetail]); // Runs whenever userDetail changes
 
   const GetListDetail = async () => {
     try {
@@ -222,9 +219,9 @@ useEffect(() => {
           setAllDoctor(alldoctor); // Set the filtered list as needed
           setAllPatient(allpatient); // Set the filtered list as needed
           // Sort doctors by their averageRating in descending order
-        const recommendedDoctors = alldoctor?.sort((a, b) => b?.averageRating - a?.averageRating);
-        console.log(recommendedDoctors,'recommendedDoctors');
-
+          const recommendedDoctors = alldoctor?.sort(
+            (a, b) => b?.averageRating - a?.averageRating,
+          );
         });
       // Clean up the listener when the component unmounts
       return () => subscriber();
@@ -284,7 +281,6 @@ useEffect(() => {
       return false;
     }
   };
-  
 
   return (
     <Authcontext.Provider
@@ -306,7 +302,7 @@ useEffect(() => {
         CheckDataBase,
 
         bookingData,
-        setRateCount
+        setRateCount,
       }}>
       {children}
     </Authcontext.Provider>
