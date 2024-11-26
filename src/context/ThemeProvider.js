@@ -19,12 +19,13 @@ const lightTheme = {
     onlightGrey: 'rgba(57, 57, 57, 0.752)',
     transpgrey: 'rgba(228, 228, 227, 0.835)',
 
-    green: '#C8E6C9',
-    error: '#FFCDD2',
+    green: '#a2dea4',
+    error: '#dea4aa',
 
     sheetGreen: '#c8e9ca',
     appColor: '#78B3CE',
     appLight: '#cde5f5',
+    rate: '#FFD700',
   },
   roundness: 6,
 };
@@ -44,6 +45,7 @@ const darkTheme = {
     sheetGreen: '#163717',
     appColor: '#78B3CE',
     appLight: '#cde5f5',
+    rate: '#FFD700',
   },
   roundness: 6,
 };

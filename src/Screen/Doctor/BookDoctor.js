@@ -106,7 +106,7 @@ export default function BookDoctor({route}) {
       await firestore().collection('bookings').add(data); // Push to 'bookings' collection
       showToast('Booking confirmed successfully!');
       // Navigate to the confirmation screen or back to previous screen
-    navigation.navigate('Parent'); // or navigation.goBack() if going back
+      navigation.navigate('Parent'); // or navigation.goBack() if going back
       setSpinner(false);
     } catch (error) {
       console.error('Error saving booking:', error);
@@ -132,10 +132,21 @@ export default function BookDoctor({route}) {
               {backgroundColor: theme.colors.transpgrey},
             ]}>
             <View style={{flexDirection: 'row', gap: 10, alignItems: 'center'}}>
-              <Image
-                style={styles.image}
-                source={{uri: doctorDetail?.profile_image.imageUri}}
-              />
+              {doctorDetail?.profile_image.imageUri ? (
+                <Image
+                  style={styles.image}
+                  source={{uri: doctorDetail?.profile_image.imageUri}}
+                />
+              ) : (
+                <View style={styles.imageview}>
+                  <Iconify
+                    icon="fontisto:doctor"
+                    size={64}
+                    color={theme.colors.onBackground}
+                  />
+                </View>
+              )}
+
               <View style={styles.doctorContent}>
                 <CustomText style={[{fontFamily: fonts.Bold, fontSize: 16}]}>
                   {doctorDetail?.name}

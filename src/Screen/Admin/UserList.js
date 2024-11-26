@@ -25,7 +25,7 @@ const UserList = () => {
           onPress={() => handlePress(item)}
           style={[styles.UserCard, {backgroundColor: theme.colors.transpgrey}]}
           activeOpacity={0.7}>
-          <View
+          {/* <View
             style={[
               styles.iconView,
               {backgroundColor: theme.colors.background},
@@ -35,16 +35,40 @@ const UserList = () => {
               size={iconsize}
               color={iconColor}
             />
-          </View>
+          </View> */}
+
+{item?.profile_image?.imageUri ? (
+            <Image
+              source={{uri: item?.profile_image?.imageUri}}
+              style={[
+                styles.profileImage,
+                {borderColor: theme.colors.appcolor},
+              ]}
+            />
+          ) : (
+            <>
+              <View
+                style={[
+                  styles.iconView,
+                  {backgroundColor: theme.colors.background},
+                ]}>
+                <Iconify
+                            icon="solar:user-outline"
+                  size={iconsize}
+                  color={iconColor}
+                />
+              </View>
+            </>
+          )}
 
           <View style={styles.UserDetails}>
             <CustomText style={[styles.UserName, {fontFamily: fonts.Bold}]}>
               {item?.name}
             </CustomText>
-            <CustomText
+            {/* <CustomText
               style={[styles.UserSpecialty, {fontFamily: fonts.SemiBold}]}>
               {item.age}
-            </CustomText>
+            </CustomText> */}
             <CustomText style={[styles.UserContact, {fontFamily: fonts.Light}]}>
               Contact: {item.contact}
             </CustomText>
@@ -197,6 +221,13 @@ const styles = StyleSheet.create({
     width: 60,
     height: 60,
     alignItems: 'center',
+  },
+  profileImage: {
+    width: 65,
+    height: 65,
+    borderRadius: 50,
+    marginRight: 16,
+    borderWidth: 1,
   },
 });
 

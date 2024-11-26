@@ -31,8 +31,6 @@ export default function Home() {
   const isFocused = useIsFocused();
   const backPressedOnce = useRef(false);
 
-  
-
   useEffect(() => {
     const backHandler = BackHandler.addEventListener(
       'hardwareBackPress',
@@ -203,8 +201,6 @@ export default function Home() {
     },
   ];
 
-  
-
   return (
     <>
       <View
@@ -212,39 +208,41 @@ export default function Home() {
           styles.maincontainer,
           {backgroundColor: theme.colors.background},
         ]}>
-     
-          <View style={styles.mainHeader}>
-           <View>
-           <CustomText
+        <View style={styles.mainHeader}>
+          <View>
+            <CustomText
               numberOfLines={1}
               style={{fontFamily: fonts.Bold, fontSize: 22}}>
               Welcome to ,
             </CustomText>
-           <CustomText
+            <CustomText
               numberOfLines={1}
-              style={{fontFamily: fonts.Black, fontSize: 26,top:-3,left:5}}>
-             ECG-Track
+              style={{fontFamily: fonts.Black, fontSize: 26, top: -3, left: 5}}>
+              ECG-Track
             </CustomText>
-           </View>
-            <View style={{flexDirection: 'row', gap: 4}}>
-              <View style={styles.profileContainer}>
+          </View>
+          <View style={{flexDirection: 'row', gap: 4}}>
+            <View style={styles.profileContainer}>
+              <TouchableOpacity
+                onPress={() =>
+                  navigation.navigate('SingleDoctor', {
+                    doctorId: userDetail?.id,
+                  })
+                }>
                 {userDetail?.profile_image?.imageUri ? (
-                  <TouchableOpacity onPress={()=>navigation.navigate("SingleDoctor",{doctorId:userDetail?.id})}>
-                    <Image
-                      source={{uri: userDetail?.profile_image?.imageUri}}
-                      style={[
-                        styles.profileImage,
-                        {borderColor: theme.colors.appcolor},
-                      ]}
-                    />
-                  </TouchableOpacity>
+                  <Image
+                    source={{uri: userDetail?.profile_image?.imageUri}}
+                    style={[
+                      styles.profileImage,
+                      {borderColor: theme.colors.appcolor},
+                    ]}
+                  />
                 ) : (
                   <>
                     <View
                       style={[
                         styles.iconView,
                         {backgroundColor: theme.colors.background},
-                        {padding: 0},
                       ]}>
                       <Iconify
                         icon="fontisto:doctor"
@@ -255,32 +253,33 @@ export default function Home() {
                     </View>
                   </>
                 )}
-              </View>
-              <View
-                style={[
-                  styles.iconView,
-                  {backgroundColor: theme.colors.background},
-                ]}>
-                <Iconify
-                  icon="majesticons:logout-half-circle-line"
-                  size={28}
-                  color={theme.colors.onBackground}
-                  onPress={handleLogout}
-                />
-              </View>
+              </TouchableOpacity>
+            </View>
+            <View
+              style={[
+                styles.iconView,
+                {backgroundColor: theme.colors.background},
+              ]}>
+              <Iconify
+                icon="majesticons:logout-half-circle-line"
+                size={28}
+                color={theme.colors.onBackground}
+                onPress={handleLogout}
+              />
             </View>
           </View>
+        </View>
 
-          <FlatList
-            showsHorizontalScrollIndicator={false}
-            showsVerticalScrollIndicator={false}
-            data={cards}
-            keyExtractor={item => item.id}
-            renderItem={renderCard}
-            numColumns={2}
-            ListHeaderComponent={
-              <>
-                {/* <View style={[styles.maindoctorCard]}>
+        <FlatList
+          showsHorizontalScrollIndicator={false}
+          showsVerticalScrollIndicator={false}
+          data={cards}
+          keyExtractor={item => item.id}
+          renderItem={renderCard}
+          numColumns={2}
+          ListHeaderComponent={
+            <>
+              {/* <View style={[styles.maindoctorCard]}>
                   <View
                     style={{
                       flexDirection: 'row',
@@ -400,15 +399,14 @@ export default function Home() {
                     )}
                   </View>
                 </View> */}
-
-<View style={{}}>
-<Appointment data={users} />
-</View>              </>
-            }
-            contentContainerStyle={styles.container}
-            columnWrapperStyle={{justifyContent: 'space-between'}}
-          />
-         
+              <View style={{}}>
+                <Appointment data={users} />
+              </View>{' '}
+            </>
+          }
+          contentContainerStyle={styles.container}
+          columnWrapperStyle={{justifyContent: 'space-between'}}
+        />
       </View>
     </>
   );
