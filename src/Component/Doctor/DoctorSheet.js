@@ -422,12 +422,13 @@ const DoctorSheet = ({bottomSheetRef, doctor, fromApt, selectedaptDetail}) => {
                       key={index}
                       onPress={() => handleStarPress(index)}
                       style={styles.star}>
-                      <Iconify
-                        key={`filled-${index}`}
-                        icon="solar:star-bold"
-                        size={30}
-                        color={theme.colors.rate}
-                      />
+                      <CustomText
+                        style={[
+                          rating > index && styles.selectedStar,
+                          {fontFamily: fonts.SemiBold, fontSize: 28},
+                        ]}>
+                        ★
+                      </CustomText>
                     </TouchableOpacity>
                   ))}
                 </View>
@@ -531,11 +532,13 @@ const styles = StyleSheet.create({
   },
   star: {
     marginHorizontal: 5,
-    marginVertical: 10,
   },
   starsContainer: {
     flexDirection: 'row',
     marginBottom: 6,
     gap: 3,
+  },
+  selectedStar: {
+    color: '#FFD700', // Gold color for selected stars
   },
 });
