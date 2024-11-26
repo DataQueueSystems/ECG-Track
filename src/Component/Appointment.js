@@ -20,7 +20,8 @@ import moment from 'moment';
 import {useNavigation} from '@react-navigation/native';
 import ImageModal from './Modal/ImageModal';
 import DoctorSheet from './Doctor/DoctorSheet';
-import Icon from 'react-native-vector-icons/FontAwesome';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+
 
 const Appointment = ({data, fromUser}) => {
   let theme = useTheme();
@@ -121,16 +122,31 @@ const Appointment = ({data, fromUser}) => {
                   marginVertical: 2,
                 }}>
                 {/* Filled Stars */}
-                {[...Array(Math.floor(person?.averageRating))]?.map(
-                  (_, index) => (
-                    <Iconify
-                    key={`filled-${index}`}
-                    icon="solar:star-bold"
-                    size={15}
-                    color={theme.colors.rate}
-                  />
-                  ),
-                )}
+             
+                {[...Array(5)].map((_, index) => {
+                  const rating = person?.averageRating; // Current rating
+                  const isFullStar = index + 1 <= Math.floor(rating); // Check if it’s a full star
+                  const isHalfStar =
+                    index + 1 > Math.floor(rating) && index < Math.ceil(rating); // Check if it’s a half star
+                  return (
+                    <MaterialIcons
+                      key={`star-${index}`}
+                      name={
+                        isFullStar
+                          ? 'star' // Full star icon
+                          : isHalfStar
+                          ? 'star-half' // Half star icon
+                          : 'star-border' // Empty star icon
+                      }
+                      size={22}
+                      color={
+                        isFullStar || isHalfStar
+                          ? theme.colors.rate
+                          : theme.colors.onBackground
+                      } // Highlight or grey color
+                    />
+                  );
+                })}
               </View>
               )}
 

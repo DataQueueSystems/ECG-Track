@@ -16,7 +16,8 @@ import {Iconify} from 'react-native-iconify';
 import {Divider, useTheme} from 'react-native-paper';
 import CustomText from '../../customText/CustomText';
 import {useAuthContext} from '../../context/GlobaContext';
-import Icon from 'react-native-vector-icons/FontAwesome';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+
 import {useNavigation} from '@react-navigation/native';
 import moment from 'moment';
 import ImageModal from '../Modal/ImageModal';
@@ -100,22 +101,40 @@ const RecommandedDoctor = () => {
             alignItems: 'center', // Align items vertically in the center
           }}>
           {/* Filled Stars */}
-          {item?.averageRating && item?.averageRating && (
+
+          {item?.averageRating && (
             <>
               <View
                 style={{
                   flexDirection: 'row', // Arrange items in a row
                   alignItems: 'center', // Align items vertically in the center
-                  gap: 6, // Add spacing between items (React Native 0.71+)
+                  gap: 2, // Add spacing between items (React Native 0.71+)
                 }}>
-                {[...Array(Math.floor(item?.averageRating))].map((_, index) => (
-                  <Iconify
-                    key={`filled-${index}`}
-                    icon="solar:star-bold"
-                    size={22}
-                    color={theme.colors.rate}
-                  />
-                ))}
+                {/* Render all 5 stars */}
+                {[...Array(5)].map((_, index) => {
+                  const rating = item?.averageRating; // Current rating
+                  const isFullStar = index + 1 <= Math.floor(rating); // Check if it’s a full star
+                  const isHalfStar =
+                    index + 1 > Math.floor(rating) && index < Math.ceil(rating); // Check if it’s a half star
+                  return (
+                    <MaterialIcons
+                      key={`star-${index}`}
+                      name={
+                        isFullStar
+                          ? 'star' // Full star icon
+                          : isHalfStar
+                          ? 'star-half' // Half star icon
+                          : 'star-border' // Empty star icon
+                      }
+                      size={22}
+                      color={
+                        isFullStar || isHalfStar
+                          ? theme.colors.rate
+                          : theme.colors.disabled
+                      } // Highlight or grey color
+                    />
+                  );
+                })}
               </View>
               <CustomText style={{fontFamily: fonts.Medium, fontSize: 11}}>
                 {item?.averageRating?.toFixed(1)} Rating
