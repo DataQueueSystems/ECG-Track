@@ -1,6 +1,13 @@
-import {BackHandler, Image, StyleSheet, Text, View} from 'react-native';
+import {
+  BackHandler,
+  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import React, {useEffect, useRef} from 'react';
-import {useIsFocused} from '@react-navigation/native';
+import {useIsFocused, useNavigation} from '@react-navigation/native';
 import {showToast} from '../../../utils/Toast';
 import {useTheme} from 'react-native-paper';
 import CustomText from '../../customText/CustomText';
@@ -14,6 +21,7 @@ export default function Home() {
   let theme = useTheme();
   const {handleLogout, userDetail} = useAuthContext();
   const isFocused = useIsFocused();
+  const navigation = useNavigation();
   const backPressedOnce = useRef(false);
   useEffect(() => {
     const backHandler = BackHandler.addEventListener(
@@ -39,6 +47,9 @@ export default function Home() {
   }, []);
 
   let todaysDate = moment().format('ddd ,DD MMM');
+  const handleNavigate = () => {
+    navigation.navigate('SingleDetail');
+  };
 
   return (
     <>
@@ -51,13 +62,23 @@ export default function Home() {
         <View style={styles.headerView}>
           {/* ProfileDetail */}
           <View style={styles.userProfile}>
-            <View style={styles.profileImage}>
-              <Iconify
-                icon="fa-solid:user"
-                size={35}
-                color={theme.colors.onBackground}
-              />
-            </View>
+            <TouchableOpacity
+              activeOpacity={0.6}
+              onPress={handleNavigate}
+              style={styles.profileImage}>
+              {userDetail?.profile_image?.imageUri ? (
+                <Image
+                  style={styles.image}
+                  source={{uri: userDetail?.profile_image?.imageUri}}
+                />
+              ) : (
+                <Iconify
+                  icon="fa-solid:user"
+                  size={35}
+                  color={theme.colors.onBackground}
+                />
+              )}
+            </TouchableOpacity>
 
             <View style={styles.NameDate}>
               <CustomText
@@ -113,7 +134,6 @@ export default function Home() {
         </View>
 
         {/* Manage Card */}
-
         <GradientCards />
       </View>
     </>
@@ -157,5 +177,11 @@ const styles = StyleSheet.create({
   },
   manageText: {
     fontSize: 30,
+  },
+  image: {
+    width:50,
+    height:50,
+    borderRadius:100,
+    bottom:7
   },
 });

@@ -17,6 +17,7 @@ import ControlUser from './Screen/Admin/ControlUser';
 import EditProfile from './Component/EditProfile';
 import SingleDoctor from './Screen/Doctor/SingleDoctor';
 import BookDoctor from './Screen/Doctor/BookDoctor';
+import UAProfile from './Screen/UAProfile';
 const Stack = createNativeStackNavigator();
 
 export default function AppNavigator() {
@@ -124,6 +125,11 @@ export default function AppNavigator() {
             <Stack.Screen
               name="BookDoctor"
               component={BookDoctor}
+              options={{headerShown: false}}
+            />
+            <Stack.Screen
+              name="SingleDetail"
+              component={UAProfile}
               options={{headerShown: false}}
             />
           </>

@@ -44,8 +44,6 @@ const RecommandedDoctor = () => {
     Linking.openURL(emailURL);
   };
 
-  const filledStars = Math.floor(2); // Number of fully filled stars
-
   const handleSinglePress = id => {
     navigation.navigate('SingleDoctor', {notDoctor: true, doctorId: id});
   };
@@ -83,36 +81,47 @@ const RecommandedDoctor = () => {
           </TouchableOpacity>
         ) : (
           <>
-            <View
-              style={[
-                styles.iconView,
-                {backgroundColor: theme.colors.background},
-              ]}>
+            <View style={[]}>
               <Iconify
                 icon="fontisto:doctor"
-                size={20}
+                size={44}
                 color={theme.colors.onBackground}
               />
             </View>
           </>
         )}
+
         <View
           style={{
-            flexDirection: 'row', // Arrange items in a row
-            gap: 6, // Add spacing between items (React Native 0.71+)
+            flexDirection: 'column', // Arrange items in a row
+            gap: 2, // Add spacing between items (React Native 0.71+)
             right: 4, // Adjust the position of the container (optional)
             justifyContent: 'flex-start', // Align items to the start (left)
             alignItems: 'center', // Align items vertically in the center
           }}>
           {/* Filled Stars */}
-          {[...Array(filledStars)].map((_, index) => (
-            <Icon
-              key={`filled-${index}`}
-              name="star"
-              size={19}
-              color={theme.colors.onBackground}
-            />
-          ))}
+          {item?.averageRating && item?.averageRating && (
+            <>
+              <View
+                style={{
+                  flexDirection: 'row', // Arrange items in a row
+                  alignItems: 'center', // Align items vertically in the center
+                  gap: 6, // Add spacing between items (React Native 0.71+)
+                }}>
+                {[...Array(Math.floor(item?.averageRating))].map((_, index) => (
+                  <Iconify
+                    key={`filled-${index}`}
+                    icon="solar:star-bold"
+                    size={22}
+                    color={theme.colors.rate}
+                  />
+                ))}
+              </View>
+              <CustomText style={{fontFamily: fonts.Medium, fontSize: 11}}>
+                {item?.averageRating?.toFixed(1)} Rating
+              </CustomText>
+            </>
+          )}
         </View>
       </View>
 
@@ -150,20 +159,19 @@ const RecommandedDoctor = () => {
           </View>
 
           {/* Available Time */}
-          {item?.availableTime&&(
-          <View style={{flexDirection: 'row', alignItems: 'center', gap: 8}}>
-            <Iconify
-              icon="mdi:clock-time-four-outline"
-              size={20}
-              color={theme.colors.onBackground}
-            />
-            <CustomText style={[{fontFamily: fonts.Regular, fontSize: 12}]}>
-              {moment(item?.availableTime?.from).format('hh:mm A')} -{' '}
-              {moment(item?.availableTime?.to).format('hh:mm A')}
-            </CustomText>
-          </View>
+          {item?.availableTime && (
+            <View style={{flexDirection: 'row', alignItems: 'center', gap: 8}}>
+              <Iconify
+                icon="mdi:clock-time-four-outline"
+                size={20}
+                color={theme.colors.onBackground}
+              />
+              <CustomText style={[{fontFamily: fonts.Regular, fontSize: 12}]}>
+                {moment(item?.availableTime?.from).format('hh:mm A')} -{' '}
+                {moment(item?.availableTime?.to).format('hh:mm A')}
+              </CustomText>
+            </View>
           )}
-
 
           {/* Address */}
           {item?.address && (
@@ -221,41 +229,57 @@ const RecommandedDoctor = () => {
 
   return (
     <>
-    <View style={styles.mainContainer}>
-      <CustomText style={[styles.apText, {fontFamily: fonts.Bold}]}>
-        Top Doctor for You
-      </CustomText>
+      <View style={styles.mainContainer}>
+        <CustomText style={[styles.apText, {fontFamily: fonts.Bold}]}>
+          Top Doctor for You
+        </CustomText>
 
-      <View style={styles.RecommandedDoctorContainer}>
-        <FlatList
-          showsHorizontalScrollIndicator={false}
-          showsVerticalScrollIndicator={false}
-          horizontal
-          data={allDoctor}
-          renderItem={renderItem}
-          keyExtractor={item => item?.id}
-          contentContainerStyle={[
-            {
-              flexGrow: 1, // Ensure the container grows to fill available space
-            },
-            centerStyle,
-          ]}
-          style={{
-            flexGrow: 0, // Prevent the list from growing beyond its content
-          }}
-        />
+        <View style={styles.RecommandedDoctorContainer}>
+          {allDoctor?.length == 0 ? (
+            <>
+              <View
+                style={{
+                  flex: 1,
+                }}>
+                <CustomText
+                  style={{
+                    fontFamily: fonts.Regular,
+                    fontSize: 18,
+                    left: 10,
+                  }}>
+                  No Doctor found
+                </CustomText>
+              </View>
+            </>
+          ) : (
+            <FlatList
+              showsHorizontalScrollIndicator={false}
+              showsVerticalScrollIndicator={false}
+              horizontal
+              data={allDoctor}
+              renderItem={renderItem}
+              keyExtractor={item => item?.id}
+              contentContainerStyle={[
+                {
+                  flexGrow: 1, // Ensure the container grows to fill available space
+                },
+                centerStyle,
+              ]}
+              style={{
+                flexGrow: 0, // Prevent the list from growing beyond its content
+              }}
+            />
+          )}
+        </View>
       </View>
-    </View>
 
-    <ImageModal
+      <ImageModal
         visible={visible}
         image={previmage}
         opacityAnim={opacityAnim}
         setVisible={setVisible}
       />
-
     </>
-
   );
 };
 

@@ -1,4 +1,5 @@
 import {
+  ActivityIndicator,
   Animated,
   Image,
   ScrollView,
@@ -19,13 +20,14 @@ import ImageModal from '../../Component/Modal/ImageModal';
 import moment from 'moment';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import firestore from '@react-native-firebase/firestore';
+import {showToast} from '../../../utils/Toast';
 
 export default function SingleDoctor({route}) {
   let {notDoctor, doctorId} = route.params;
   let theme = useTheme();
   let navigation = useNavigation();
   let screenName = notDoctor ? 'Doctor Detail' : 'Profile Detail';
-  const {userDetail} = useAuthContext();
+  const {userDetail, Checknetinfo, setRateCount} = useAuthContext();
   const [singleDoctor, setSingleDoctor] = useState(null);
   const [spinner, setSpinner] = useState(false);
 
@@ -39,7 +41,7 @@ export default function SingleDoctor({route}) {
         .onSnapshot(async userDoc => {
           if (!userDoc.exists) {
             return;
-          };
+          }
           const singleDoctor = {id: userDoc.id, ...userDoc.data()};
           // Set user details if the account is active
           await setSingleDoctor(singleDoctor);
@@ -84,6 +86,71 @@ export default function SingleDoctor({route}) {
       useNativeDriver: true,
     }).start();
   };
+
+  const [rating, setRating] = useState(0);
+  const handleStarPress = index => {
+    setRating(index + 1);
+  };
+
+  const [rateSpinner, setRateSpinner] = useState(false);
+
+  const SubmitRate = async () => {
+    setRateSpinner(true);
+
+    if (!rating) {
+      setRateSpinner(false);
+      showToast(`Rating is Required`);
+      return;
+    }
+    const isConnected = await Checknetinfo();
+    if (!isConnected) {
+      setRateSpinner(false);
+      return; // Do not proceed if there is no internet connection
+    }
+    let data = {
+      userId: userDetail?.id,
+      doctorId: singleDoctor?.id,
+      rating,
+    };
+    const currentFeedback = singleDoctor?.feedback || [];
+    // Add the new rating data to the feedback array
+    const updatedFeedback = [...currentFeedback, data];
+    // Calculate the average rating from the updated feedback (sum of ratings)
+    const total = updatedFeedback.reduce(
+      (sum, feedback) => sum + feedback.rating,
+      0,
+    ); // Sum of rating values
+    const averageRating = total / updatedFeedback.length;
+    try {
+      // Update the doctor's feedback array and average rating
+      await firestore().collection('users').doc(singleDoctor?.id).update({
+        feedback: updatedFeedback,
+        averageRating: averageRating, // Store the calculated average rating
+      });
+      showToast('Booking confirmed successfully!');
+      // Navigate to the confirmation screen or back to previous screen
+      await navigation.navigate("Parent");
+      setRateSpinner(false);
+      setRateCount(count => count + 1);
+    } catch (error) {
+      console.error('Error saving booking:', error);
+      showToast('Failed to confirm booking. Please try again.');
+      setRateSpinner(false);
+    }
+  };
+
+  const handleNavigate = () => {
+    if (!singleDoctor?.availableTime) {
+      showToast(
+        "Sorry to say that, This Doctor Didn't mention the availabel time",
+      );
+      return;
+    }
+    navigation.navigate('BookDoctor', {
+      doctorDetail: singleDoctor,
+    });
+  };
+
   return (
     <>
       <Header screenName={screenName} {...(!notDoctor ? {renderAction} : {})} />
@@ -116,14 +183,22 @@ export default function SingleDoctor({route}) {
               </View>
             </View>
 
-            <TouchableOpacity
-              onPress={handlePrevImage}
-              style={styles.imageview}>
-              <Image
-                style={styles.image}
-                source={{uri: singleDoctor?.profile_image?.imageUri}}
-              />
-            </TouchableOpacity>
+            {singleDoctor?.profile_image?.imageUri ? (
+              <TouchableOpacity onPress={handlePrevImage}>
+                <Image
+                  style={styles.image}
+                  source={{uri: singleDoctor?.profile_image?.imageUri}}
+                />
+              </TouchableOpacity>
+            ) : (
+              <View style={styles.imageview}>
+                <Iconify
+                  icon="fontisto:doctor"
+                  size={90}
+                  color={theme.colors.onBackground}
+                />
+              </View>
+            )}
           </View>
 
           <View
@@ -179,17 +254,29 @@ export default function SingleDoctor({route}) {
                   </CustomText>
                 </View>
               )}
+
+              {singleDoctor?.address && (
+                <View style={styles.iconView}>
+                  <Iconify
+                    icon="mingcute:location-line"
+                    size={iconsize}
+                    color={theme.colors.onBackground}
+                  />
+                  <CustomText
+                    style={[
+                      {fontFamily: fonts.Regular, fontSize: contentSize},
+                    ]}>
+                    {singleDoctor?.address}
+                  </CustomText>
+                </View>
+              )}
             </View>
           </View>
           <View>
             {userDetail?.role == 'user' && (
               <TouchableOpacity
                 activeOpacity={0.8}
-                onPress={() =>
-                  navigation.navigate('BookDoctor', {
-                    doctorDetail: singleDoctor,
-                  })
-                }
+                onPress={handleNavigate}
                 style={[
                   styles.button,
                   {backgroundColor: theme.colors.onBackground},
@@ -214,9 +301,107 @@ export default function SingleDoctor({route}) {
               </TouchableOpacity>
             )}
           </View>
+
+          <View style={styles.allRate}>
+            <CustomText
+              style={[
+                {
+                  fontFamily: fonts.SemiBold,
+                  fontSize: 20,
+                  marginTop: 10,
+                  // textAlign: 'center',
+                },
+              ]}>
+              Rating
+            </CustomText>
+            <Divider />
+
+            <View
+              style={{
+                flexDirection: 'row',
+                gap: 10,
+                marginVertical: 10,
+                alignItems: 'center',
+              }}>
+              {/* icon */}
+              <Iconify
+                icon="solar:star-bold"
+                size={38}
+                color={theme.colors.rate}
+              />
+              {/* Rate Text */}
+              <View>
+                <View>
+                  <CustomText style={{fontFamily: fonts.Medium, fontSize: 19}}>
+                    {singleDoctor?.averageRating?.toFixed(1)} Rating
+                  </CustomText>
+                  <CustomText style={{fontFamily: fonts.Light, fontSize: 12}}>
+                    Based on {singleDoctor?.feedback?.length} rate
+                  </CustomText>
+                </View>
+              </View>
+            </View>
+
+            <View>
+              <CustomText style={{fontFamily: fonts.Light, fontSize: 14}}>
+                Your rating helps others find the best doctors and ensures
+                better health outcomes for everyone.
+              </CustomText>
+            </View>
+
+            {userDetail?.role == 'user' && (
+              <>
+
+<CustomText style={{fontFamily: fonts.Medium, fontSize: 14,color:theme.colors.green,top:4}}>
+                Give Your's
+              </CustomText>
+                <View style={styles.starsContainer}>
+                  {Array.from({length: 5}, (_, index) => (
+                    <TouchableOpacity
+                      key={index}
+                      onPress={() => handleStarPress(index)}
+                      style={styles.star}>
+                      <CustomText
+                        style={[
+                          rating > index && styles.selectedStar,
+                          {fontFamily: fonts.SemiBold, fontSize: 28},
+                        ]}>
+                        ★
+                      </CustomText>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+
+                <TouchableOpacity
+                  activeOpacity={0.8}
+                  onPress={rateSpinner ? () => {} : SubmitRate}
+                  style={[
+                    styles.button2,
+                    {borderColor: theme.colors.onBackground},
+                  ]}>
+                  {!rateSpinner ? (
+                    <CustomText
+                      style={[
+                        {
+                          color: theme.colors.onBackground,
+                          fontSize: 15,
+                          fontFamily: fonts.Medium,
+                        },
+                      ]}>
+                      Submit
+                    </CustomText>
+                  ) : (
+                    <ActivityIndicator
+                      size={24}
+                      color={theme.colors.onBackground}
+                    />
+                  )}
+                </TouchableOpacity>
+              </>
+            )}
+          </View>
         </ScrollView>
       </View>
-
       <ImageModal
         visible={visible}
         image={previmage}
@@ -245,7 +430,9 @@ const styles = StyleSheet.create({
     marginHorizontal: 2,
     top: -2,
   },
-  imageview: {},
+  imageview: {
+    padding: 30,
+  },
   image: {
     height: 170,
     width: 170,
@@ -253,7 +440,7 @@ const styles = StyleSheet.create({
   },
   otherDetailView: {
     marginVertical: 20,
-    padding: 10,
+    paddingVertical: 10,
     borderRadius: 10,
   },
   iconView: {
@@ -268,5 +455,26 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     flexDirection: 'row',
     justifyContent: 'center',
+  },
+  button2: {
+    marginTop: 10,
+    padding: 10,
+    borderRadius: 16,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    borderWidth: 0.5,
+  },
+  allRate: {
+    marginVertical: 10,
+  },
+  star: {
+    marginHorizontal: 5,
+  },
+  starsContainer: {
+    flexDirection: 'row',
+    marginVertical: 6,
+  },
+  selectedStar: {
+    color: '#FFD700', // Gold color for selected stars
   },
 });

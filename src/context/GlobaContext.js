@@ -92,8 +92,11 @@ export const AuthContextProvider = ({children}) => {
   }, []);
 
   const [bookingData, setBookingData] = useState([]);
+
+  const [count, setRateCount] = useState(0);
+
   const GetAppointMent = async id => {
-    if (!id) return;
+    if (!id) return () => {}; // Return a no-op function if no ID is provided.
 
     try {
       let query = firestore().collection('bookings');
@@ -150,16 +153,59 @@ export const AuthContextProvider = ({children}) => {
       console.error('Error fetching bookings:', error);
     }
   };
-
   useEffect(() => {
     // Fetch appointments only if the user is not an admin
+    let unsubscribe = () => {}; // Default to a no-op function.
     if (userDetail && userDetail?.role !== 'admin') {
-      const unsubscribe = GetAppointMent(userDetail?.id);
+      unsubscribe = GetAppointMent(userDetail?.id);
+    };
+    // Clean up the listener on component unmount or dependency change.
+    return () => {
+      if (typeof unsubscribe === 'function') {
+        unsubscribe();
+      }
+    };
+  }, [userDetail?.id,count]);
 
-      // Clean up on component unmount
-      return () => unsubscribe?.();
+  
+const getDoctorFeedback = async (doctorId) => {
+  try {
+    const snapshot = await firestore()
+      .collection('feedback')
+      .where('doctorId', '==', doctorId)
+      .get();
+
+    if (snapshot.empty) {
+      console.log('No feedback found for this doctor.');
+      return 0; // No feedback yet
     }
-  }, [userDetail]);
+    // Extract ratings
+    const ratings = snapshot.docs.map((doc) => doc.data().rating);
+
+    // Calculate average rating
+    const total = ratings.reduce((sum, rating) => sum + rating, 0);
+    const average = total / ratings.length;
+
+    console.log(`Average Rating for Doctor ${doctorId}:`, average);
+    return average;
+  } catch (error) {
+    console.error('Error fetching feedback:', error);
+    return 0; // Return 0 in case of error
+  }
+};
+
+useEffect(() => {
+  const fetchFeedback = async () => {
+    if (userDetail) {
+      const doctorId = userDetail.id;
+      const averageRating = await getDoctorFeedback(doctorId);
+      console.log('Average Rating:', averageRating);
+    }
+  };
+  fetchFeedback(); // Call the async function
+}, [userDetail]); // Runs whenever userDetail changes
+
+
 
   const GetListDetail = async () => {
     try {
@@ -175,6 +221,10 @@ export const AuthContextProvider = ({children}) => {
           const allpatient = alluser?.filter(user => user?.role === 'user');
           setAllDoctor(alldoctor); // Set the filtered list as needed
           setAllPatient(allpatient); // Set the filtered list as needed
+          // Sort doctors by their averageRating in descending order
+        const recommendedDoctors = alldoctor?.sort((a, b) => b?.averageRating - a?.averageRating);
+        console.log(recommendedDoctors,'recommendedDoctors');
+
         });
       // Clean up the listener when the component unmounts
       return () => subscriber();
@@ -234,6 +284,7 @@ export const AuthContextProvider = ({children}) => {
       return false;
     }
   };
+  
 
   return (
     <Authcontext.Provider
@@ -255,6 +306,7 @@ export const AuthContextProvider = ({children}) => {
         CheckDataBase,
 
         bookingData,
+        setRateCount
       }}>
       {children}
     </Authcontext.Provider>

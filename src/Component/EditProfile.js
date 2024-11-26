@@ -126,10 +126,6 @@ export default function EditProfile({route}) {
       }));
     }
   };
-  const formatTime = time => {
-    return time.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
-  };
-
   const handleSubmit = async () => {
     setSpinner(true);
     const isConnected = await Checknetinfo();
@@ -144,12 +140,13 @@ export default function EditProfile({route}) {
         if (!CanEdit) {
           showToast('Invalid data');
           return;
-        };
-        
+        }
         let profileData = {...form};
-        profileData.availableTime={
-          from:fromTime.getTime(),
-          to:toTime.getTime(),
+        if (userDetail?.role == 'doctor') {
+          profileData.availableTime = {
+            from: fromTime.getTime(),
+            to: toTime.getTime(),
+          };
         }
         if (selectedImageUri) {
           // Wait for the image upload to complete and get the image URL
@@ -167,13 +164,12 @@ export default function EditProfile({route}) {
             return;
           }
         }
-
         await firestore()
           .collection('users')
           .doc(userData?.id)
           .update(profileData);
+           // Ensure navigation happens only when confirmed
         showToast('Updated successfully ...');
-
         setSpinner(false);
         // navigation.goBack();
       }
@@ -367,7 +363,7 @@ export default function EditProfile({route}) {
             </CustomText>
           )}
 
-          {fromdoctor && (
+          {fromdoctor && userDetail?.role == 'doctor' ? (
             <View style={styles.avlTimeView}>
               <CustomText style={[styles.title, {fontFamily: fonts.SemiBold}]}>
                 Available Time
@@ -409,8 +405,7 @@ export default function EditProfile({route}) {
                   </CustomText>
                   <Button
                     style={{backgroundColor: theme.colors.transpgrey}}
-                    onPress={() => setShowToPicker(true)}
-                    >
+                    onPress={() => setShowToPicker(true)}>
                     <CustomText
                       style={[styles.label, {fontFamily: fonts.Regular}]}>
                       {form?.availableTime?.to
@@ -430,6 +425,8 @@ export default function EditProfile({route}) {
                 </View>
               </View>
             </View>
+          ) : (
+            <></>
           )}
 
           <TextInput

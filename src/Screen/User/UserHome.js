@@ -1,4 +1,13 @@
-import {BackHandler, ScrollView, StyleSheet, Text, View} from 'react-native';
+import {
+  Alert,
+  BackHandler,
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import React, {useEffect, useRef} from 'react';
 import {useAuthContext} from '../../context/GlobaContext';
 import {useIsFocused, useNavigation} from '@react-navigation/native';
@@ -41,8 +50,9 @@ export default function Home() {
 
   let navigation = useNavigation();
   const handleNavigate = () => {
-    navigation.navigate('EditProfile', {fromuser: true,fromdoctor:false});
+    navigation.navigate('EditProfile', {fromuser: true, fromdoctor: false});
   };
+
   return (
     <>
       <View
@@ -52,6 +62,23 @@ export default function Home() {
         ]}>
         {/* Header */}
         <View style={styles.headerView}>
+         <View style={{flexDirection:'row',gap:10,alignItems:'center'}}>
+         <TouchableOpacity
+            activeOpacity={0.6}
+            onPress={() => navigation.navigate('SingleDetail')}>
+            {userDetail?.profile_image?.imageUri ? (
+              <Image
+                style={styles.image}
+                source={{uri: userDetail?.profile_image?.imageUri}}
+              />
+            ) : (
+              <Iconify
+                icon="fa-solid:user"
+                size={35}
+                color={theme.colors.onBackground}
+              />
+            )}
+          </TouchableOpacity>
           {/* Greeting */}
           <View>
             <CustomText style={{fontFamily: fonts.Bold, fontSize: 22}}>
@@ -67,6 +94,7 @@ export default function Home() {
               How do you feel today?
             </CustomText>
           </View>
+         </View>
           {/* ProfileDetail */}
           <View style={styles.userProfile}>
             <View style={styles.profileImage}>
@@ -316,5 +344,11 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     marginTop: 10,
     marginBottom: 30,
+  },
+  image: {
+    width: 50,
+    height: 50,
+    borderRadius: 100,
+    bottom: 7,
   },
 });

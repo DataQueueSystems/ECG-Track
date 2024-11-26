@@ -30,7 +30,7 @@ const GradientCards = () => {
   return (
     <View style={styles.container}>
       {/* Doctor Card */}
-      <LinearGradient colors={['#cde5f5', '#78B3CE']} style={styles.card}>
+      <View style={[styles.card,{backgroundColor:theme.colors.transpgrey}]}>
         <View
           style={[styles.iconView, {backgroundColor: theme.colors.background}]}>
           <Iconify icon="fontisto:doctor" size={iconsize} color={iconColor} />
@@ -41,7 +41,7 @@ const GradientCards = () => {
         <CustomText
           style={[
             styles.countText,
-            {fontFamily: fonts.Regular, color: 'black'},
+            {fontFamily: fonts.Regular, color: theme.colors.onBackground},
           ]}>
           {allDoctor?.length}
         </CustomText>
@@ -51,10 +51,12 @@ const GradientCards = () => {
           style={styles.arrow}>
           <Iconify icon="ep:arrow-right-bold" size={20} color={iconColor} />
         </TouchableOpacity>
-      </LinearGradient>
+      </View>
+
 
       {/* User Card */}
-      <LinearGradient colors={['#cde5f5', '#78B3CE']} style={styles.card}>
+      <View style={[styles.card,{backgroundColor:theme.colors.transpgrey}]}>
+      
         <View
           style={[styles.iconView, {backgroundColor: theme.colors.background}]}>
           <Iconify icon="mdi:patient" size={44} color={iconColor} />
@@ -65,17 +67,16 @@ const GradientCards = () => {
         <CustomText
           style={[
             styles.countText,
-            {fontFamily: fonts.Regular, color: 'black'},
+            {fontFamily: fonts.Regular, color: theme.colors.onBackground},
           ]}>
           {allpatient?.length}
         </CustomText>
-
         <TouchableOpacity
           onPress={() => handleNavigate('UserList')}
           style={styles.arrow}>
           <Iconify icon="ep:arrow-right-bold" size={20} color={iconColor} />
         </TouchableOpacity>
-      </LinearGradient>
+      </View>
     </View>
   );
 };
@@ -95,7 +96,6 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.2,
     shadowRadius: 5,
-    elevation: 5,
   },
   iconView: {
     padding: 10,
@@ -119,8 +119,6 @@ const styles = StyleSheet.create({
     borderRadius: 100,
     right: 5,
     bottom: 5,
-    elevation: 2,
-    backgroundColor: '#bad6e9',
   },
 });
 

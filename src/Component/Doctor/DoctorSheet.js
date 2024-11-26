@@ -7,20 +7,28 @@ import {
   Alert,
   TouchableOpacity,
   Animated,
+  ActivityIndicator,
+  ScrollView,
 } from 'react-native';
-import BottomSheet, {BottomSheetBackdrop} from '@gorhom/bottom-sheet';
-import {useTheme, Portal} from 'react-native-paper';
+import BottomSheet, {
+  BottomSheetBackdrop,
+  BottomSheetScrollView,
+} from '@gorhom/bottom-sheet';
+import {useTheme, Portal, Divider} from 'react-native-paper';
 import {useNavigation} from '@react-navigation/native';
 import CustomText from '../../customText/CustomText';
 import {fonts} from '../../customText/fonts';
 import {Iconify} from 'react-native-iconify';
 import ImageModal from '../Modal/ImageModal';
 import moment from 'moment';
-
-const DoctorSheet = ({bottomSheetRef, doctor}) => {
-  const snapPoints = ['50%', '70%'];
+import {useAuthContext} from '../../context/GlobaContext';
+import firestore from '@react-native-firebase/firestore';
+import {showToast} from '../../../utils/Toast';
+const DoctorSheet = ({bottomSheetRef, doctor, fromApt, selectedaptDetail}) => {
+  const {Checknetinfo, userDetail, bookingData, setRateCount} =
+    useAuthContext();
+  const snapPoints = ['60%', '90%'];
   const theme = useTheme();
-
   const renderBackdrop = useCallback(
     props => (
       <BottomSheetBackdrop
@@ -61,6 +69,58 @@ const DoctorSheet = ({bottomSheetRef, doctor}) => {
     }).start();
   };
 
+  const [spinner, setSpinner] = useState(false);
+
+  const SubmitRate = async () => {
+    setSpinner(true);
+    if (!rating) {
+      setSpinner(false);
+      showToast(`Rating is Required`);
+      return;
+    }
+    const isConnected = await Checknetinfo();
+    if (!isConnected) {
+      setSpinner(false);
+      return; // Do not proceed if there is no internet connection
+    }
+    let data = {
+      userId: userDetail?.id,
+      doctorId: doctor?.id,
+      aptId: selectedaptDetail?.id,
+      rating,
+    };
+    const currentFeedback = doctor?.feedback || [];
+    // Add the new rating data to the feedback array
+    const updatedFeedback = [...currentFeedback, data];
+    // Calculate the average rating from the updated feedback (sum of ratings)
+    const total = updatedFeedback.reduce(
+      (sum, feedback) => sum + feedback.rating,
+      0,
+    ); // Sum of rating values
+    const averageRating = total / updatedFeedback.length;
+    try {
+      // Update the doctor's feedback array and average rating
+      await firestore().collection('users').doc(doctor?.id).update({
+        feedback: updatedFeedback,
+        averageRating: averageRating, // Store the calculated average rating
+      });
+      showToast('Booking confirmed successfully!');
+      // Navigate to the confirmation screen or back to previous screen
+      navigation.navigate('Parent'); // or navigation.goBack() if going back
+      setSpinner(false);
+      setRateCount(count => count + 1);
+    } catch (error) {
+      console.error('Error saving booking:', error);
+      showToast('Failed to confirm booking. Please try again.');
+      setSpinner(false);
+    }
+  };
+
+  const [rating, setRating] = useState(0);
+  const handleStarPress = index => {
+    setRating(index + 1);
+  };
+
   return (
     <>
       <Portal>
@@ -74,156 +134,332 @@ const DoctorSheet = ({bottomSheetRef, doctor}) => {
             backgroundColor: theme.colors.background,
           }}
           handleIndicatorStyle={{backgroundColor: theme.colors.onBackground}}>
-          <View
-            style={[
-              styles.bottomModelDiv,
-              {backgroundColor: theme.colors.background},
-            ]}>
-            {/* action Icon */}
-            <View style={styles.actionView}>
-              <Iconify
-                onPress={handleEdit}
-                icon="mynaui:edit"
-                size={27}
-                color={theme.colors.error}
-              />
-            </View>
+          <BottomSheetScrollView showsVerticalScrollIndicator={false}>
+            <View
+              style={[
+                styles.bottomModelDiv,
+                {backgroundColor: theme.colors.background},
+              ]}>
+              {/* action Icon */}
 
-            {/* Doctor Details */}
-            <View style={styles.profileContainer}>
-              {doctor?.profile_image?.imageUri ? (
-                <TouchableOpacity onPress={handlePrevImage}>
-                  <Image
-                    source={{uri: doctor?.profile_image?.imageUri}}
-                    style={[
-                      styles.profileImage,
-                      {borderColor: theme.colors.appcolor},
-                    ]}
+              {!fromApt && (
+                <View style={styles.actionView}>
+                  <Iconify
+                    onPress={handleEdit}
+                    icon="mynaui:edit"
+                    size={27}
+                    color={theme.colors.error}
                   />
-                </TouchableOpacity>
-              ) : (
+                </View>
+              )}
+
+              {/* Doctor Details */}
+              <View style={styles.profileContainer}>
+                {doctor?.profile_image?.imageUri ? (
+                  <TouchableOpacity onPress={handlePrevImage}>
+                    <Image
+                      source={{uri: doctor?.profile_image?.imageUri}}
+                      style={[
+                        styles.profileImage,
+                        {borderColor: theme.colors.appcolor},
+                      ]}
+                    />
+                  </TouchableOpacity>
+                ) : (
+                  <>
+                    <View
+                      style={[
+                        styles.iconView,
+                        {backgroundColor: theme.colors.background},
+                      ]}>
+                      <Iconify
+                        icon="fontisto:doctor"
+                        size={iconsize}
+                        color={iconColor}
+                      />
+                    </View>
+                  </>
+                )}
+
+                <CustomText
+                  style={[
+                    styles.doctorName,
+                    {
+                      color: theme.colors.onBackground,
+                      fontFamily: fonts.SemiBold,
+                    },
+                  ]}>
+                  {doctor?.name || 'Doctor Name'}
+                </CustomText>
+                {doctor?.specialist && (
+                  <CustomText
+                    style={[
+                      styles.doctorspecialist,
+                      {color: theme.colors.primary, fontFamily: fonts.Medium},
+                    ]}>
+                    {doctor?.specialist}
+                  </CustomText>
+                )}
+
+                {doctor?.averageRating && (
+                  <View style={styles.starsContainer}>
+                    {[...Array(Math.floor(doctor?.averageRating))].map(
+                      (_, index) => (
+                        <Iconify
+                          key={`filled-${index}`}
+                          icon="solar:star-bold"
+                          size={30}
+                          color={theme.colors.rate}
+                        />
+                      ),
+                    )}
+                  </View>
+                )}
+              </View>
+
+              {userDetail?.rol == 'admin' ? (
                 <>
                   <View
+                    style={{
+                      marginVertical: 10,
+                      marginTop: 20,
+                    }}>
+                    <CustomText
+                      style={[
+                        {
+                          color: theme.colors.onBackground,
+                          fontFamily: fonts.SemiBold,
+                        },
+                      ]}>
+                      AppointMent Detail
+                    </CustomText>
+                    <Divider />
+                  </View>
+
+                  <CustomText
                     style={[
-                      styles.iconView,
-                      {backgroundColor: theme.colors.background},
+                      styles.infoLabel,
+                      {
+                        color: theme.colors.onBackground,
+                        fontFamily: fonts.Regular,
+                      },
                     ]}>
+                    Date:{moment(selectedaptDetail?.time).format('DD MMM y')}
+                  </CustomText>
+                  <CustomText
+                    style={[
+                      styles.infoLabel,
+                      {
+                        color: theme.colors.onBackground,
+                        fontFamily: fonts.Regular,
+                      },
+                    ]}>
+                    Time:{selectedaptDetail?.timeSlot}
+                  </CustomText>
+
+                  <View>
+                    <CustomText
+                      style={[
+                        styles.doctorspecialist,
+                        {
+                          color: theme.colors.onBackground,
+                          fontFamily: fonts.SemiBold,
+                        },
+                      ]}>
+                      {userDetail?.role == 'user'
+                        ? 'Doctor Detail'
+                        : 'User Detail'}
+                    </CustomText>
+                    <Divider />
+                  </View>
+                </>
+              ) : (
+                <View style={{marginTop: 10}} />
+              )}
+              {/* Additional Information */}
+              <View style={styles.infoContainer}>
+                {doctor?.availableTime && (
+                  <>
+                    <CustomText
+                      style={[
+                        styles.infoLabel,
+                        {
+                          color: theme.colors.onBackground,
+                          fontFamily: fonts.Medium,
+                        },
+                      ]}>
+                      Available Time:
+                    </CustomText>
+                    <CustomText
+                      style={[
+                        styles.infoValue,
+                        {
+                          color: theme.colors.onBackground,
+                          fontFamily: fonts.Regular,
+                        },
+                      ]}>
+                      {moment(doctor?.availableTime?.from).format('hh:mm A')} -{' '}
+                      {moment(doctor?.availableTime?.to).format('hh:mm A')}
+                    </CustomText>
+                  </>
+                )}
+
+                <CustomText
+                  style={[
+                    styles.infoLabel,
+                    {
+                      color: theme.colors.onBackground,
+                      fontFamily: fonts.Medium,
+                    },
+                  ]}>
+                  Contact:
+                </CustomText>
+                <CustomText
+                  style={[
+                    styles.infoValue,
+                    {
+                      color: theme.colors.onBackground,
+                      fontFamily: fonts.Regular,
+                    },
+                  ]}>
+                  {doctor?.contact || '+1 234 567 890'}
+                </CustomText>
+                <CustomText
+                  style={[
+                    styles.infoLabel,
+                    {
+                      color: theme.colors.onBackground,
+                      fontFamily: fonts.Medium,
+                    },
+                  ]}>
+                  Email:
+                </CustomText>
+                <CustomText
+                  style={[
+                    styles.infoValue,
+                    {
+                      color: theme.colors.onBackground,
+                      fontFamily: fonts.Regular,
+                    },
+                  ]}>
+                  {doctor?.email}
+                </CustomText>
+
+                {doctor?.address && (
+                  <>
+                    <CustomText
+                      style={[
+                        styles.infoLabel,
+                        {
+                          color: theme.colors.onBackground,
+                          fontFamily: fonts.Medium,
+                        },
+                      ]}>
+                      Address:
+                    </CustomText>
+                    <CustomText
+                      style={[
+                        styles.infoValue,
+                        {
+                          color: theme.colors.onBackground,
+                          fontFamily: fonts.Regular,
+                        },
+                      ]}>
+                      {doctor?.address}
+                    </CustomText>
+                  </>
+                )}
+              </View>
+              <Divider style={{marginTop: 10}} />
+              {userDetail?.role == 'admin' && doctor?.averageRating && (
+                <>
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      gap: 10,
+                      marginVertical: 10,
+                      alignItems: 'center',
+                    }}>
+                    {/* icon */}
                     <Iconify
-                      icon="fontisto:doctor"
-                      size={iconsize}
-                      color={iconColor}
+                      icon="solar:star-bold"
+                      size={38}
+                      color={theme.colors.rate}
                     />
+                    {/* Rate Text */}
+                    <View>
+                      <View>
+                        <CustomText
+                          style={{fontFamily: fonts.Medium, fontSize: 19}}>
+                          {doctor?.averageRating?.toFixed(1)} Rating
+                        </CustomText>
+                        <CustomText
+                          style={{fontFamily: fonts.Light, fontSize: 12}}>
+                          Based on {doctor?.feedback?.length} rate
+                        </CustomText>
+                      </View>
+                    </View>
                   </View>
                 </>
               )}
+            </View>
 
-              <CustomText
+            {userDetail?.role == 'user' && (
+              <View
                 style={[
-                  styles.doctorName,
-                  {color: theme.colors.onBackground, fontFamily: fonts.Bold},
+                  styles.ratecontainer,
+                  {backgroundColor: theme.colors.transpgrey},
                 ]}>
-                {doctor?.name || 'Doctor Name'}
-              </CustomText>
-              {doctor?.specialist && (
-                <CustomText
+                <View style={{marginTop: 10}}>
+                  <CustomText
+                    style={[{fontFamily: fonts.Medium, fontSize: 18}]}>
+                    Rate Doctor
+                  </CustomText>
+                </View>
+                <View style={styles.starsContainer}>
+                  {Array.from({length: 5}, (_, index) => (
+                    <TouchableOpacity
+                      key={index}
+                      onPress={() => handleStarPress(index)}
+                      style={styles.star}>
+                      <Iconify
+                        key={`filled-${index}`}
+                        icon="solar:star-bold"
+                        size={30}
+                        color={theme.colors.rate}
+                      />
+                    </TouchableOpacity>
+                  ))}
+                </View>
+
+                <TouchableOpacity
+                  onPress={spinner ? () => {} : SubmitRate}
+                  activeOpacity={0.8}
                   style={[
-                    styles.doctorspecialist,
-                    {color: theme.colors.primary, fontFamily: fonts.SemiBold},
+                    styles.button,
+                    {backgroundColor: theme.colors.onBackground},
                   ]}>
-                  {doctor?.specialist}
-                </CustomText>
-              )}
-            </View>
-
-            {/* Additional Information */}
-            <View style={styles.infoContainer}>
-              {doctor?.availableTime && (
-                <>
-                  <CustomText
-                    style={[
-                      styles.infoLabel,
-                      {
-                        color: theme.colors.onBackground,
-                        fontFamily: fonts.SemiBold,
-                      },
-                    ]}>
-                    Available Time:
-                  </CustomText>
-                  <CustomText
-                    style={[
-                      styles.infoValue,
-                      {
-                        color: theme.colors.onBackground,
-                        fontFamily: fonts.Regular,
-                      },
-                    ]}>
-                       {moment(doctor?.availableTime?.from).format('hh:mm A')}{' '}
-                       - {moment(doctor?.availableTime?.to).format('hh:mm A')}
-                  </CustomText>
-                </>
-              )}
-
-              <CustomText
-                style={[
-                  styles.infoLabel,
-                  {
-                    color: theme.colors.onBackground,
-                    fontFamily: fonts.SemiBold,
-                  },
-                ]}>
-                Contact:
-              </CustomText>
-              <CustomText
-                style={[
-                  styles.infoValue,
-                  {color: theme.colors.onBackground, fontFamily: fonts.Regular},
-                ]}>
-                {doctor?.contact || '+1 234 567 890'}
-              </CustomText>
-              <CustomText
-                style={[
-                  styles.infoLabel,
-                  {
-                    color: theme.colors.onBackground,
-                    fontFamily: fonts.SemiBold,
-                  },
-                ]}>
-                Email:
-              </CustomText>
-              <CustomText
-                style={[
-                  styles.infoValue,
-                  {color: theme.colors.onBackground, fontFamily: fonts.Regular},
-                ]}>
-                {doctor?.email}
-              </CustomText>
-
-              {doctor?.address && (
-                <>
-                  <CustomText
-                    style={[
-                      styles.infoLabel,
-                      {
-                        color: theme.colors.onBackground,
-                        fontFamily: fonts.SemiBold,
-                      },
-                    ]}>
-                    Address:
-                  </CustomText>
-                  <CustomText
-                    style={[
-                      styles.infoValue,
-                      {
-                        color: theme.colors.onBackground,
-                        fontFamily: fonts.Regular,
-                      },
-                    ]}>
-                    {doctor?.address}
-                  </CustomText>
-                </>
-              )}
-            </View>
-          </View>
+                  {!spinner ? (
+                    <CustomText
+                      style={[
+                        {
+                          color: theme.colors.background,
+                          fontSize: 17,
+                          fontFamily: fonts.Medium,
+                        },
+                      ]}>
+                      Submit
+                    </CustomText>
+                  ) : (
+                    <ActivityIndicator
+                      size={24}
+                      color={theme.colors.background}
+                    />
+                  )}
+                </TouchableOpacity>
+              </View>
+            )}
+          </BottomSheetScrollView>
         </BottomSheet>
       </Portal>
       <ImageModal
@@ -240,12 +476,10 @@ export default DoctorSheet;
 
 const styles = StyleSheet.create({
   bottomModelDiv: {
-    padding: 20,
-    flex: 1,
+    padding: 15,
   },
   profileContainer: {
     alignItems: 'center',
-    marginBottom: 20,
   },
   iconView: {
     borderRadius: 100,
@@ -272,7 +506,7 @@ const styles = StyleSheet.create({
   },
   infoLabel: {
     fontSize: 16,
-    marginTop: 10,
+    marginVertical: 3,
   },
   infoValue: {
     fontSize: 14,
@@ -282,5 +516,26 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'flex-end',
     gap: 6,
+  },
+  ratecontainer: {
+    margin: 10,
+    padding: 10,
+    borderRadius: 13,
+    marginBottom: 50,
+  },
+  button: {
+    padding: 15,
+    borderRadius: 16,
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  star: {
+    marginHorizontal: 5,
+    marginVertical: 10,
+  },
+  starsContainer: {
+    flexDirection: 'row',
+    marginBottom: 6,
+    gap: 3,
   },
 });
