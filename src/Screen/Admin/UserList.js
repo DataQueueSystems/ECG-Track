@@ -81,8 +81,7 @@ const UserList = () => {
     );
   };
 
-  const {allpatient} = useAuthContext();
-
+  const {adminPatient} = useAuthContext();
   let theme = useTheme();
   let navigation = useNavigation();
   let themeColor = Appearance.getColorScheme();
@@ -106,7 +105,7 @@ const UserList = () => {
       <View
         style={[styles.container, {backgroundColor: theme.colors.background}]}>
         {/* User List */}
-        {allpatient?.length == 0 ? (
+        {adminPatient?.length == 0 ? (
           <>
             <View
               style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
@@ -125,7 +124,7 @@ const UserList = () => {
             <FlatList
               showsHorizontalScrollIndicator={false}
               showsVerticalScrollIndicator={false}
-              data={allpatient}
+              data={adminPatient}
               renderItem={({item}) =>
                 renderUserItem({item, iconColor, iconsize, handlePress})
               }

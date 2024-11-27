@@ -32,8 +32,7 @@ export default function SingleDoctor({route}) {
   const [spinner, setSpinner] = useState(false);
 
   const GetSingleDoctor = async () => {
-    const userToken = await AsyncStorage.getItem('token');
-    if (!userToken) return;
+    
     try {
       const unsubscribe = firestore()
         .collection('users') // Assuming agents are in the `users` collection
@@ -75,6 +74,7 @@ export default function SingleDoctor({route}) {
   const [visible, setVisible] = useState(false);
   const opacityAnim = useRef(new Animated.Value(0)).current;
   const [previmage, setPrevimage] = useState(null);
+  
   // Function to handle opening the modal with animation
   const handlePrevImage = () => {
     setVisible(true);
@@ -96,7 +96,6 @@ export default function SingleDoctor({route}) {
 
   const SubmitRate = async () => {
     setRateSpinner(true);
-
     if (!rating) {
       setRateSpinner(false);
       showToast(`Rating is Required`);

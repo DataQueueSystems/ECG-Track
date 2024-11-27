@@ -16,10 +16,13 @@ import {Iconify} from 'react-native-iconify';
 import GradientCards from '../../Component/Admin/GradientCards';
 import {useAuthContext} from '../../context/GlobaContext';
 import moment from 'moment';
+import firestore from '@react-native-firebase/firestore';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 
 export default function Home() {
   let theme = useTheme();
-  const {handleLogout, userDetail} = useAuthContext();
+  const {handleLogout, userDetail,setUserDetail, setAdminDoctors, setAdminPatient} = useAuthContext();
   const isFocused = useIsFocused();
   const navigation = useNavigation();
   const backPressedOnce = useRef(false);
@@ -51,6 +54,108 @@ export default function Home() {
     navigation.navigate('SingleDetail');
   };
 
+  
+  
+  const GetListofUser = async () => {
+    try {
+      const subscriber = firestore()
+        .collection('users')
+        .where('Status', '==', 'Active')
+        .onSnapshot(async snapshot => {
+          let alluser = snapshot.docs.map(snapdata => ({
+            id: snapdata.id,
+            ...snapdata.data(),
+          }));
+          const allpatient = alluser?.filter(user => user?.role === 'user');
+          await setAdminPatient(allpatient); // Set the filtered list as needed
+        });
+      // Clean up the listener when the component unmounts
+      return () => subscriber();
+    } catch (error) {
+      console.log('Error is:', error);
+    }
+  };
+
+  useEffect(() => {
+    // Fetch appointments only if the user is not an admin
+    let unsubscribe = () => {}; // Default to a no-op function.
+    if (userDetail && userDetail?.role == 'admin') {
+      unsubscribe = GetListofUser();
+    }
+    // Clean up the listener on component unmount or dependency change.
+    return () => {
+      if (typeof unsubscribe === 'function') {
+        unsubscribe();
+      }
+    };
+  }, [userDetail]);
+
+  const GetListofDoctor = async () => {
+    try {
+      const subscriber = firestore()
+        .collection('users')
+        .where('Status', '==', 'Active')
+        .onSnapshot(async snapshot => {
+          let alluser = snapshot.docs.map(snapdata => ({
+            id: snapdata.id,
+            ...snapdata.data(),
+          }));
+          const allpatient = alluser?.filter(user => user?.role === 'doctor');
+          await setAdminDoctors(allpatient); // Set the filtered list as needed
+        });
+      // Clean up the listener when the component unmounts
+      return () => subscriber();
+    } catch (error) {
+      console.log('Error is:', error);
+    }
+  };
+
+  useEffect(() => {
+    // Fetch appointments only if the user is not an admin
+    let unsubscribe = () => {}; // Default to a no-op function.
+    if (userDetail && userDetail?.role == 'admin') {
+      unsubscribe = GetListofDoctor();
+    };
+    // Clean up the listener on component unmount or dependency change.
+    return () => {
+      if (typeof unsubscribe === 'function') {
+        unsubscribe();
+      }
+    };
+  }, [userDetail]);
+
+
+
+  
+  const GetUserDetail = async () => {
+    const userToken = await AsyncStorage.getItem('token');
+    if (!userToken) return;
+    try {
+      const unsubscribe = firestore()
+        .collection('users') // Assuming agents are in the `users` collection
+        .doc(userToken)
+        .onSnapshot(async userDoc => {
+          if (!userDoc.exists) {
+            return;
+          }
+          const userData = {id: userDoc.id, ...userDoc.data()};
+          // Set user details if the account is active
+          await setUserDetail(userData);
+        });
+
+      // Clean up the listener when the component unmounts or userToken changes
+      return () => unsubscribe();
+    } catch (error) {
+      console.error('Error fetching user details:', error);
+    }
+  };
+  useEffect(() => {
+    if (userDetail && userDetail?.id) {
+      GetUserDetail();
+    }
+  }, []);
+
+  
   return (
     <>
       <View

@@ -27,7 +27,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import moment from 'moment';
 export default function EditProfile({route}) {
   const {propsData, fromuser, fromdoctor} = route.params || {};
-  const {userDetail, CheckDataBase, Checknetinfo} = useAuthContext();
+  const {userDetail, CheckDataBase, Checknetinfo, setCount} = useAuthContext();
   const [userData, setUserData] = useState(
     fromuser || fromdoctor ? userDetail : propsData,
   );
@@ -142,6 +142,7 @@ export default function EditProfile({route}) {
           showToast('Invalid data');
           return;
         }
+
         let profileData = {...form};
         if (selectedImageUri) {
           // Wait for the image upload to complete and get the image URL
@@ -159,6 +160,11 @@ export default function EditProfile({route}) {
             return;
           }
         }
+        
+        if (userData?.id == userDetail?.id) {
+          await setCount(count => count + 1);
+        };
+
         await firestore()
           .collection('users')
           .doc(userData?.id)
@@ -166,6 +172,7 @@ export default function EditProfile({route}) {
         // Ensure navigation happens only when confirmed
         showToast('Updated successfully ...');
         setSpinner(false);
+
         // navigation.goBack();
       }
     } catch (error) {

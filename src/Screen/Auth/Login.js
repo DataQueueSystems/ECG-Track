@@ -42,7 +42,7 @@ export default function Login() {
       if (snapShot.empty) {
         showToast('No user found');
         return;
-      };
+      }
       let userDoc = snapShot.docs.find(doc => {
         const data = doc.data();
         return data.email == email && data.password == password;

@@ -27,6 +27,7 @@ const Appointment = ({data, fromUser}) => {
   let theme = useTheme();
   let navigation = useNavigation();
   const {userDetail} = useAuthContext();
+
   const [bookingData, setBookingData] = useState([]);
 
   const GetAppointMent = async id => {
@@ -34,7 +35,6 @@ const Appointment = ({data, fromUser}) => {
 
     try {
       let bookingQuery = firestore().collection('bookings');
-
       // Apply filter based on role
       if (userDetail?.role === 'user') {
         bookingQuery = bookingQuery.where('userId', '==', id);
@@ -104,7 +104,7 @@ const Appointment = ({data, fromUser}) => {
   useEffect(() => {
     // Fetch appointments only if the user is not an admin
     let unsubscribe = () => {}; // Default to a no-op function.
-    if (userDetail && userDetail?.role !== 'admin') {
+    if (userDetail && userDetail?.role != 'admin') {
       unsubscribe = GetAppointMent(userDetail?.id);
     }
     // Clean up the listener on component unmount or dependency change.
@@ -113,7 +113,93 @@ const Appointment = ({data, fromUser}) => {
         unsubscribe();
       }
     };
-  }, [userDetail?.id]);
+  }, []);
+
+  // const GetAppointMent = async id => {
+  //   if (!id) return () => {}; // Return a no-op function if no ID is provided.
+
+  //   try {
+  //     let bookingQuery = firestore().collection('bookings');
+
+  //     // Apply filter based on role
+  //     if (userDetail?.role === 'user') {
+  //       bookingQuery = bookingQuery.where('userId', '==', id);
+  //     } else if (userDetail?.role === 'doctor') {
+  //       bookingQuery = bookingQuery.where('doctorId', '==', id);
+  //     }
+
+  //     const unsubscribeBooking = bookingQuery.onSnapshot(
+  //       async bookingSnapshot => {
+  //         if (bookingSnapshot.empty) {
+  //           setBookingData([]); // No bookings found
+  //           return;
+  //         }
+
+  //         // Step 1: Collect booking data
+  //         const bookingData = bookingSnapshot.docs.map(doc => ({
+  //           id: doc.id,
+  //           ...doc.data(),
+  //         }));
+
+  //         // Step 2: Listen for user/doctor updates
+  //         const personIds = [
+  //           ...new Set(
+  //             bookingData.map(booking =>
+  //               userDetail?.role === 'doctor'
+  //                 ? booking.userId
+  //                 : booking.doctorId,
+  //             ),
+  //           ),
+  //         ]; // Collect unique user/doctor IDs
+
+  //         const userQuery = firestore()
+  //           .collection('users')
+  //           .where(firestore.FieldPath.documentId(), 'in', personIds);
+
+  //         const unsubscribeUser = userQuery.onSnapshot(userSnapshot => {
+  //           const userDetails = {};
+  //           userSnapshot.forEach(userDoc => {
+  //             userDetails[userDoc.id] = {id: userDoc.id, ...userDoc.data()};
+  //           });
+
+  //           // Step 3: Enrich bookings with the updated user/doctor details
+  //           const enrichedBookings = bookingData.map(booking => {
+  //             const personId =
+  //               userDetail?.role === 'doctor'
+  //                 ? booking.userId
+  //                 : booking.doctorId;
+  //             return {
+  //               ...booking,
+  //               person: userDetails[personId] || null, // Attach updated user/doctor data
+  //             };
+  //           });
+
+  //           setBookingData(enrichedBookings); // Update state with enriched bookings
+  //         });
+
+  //         return () => unsubscribeUser(); // Clean up user listener
+  //       },
+  //     );
+
+  //     return () => unsubscribeBooking(); // Clean up booking listener
+  //   } catch (error) {
+  //     console.error('Error fetching bookings:', error);
+  //   }
+  // };
+
+  // useEffect(() => {
+  //   // Fetch appointments only if the user is not an admin
+  //   let unsubscribe = () => {}; // Default to a no-op function.
+  //   if (userDetail && userDetail?.role !== 'admin') {
+  //     unsubscribe = GetAppointMent(userDetail?.id);
+  //   }
+  //   // Clean up the listener on component unmount or dependency change.
+  //   return () => {
+  //     if (typeof unsubscribe === 'function') {
+  //       unsubscribe();
+  //     }
+  //   };
+  // }, [userDetail?.id]);
 
   // useEffect(() => {
   //   const unsubscribe = GetAppointMent(userDetail?.id);

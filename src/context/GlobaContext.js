@@ -18,29 +18,7 @@ export const AuthContextProvider = ({children}) => {
     }
     return true; // Internet connection is available
   };
-  const GetUserDetail = async () => {
-    const userToken = await AsyncStorage.getItem('token');
 
-    if (!userToken) return;
-    try {
-      const unsubscribe = firestore()
-        .collection('users') // Assuming agents are in the `users` collection
-        .doc(userToken)
-        .onSnapshot(async userDoc => {
-          if (!userDoc.exists) {
-            return;
-          }
-          const userData = {id: userDoc.id, ...userDoc.data()};
-          // Set user details if the account is active
-          await setUserDetail(userData);
-        });
-
-      // Clean up the listener when the component unmounts or userToken changes
-      return () => unsubscribe();
-    } catch (error) {
-      console.error('Error fetching user details:', error);
-    }
-  };
   const gotoSetting = () => {
     Alert.alert(
       'Notification Permission Denied',
@@ -85,48 +63,10 @@ export const AuthContextProvider = ({children}) => {
     );
   };
 
-  useEffect(() => {
-    GetUserDetail();
-  }, []);
+ 
 
-  const [bookingData, setBookingData] = useState([]);
-  const [count, setRateCount] = useState(0);
-  
-
-  const getDoctorFeedback = async doctorId => {
-    try {
-      const snapshot = await firestore()
-        .collection('feedback')
-        .where('doctorId', '==', doctorId)
-        .get();
-
-      if (snapshot.empty) {
-        console.log('No feedback found for this doctor.');
-        return 0; // No feedback yet
-      }
-      // Extract ratings
-      const ratings = snapshot.docs.map(doc => doc.data().rating);
-
-      // Calculate average rating
-      const total = ratings.reduce((sum, rating) => sum + rating, 0);
-      const average = total / ratings.length;
-      return average;
-    } catch (error) {
-      console.error('Error fetching feedback:', error);
-      return 0; // Return 0 in case of error
-    }
-  };
-
-  useEffect(() => {
-    const fetchFeedback = async () => {
-      if (userDetail) {
-        const doctorId = userDetail.id;
-        const averageRating = await getDoctorFeedback(doctorId);
-        console.log('Average Rating:', averageRating);
-      }
-    };
-    fetchFeedback(); // Call the async function
-  }, [userDetail]); // Runs whenever userDetail changes
+  const [count, setCount] = useState(0);
+ 
 
   const CheckDataBase = async (setSpinner, setErrors, form) => {
     setSpinner(true);
@@ -173,9 +113,11 @@ export const AuthContextProvider = ({children}) => {
     }
   };
 
+  const [allDoctor, setAllDoctor] = useState([]);
+  const [allpatient, setAllPatient] = useState([]);
 
-  const [allDoctor, setAllDoctor] = useState(null);
-  const [allpatient, setAllPatient] = useState(null);
+  const [adminDoctors, setAdminDoctors] = useState([]);
+  const [adminPatient, setAdminPatient] = useState([]);
 
   return (
     <Authcontext.Provider
@@ -192,8 +134,17 @@ export const AuthContextProvider = ({children}) => {
         gotoSetting,
         CheckDataBase,
 
-        allDoctor, setAllDoctor,
-        allpatient, setAllPatient
+        allDoctor,
+        setAllDoctor,
+        allpatient,
+        setAllPatient,
+
+        setCount,
+
+        adminDoctors,
+        setAdminDoctors,
+        adminPatient,
+        setAdminPatient,
       }}>
       {children}
     </Authcontext.Provider>

@@ -24,11 +24,48 @@ import moment from 'moment';
 import ImageModal from '../Modal/ImageModal';
 
 const RecommandedDoctor = () => {
-  const {allDoctor, setAllDoctor, setAllPatient} = useAuthContext();
+  const { userDetail} = useAuthContext();
   let theme = useTheme();
   let navigation = useNavigation();
+  
+  const [allDoctor, setAllDoctor] = useState([]);
+  
+  // const GetListDetail = async () => {
+  //   try {
+  //     const subscriber = firestore()
+  //       .collection('users')
+  //       .where('Status', '==', 'Active')
+  //       .onSnapshot(async snapshot => {
+  //         let alluser = snapshot.docs.map(snapdata => ({
+  //           id: snapdata.id,
+  //           ...snapdata.data(),
+  //         }));
+  //         const alldoctor = alluser?.filter(user => user?.role === 'doctor');
+  //         const allpatient = alluser?.filter(user => user?.role === 'user');
+  //         setAllDoctor(alldoctor); // Set the filtered list as needed
+  //         setAllPatient(allpatient); // Set the filtered list as needed
+  //       });
+  //     // Clean up the listener when the component unmounts
+  //     return () => subscriber();
+  //   } catch (error) {
+  //     console.log('Error is:', error);
+  //   }
+  // };
 
-  const GetListDetail = async () => {
+  // useEffect(() => {
+  //   // Fetch appointments only if the user is not an admin
+  //   let unsubscribe = () => {}; // Default to a no-op function.
+  //   unsubscribe = GetListDetail();
+  //   // Clean up the listener on component unmount or dependency change.
+  //   return () => {
+  //     if (typeof unsubscribe === 'function') {
+  //       unsubscribe();
+  //     }
+  //   };
+  // }, []);
+
+
+  const GetListOfDoctor = async () => {
     try {
       const subscriber = firestore()
         .collection('users')
@@ -39,9 +76,7 @@ const RecommandedDoctor = () => {
             ...snapdata.data(),
           }));
           const alldoctor = alluser?.filter(user => user?.role === 'doctor');
-          const allpatient = alluser?.filter(user => user?.role === 'user');
-          setAllDoctor(alldoctor); // Set the filtered list as needed
-          setAllPatient(allpatient); // Set the filtered list as needed
+          await setAllDoctor(alldoctor); // Set the filtered list as needed
         });
       // Clean up the listener when the component unmounts
       return () => subscriber();
@@ -49,18 +84,19 @@ const RecommandedDoctor = () => {
       console.log('Error is:', error);
     }
   };
-
+  
   useEffect(() => {
-    // Fetch appointments only if the user is not an admin
-    let unsubscribe = () => {}; // Default to a no-op function.
-    unsubscribe = GetListDetail();
-    // Clean up the listener on component unmount or dependency change.
+    let unsubscribe = () => {};
+
+    if (userDetail && userDetail?.role !== 'doctor') {
+      unsubscribe = GetListOfDoctor();
+    }
     return () => {
-      if (typeof unsubscribe === 'function') {
+      if (unsubscribe && typeof unsubscribe === 'function') {
         unsubscribe();
       }
     };
-  }, []);
+  }, [userDetail?.id]);
 
   const handleCallPress = contactNumber => {
     const phoneURL = `tel:${contactNumber}`;
