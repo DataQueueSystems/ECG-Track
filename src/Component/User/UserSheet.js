@@ -17,8 +17,6 @@ import {Iconify} from 'react-native-iconify';
 import ImageModal from '../Modal/ImageModal';
 
 const UserSheet = ({bottomSheetRef, user}) => {
-  console.log(user, 'user');
-
   const snapPoints = ['50%', '70%'];
   const theme = useTheme();
   let iconsize = 70;
@@ -38,7 +36,6 @@ const UserSheet = ({bottomSheetRef, user}) => {
   let iconColor = themeColor == 'dark' ? '#fff' : 'black';
   let navigation = useNavigation();
   const handleEdit = () => {
-    console.log('fdsbjk');
     bottomSheetRef.current.close();
     navigation.navigate('ControlUser', {
       screenName: 'Edit User',

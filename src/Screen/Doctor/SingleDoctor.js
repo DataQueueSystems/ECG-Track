@@ -27,7 +27,7 @@ export default function SingleDoctor({route}) {
   let theme = useTheme();
   let navigation = useNavigation();
   let screenName = notDoctor ? 'Doctor Detail' : 'Profile Detail';
-  const {userDetail, Checknetinfo, setRateCount} = useAuthContext();
+  const {userDetail, Checknetinfo, } = useAuthContext();
   const [singleDoctor, setSingleDoctor] = useState(null);
   const [spinner, setSpinner] = useState(false);
 
@@ -129,9 +129,7 @@ export default function SingleDoctor({route}) {
       });
       showToast('Booking confirmed successfully!');
       // Navigate to the confirmation screen or back to previous screen
-      await navigation.navigate("Parent");
       setRateSpinner(false);
-      setRateCount(count => count + 1);
     } catch (error) {
       console.error('Error saving booking:', error);
       showToast('Failed to confirm booking. Please try again.');

@@ -21,12 +21,107 @@ import {useNavigation} from '@react-navigation/native';
 import ImageModal from './Modal/ImageModal';
 import DoctorSheet from './Doctor/DoctorSheet';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-
+import firestore from '@react-native-firebase/firestore';
 
 const Appointment = ({data, fromUser}) => {
   let theme = useTheme();
   let navigation = useNavigation();
-  const {bookingData,userDetail} = useAuthContext();
+  const {userDetail} = useAuthContext();
+  const [bookingData, setBookingData] = useState([]);
+
+  const GetAppointMent = async id => {
+    if (!id) return () => {}; // Return a no-op function if no ID is provided.
+
+    try {
+      let bookingQuery = firestore().collection('bookings');
+
+      // Apply filter based on role
+      if (userDetail?.role === 'user') {
+        bookingQuery = bookingQuery.where('userId', '==', id);
+      } else if (userDetail?.role === 'doctor') {
+        bookingQuery = bookingQuery.where('doctorId', '==', id);
+      }
+
+      const unsubscribeBooking = bookingQuery.onSnapshot(
+        async bookingSnapshot => {
+          if (bookingSnapshot.empty) {
+            setBookingData([]); // No bookings found
+            return;
+          }
+
+          // Step 1: Collect booking data
+          const bookingData = bookingSnapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data(),
+          }));
+
+          // Step 2: Listen for user/doctor updates
+          const personIds = [
+            ...new Set(
+              bookingData.map(booking =>
+                userDetail?.role === 'doctor'
+                  ? booking.userId
+                  : booking.doctorId,
+              ),
+            ),
+          ]; // Collect unique user/doctor IDs
+
+          const userQuery = firestore()
+            .collection('users')
+            .where(firestore.FieldPath.documentId(), 'in', personIds);
+
+          const unsubscribeUser = userQuery.onSnapshot(userSnapshot => {
+            const userDetails = {};
+            userSnapshot.forEach(userDoc => {
+              userDetails[userDoc.id] = {id: userDoc.id, ...userDoc.data()};
+            });
+
+            // Step 3: Enrich bookings with the updated user/doctor details
+            const enrichedBookings = bookingData.map(booking => {
+              const personId =
+                userDetail?.role === 'doctor'
+                  ? booking.userId
+                  : booking.doctorId;
+              return {
+                ...booking,
+                person: userDetails[personId] || null, // Attach updated user/doctor data
+              };
+            });
+
+            setBookingData(enrichedBookings); // Update state with enriched bookings
+          });
+
+          return () => unsubscribeUser(); // Clean up user listener
+        },
+      );
+
+      return () => unsubscribeBooking(); // Clean up booking listener
+    } catch (error) {
+      console.error('Error fetching bookings:', error);
+    }
+  };
+
+  useEffect(() => {
+    // Fetch appointments only if the user is not an admin
+    let unsubscribe = () => {}; // Default to a no-op function.
+    if (userDetail && userDetail?.role !== 'admin') {
+      unsubscribe = GetAppointMent(userDetail?.id);
+    }
+    // Clean up the listener on component unmount or dependency change.
+    return () => {
+      if (typeof unsubscribe === 'function') {
+        unsubscribe();
+      }
+    };
+  }, [userDetail?.id]);
+
+  // useEffect(() => {
+  //   const unsubscribe = GetAppointMent(userDetail?.id);
+  //   return () => {
+  //     if (unsubscribe) unsubscribe(); // Clean up to prevent memory leaks
+  //   };
+  // }, []);
+
   const handleCallPress = contactNumber => {
     const phoneURL = `tel:${contactNumber}`;
     Linking.canOpenURL(phoneURL)
@@ -112,44 +207,44 @@ const Appointment = ({data, fromUser}) => {
                 {person?.name}
               </CustomText>
 
-              {userDetail?.role=="user" && person?.averageRating&&(
-              <View
-                style={{
-                  flexDirection: 'row', // Arrange items in a row
-                  gap: 4, // Add spacing between items (React Native 0.71+)
-                  justifyContent: 'flex-start', // Align items to the start (left)
-                  alignItems: 'center', // Align items vertically in the center
-                  marginVertical: 2,
-                }}>
-                {/* Filled Stars */}
-             
-                {[...Array(5)].map((_, index) => {
-                  const rating = person?.averageRating; // Current rating
-                  const isFullStar = index + 1 <= Math.floor(rating); // Check if it’s a full star
-                  const isHalfStar =
-                    index + 1 > Math.floor(rating) && index < Math.ceil(rating); // Check if it’s a half star
-                  return (
-                    <MaterialIcons
-                      key={`star-${index}`}
-                      name={
-                        isFullStar
-                          ? 'star' // Full star icon
-                          : isHalfStar
-                          ? 'star-half' // Half star icon
-                          : 'star-border' // Empty star icon
-                      }
-                      size={22}
-                      color={
-                        isFullStar || isHalfStar
-                          ? theme.colors.rate
-                          : theme.colors.onBackground
-                      } // Highlight or grey color
-                    />
-                  );
-                })}
-              </View>
-              )}
+              {userDetail?.role == 'user' && person?.averageRating && (
+                <View
+                  style={{
+                    flexDirection: 'row', // Arrange items in a row
+                    gap: 4, // Add spacing between items (React Native 0.71+)
+                    justifyContent: 'flex-start', // Align items to the start (left)
+                    alignItems: 'center', // Align items vertically in the center
+                    marginVertical: 2,
+                  }}>
+                  {/* Filled Stars */}
 
+                  {[...Array(5)].map((_, index) => {
+                    const rating = person?.averageRating; // Current rating
+                    const isFullStar = index + 1 <= Math.floor(rating); // Check if it’s a full star
+                    const isHalfStar =
+                      index + 1 > Math.floor(rating) &&
+                      index < Math.ceil(rating); // Check if it’s a half star
+                    return (
+                      <MaterialIcons
+                        key={`star-${index}`}
+                        name={
+                          isFullStar
+                            ? 'star' // Full star icon
+                            : isHalfStar
+                            ? 'star-half' // Half star icon
+                            : 'star-border' // Empty star icon
+                        }
+                        size={22}
+                        color={
+                          isFullStar || isHalfStar
+                            ? theme.colors.rate
+                            : theme.colors.onBackground
+                        } // Highlight or grey color
+                      />
+                    );
+                  })}
+                </View>
+              )}
 
               {item?.specialty && (
                 <CustomText
@@ -235,12 +330,12 @@ const Appointment = ({data, fromUser}) => {
   return (
     <>
       <View style={styles.mainContainer}>
-        <CustomText style={[styles.apText, {fontFamily: fonts.Bold}]}>
+        <CustomText style={[styles.apText, {fontFamily: fonts.Medium}]}>
           Your Appointments
         </CustomText>
 
         <View style={styles.appointmentContainer}>
-        {bookingData?.length == 0 ? (
+          {bookingData?.length == 0 ? (
             <>
               <View
                 style={{
@@ -249,22 +344,22 @@ const Appointment = ({data, fromUser}) => {
                 <CustomText
                   style={{
                     fontFamily: fonts.Regular,
-                    fontSize: 18,
-                    left:10
+                    fontSize: 15,
+                    left: 10,
                   }}>
-                  No book found
+                  No appointment found
                 </CustomText>
               </View>
             </>
           ) : (
-          <FlatList
-            showsHorizontalScrollIndicator={false}
-            showsVerticalScrollIndicator={false}
-            horizontal
-            data={bookingData}
-            renderItem={renderItem}
-            keyExtractor={item => item.id}
-          />
+            <FlatList
+              showsHorizontalScrollIndicator={false}
+              showsVerticalScrollIndicator={false}
+              horizontal
+              data={bookingData}
+              renderItem={renderItem}
+              keyExtractor={item => item.id}
+            />
           )}
         </View>
       </View>
@@ -291,7 +386,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   apText: {
-    fontSize: 20,
+    fontSize: 19,
     marginBottom: 10,
   },
   appointmentContainer: {

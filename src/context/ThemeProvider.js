@@ -62,12 +62,12 @@ const ThemeProvider = ({children}) => {
     return () => subscription.remove();
   }, []);
 
-  console.log('Theme updated:', theme);
 
-
-  const currentTheme = useMemo(() => {
-    return theme === 'dark' ? darkTheme : lightTheme;
-  }, [theme]);
+  const currentTheme = useMemo(
+    () => (theme === 'dark' ? darkTheme : lightTheme),
+    [theme]
+  );
+  
 
   return (
     <ThemeContext.Provider value={{theme: currentTheme}}>

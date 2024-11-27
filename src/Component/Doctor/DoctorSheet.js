@@ -108,9 +108,8 @@ const DoctorSheet = ({bottomSheetRef, doctor, fromApt, selectedaptDetail}) => {
       });
       showToast('Booking confirmed successfully!');
       // Navigate to the confirmation screen or back to previous screen
-      navigation.navigate('Parent'); // or navigation.goBack() if going back
+      // navigation.navigate('Parent'); // or navigation.goBack() if going back
       setSpinner(false);
-      setRateCount(count => count + 1);
     } catch (error) {
       console.error('Error saving booking:', error);
       showToast('Failed to confirm booking. Please try again.');
