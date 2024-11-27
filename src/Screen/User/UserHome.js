@@ -18,7 +18,6 @@ import {useTheme} from 'react-native-paper';
 import {fonts} from '../../customText/fonts';
 import Appointment from '../../Component/Appointment';
 import RecommandedDoctor from '../../Component/User/RecommandedDoctor';
-
 export default function Home() {
   let theme = useTheme();
   const {handleLogout, userDetail} = useAuthContext();
@@ -28,7 +27,6 @@ export default function Home() {
     const backHandler = BackHandler.addEventListener(
       'hardwareBackPress',
       () => {
-        console.log(backPressedOnce, 'backPressedOnce');
         if (isFocused) {
           if (!backPressedOnce.current) {
             backPressedOnce.current = true;
@@ -62,39 +60,39 @@ export default function Home() {
         ]}>
         {/* Header */}
         <View style={styles.headerView}>
-         <View style={{flexDirection:'row',gap:10,alignItems:'center'}}>
-         <TouchableOpacity
-            activeOpacity={0.6}
-            onPress={() => navigation.navigate('SingleDetail')}>
-            {userDetail?.profile_image?.imageUri ? (
-              <Image
-                style={styles.image}
-                source={{uri: userDetail?.profile_image?.imageUri}}
-              />
-            ) : (
-              <Iconify
-                icon="fa-solid:user"
-                size={35}
-                color={theme.colors.onBackground}
-              />
-            )}
-          </TouchableOpacity>
-          {/* Greeting */}
-          <View>
-            <CustomText style={{fontFamily: fonts.Bold, fontSize: 22}}>
-              Hello, {userDetail?.name}
-            </CustomText>
+          <View style={{flexDirection: 'row', gap: 10, alignItems: 'center'}}>
+            <TouchableOpacity
+              activeOpacity={0.6}
+              onPress={() => navigation.navigate('SingleDetail')}>
+              {userDetail?.profile_image?.imageUri ? (
+                <Image
+                  style={styles.image}
+                  source={{uri: userDetail?.profile_image?.imageUri}}
+                />
+              ) : (
+                <Iconify
+                  icon="fa-solid:user"
+                  size={35}
+                  color={theme.colors.onBackground}
+                />
+              )}
+            </TouchableOpacity>
+            {/* Greeting */}
+            <View>
+              <CustomText style={{fontFamily: fonts.Bold, fontSize: 22}}>
+                Hello, {userDetail?.name}
+              </CustomText>
 
-            <CustomText
-              style={{
-                fontFamily: fonts.Light,
-                fontSize: 13,
-                top: -4,
-              }}>
-              How do you feel today?
-            </CustomText>
+              <CustomText
+                style={{
+                  fontFamily: fonts.Light,
+                  fontSize: 13,
+                  top: -4,
+                }}>
+                How do you feel today?
+              </CustomText>
+            </View>
           </View>
-         </View>
           {/* ProfileDetail */}
           <View style={styles.userProfile}>
             <View style={styles.profileImage}>

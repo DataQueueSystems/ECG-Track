@@ -9,8 +9,6 @@ const Authcontext = createContext();
 export const AuthContextProvider = ({children}) => {
   const [isLogin, setIsLogin] = useState(false);
   const [userDetail, setUserDetail] = useState(null);
-  const [allDoctor, setAllDoctor] = useState(null);
-  const [allpatient, setAllPatient] = useState(null);
 
   const Checknetinfo = async () => {
     const state = await NetInfo.fetch(); // Get the current network state
@@ -92,80 +90,8 @@ export const AuthContextProvider = ({children}) => {
   }, []);
 
   const [bookingData, setBookingData] = useState([]);
-
   const [count, setRateCount] = useState(0);
-
-  const GetAppointMent = async id => {
-    if (!id) return () => {}; // Return a no-op function if no ID is provided.
-
-    try {
-      let query = firestore().collection('bookings');
-
-      // Apply filter based on role
-      if (userDetail?.role === 'user') {
-        query = query.where('userId', '==', id);
-      } else if (userDetail?.role === 'doctor') {
-        query = query.where('doctorId', '==', id);
-      }
-
-      // Listen for real-time updates
-      const unsubscribe = query.onSnapshot(async snapshot => {
-        if (snapshot.empty) {
-          setBookingData([]); // No bookings found
-          return;
-        }
-
-        const bookings = await Promise.all(
-          snapshot.docs.map(async doc => {
-            const booking = {id: doc.id, ...doc.data()};
-
-            if (userDetail?.role === 'doctor') {
-              // Fetch user details for doctor role
-              const userDoc = await firestore()
-                .collection('users') // Assuming user details are stored in the 'users' collection
-                .doc(booking.userId)
-                .get();
-
-              if (userDoc.exists) {
-                booking.person = {id: userDoc.id, ...userDoc.data()};
-              }
-            } else if (userDetail?.role === 'user') {
-              // Fetch doctor details for user role
-              const doctorDoc = await firestore()
-                .collection('users') // Assuming doctor details are stored in the 'users' collection
-                .doc(booking.doctorId)
-                .get();
-
-              if (doctorDoc.exists) {
-                booking.person = {id: doctorDoc.id, ...doctorDoc.data()};
-              }
-            }
-
-            return booking;
-          }),
-        );
-
-        setBookingData(bookings); // Set enriched bookings data
-      });
-
-      return unsubscribe; // Clean up listener
-    } catch (error) {
-      console.error('Error fetching bookings:', error);
-    }
-  };
-  useEffect(() => {
-    // Fetch appointments only if the user is not an admin
-    let unsubscribe = () => {}; // Default to a no-op function.
-    if (userDetail && userDetail?.role !== 'admin') {
-      unsubscribe = GetAppointMent(userDetail?.id);
-    }
-    // Clean up the listener on component unmount or dependency change.
-    return () => {
-      if (typeof unsubscribe === 'function') {
-        unsubscribe();
-      }
-    };
-  }, [userDetail?.id, count]);
+  
 
   const getDoctorFeedback = async doctorId => {
     try {
@@ -184,8 +110,6 @@ export const AuthContextProvider = ({children}) => {
       // Calculate average rating
       const total = ratings.reduce((sum, rating) => sum + rating, 0);
       const average = total / ratings.length;
-
-      console.log(`Average Rating for Doctor ${doctorId}:`, average);
       return average;
     } catch (error) {
       console.error('Error fetching feedback:', error);
@@ -203,39 +127,6 @@ export const AuthContextProvider = ({children}) => {
     };
     fetchFeedback(); // Call the async function
   }, [userDetail]); // Runs whenever userDetail changes
-
-  const GetListDetail = async () => {
-    try {
-      const subscriber = firestore()
-        .collection('users')
-        .where('Status', '==', 'Active')
-        .onSnapshot(async snapshot => {
-          let alluser = snapshot.docs.map(snapdata => ({
-            id: snapdata.id,
-            ...snapdata.data(),
-          }));
-          const alldoctor = alluser?.filter(user => user?.role === 'doctor');
-          const allpatient = alluser?.filter(user => user?.role === 'user');
-          setAllDoctor(alldoctor); // Set the filtered list as needed
-          setAllPatient(allpatient); // Set the filtered list as needed
-          // Sort doctors by their averageRating in descending order
-          const recommendedDoctors = alldoctor?.sort(
-            (a, b) => b?.averageRating - a?.averageRating,
-          );
-        });
-      // Clean up the listener when the component unmounts
-      return () => subscriber();
-    } catch (error) {
-      console.log('Error is:', error);
-    }
-  };
-
-  useEffect(() => {
-    const unsubscribe = GetListDetail();
-    return () => {
-      if (unsubscribe) unsubscribe(); // Clean up to prevent memory leaks
-    };
-  }, []);
 
   const CheckDataBase = async (setSpinner, setErrors, form) => {
     setSpinner(true);
@@ -282,6 +173,10 @@ export const AuthContextProvider = ({children}) => {
     }
   };
 
+
+  const [allDoctor, setAllDoctor] = useState(null);
+  const [allpatient, setAllPatient] = useState(null);
+
   return (
     <Authcontext.Provider
       value={{
@@ -295,14 +190,10 @@ export const AuthContextProvider = ({children}) => {
         // logout func
         handleLogout,
         gotoSetting,
-
-        // list of patient and doctor
-        allDoctor,
-        allpatient,
         CheckDataBase,
 
-        bookingData,
-        setRateCount,
+        allDoctor, setAllDoctor,
+        allpatient, setAllPatient
       }}>
       {children}
     </Authcontext.Provider>

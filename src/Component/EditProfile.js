@@ -23,15 +23,11 @@ import ImageModal from './Modal/ImageModal';
 import {launchImageLibrary} from 'react-native-image-picker';
 import {Iconify} from 'react-native-iconify';
 import {uploadImageToCloudinary} from '../cloudinary';
-
 import DateTimePicker from '@react-native-community/datetimepicker';
-import DatePickerModal from './Modal/DatePickerModal';
 import moment from 'moment';
-
 export default function EditProfile({route}) {
   const {propsData, fromuser, fromdoctor} = route.params || {};
   const {userDetail, CheckDataBase, Checknetinfo} = useAuthContext();
-
   const [userData, setUserData] = useState(
     fromuser || fromdoctor ? userDetail : propsData,
   );
@@ -49,11 +45,11 @@ export default function EditProfile({route}) {
     contact: userData?.contact || '',
     address: userData?.address || '',
     profile_image: userData?.profile_image || '',
-    availableTime: userData.availableTime || '',
   };
   // Conditionally add the 'specialist' field if the user is a doctor
   if (userDetail?.role === 'doctor') {
     initialForm.specialist = userData?.specialist || '';
+    initialForm.availableTime = userData?.availableTime || '';
   }
   // Initialize state with the prepared object
   const [form, setForm] = useState(initialForm);
@@ -87,6 +83,11 @@ export default function EditProfile({route}) {
     if (!form.password) newErrors.password = 'Password is required';
     if (!form.address) newErrors.address = 'Address is required';
     if (!form.contact) newErrors.contact = 'Contact number is required';
+    if (
+      userDetail?.role == 'doctor' &&
+      form?.availableTime?.to < form?.availableTime?.from
+    )
+      newErrors.availableTime = 'To Time Must be future time than From time';
     else if (!/^\d{10}$/.test(form.contact))
       newErrors.contact = 'Contact number must be 10 digits';
     setErrors(newErrors);
@@ -107,7 +108,7 @@ export default function EditProfile({route}) {
         ...prev,
         availableTime: {
           ...prev.availableTime, // Ensure existing "availableTime" properties are retained
-          from: selectedTime, // Update only the "to" field
+          from: selectedTime.getTime(), // Update only the "from" field
         },
       }));
     }
@@ -121,7 +122,7 @@ export default function EditProfile({route}) {
         ...prev,
         availableTime: {
           ...prev.availableTime, // Ensure existing "availableTime" properties are retained
-          to: selectedTime, // Update only the "to" field
+          to: selectedTime.getTime(), // Update only the "to" field
         },
       }));
     }
@@ -142,12 +143,6 @@ export default function EditProfile({route}) {
           return;
         }
         let profileData = {...form};
-        if (userDetail?.role == 'doctor') {
-          profileData.availableTime = {
-            from: fromTime.getTime(),
-            to: toTime.getTime(),
-          };
-        }
         if (selectedImageUri) {
           // Wait for the image upload to complete and get the image URL
           const uploadedImageUrl = await uploadImageToCloudinary(
@@ -168,7 +163,7 @@ export default function EditProfile({route}) {
           .collection('users')
           .doc(userData?.id)
           .update(profileData);
-           // Ensure navigation happens only when confirmed
+        // Ensure navigation happens only when confirmed
         showToast('Updated successfully ...');
         setSpinner(false);
         // navigation.goBack();
@@ -381,9 +376,13 @@ export default function EditProfile({route}) {
                     onPress={() => setShowFromPicker(true)}>
                     <CustomText
                       style={[styles.label, {fontFamily: fonts.Regular}]}>
-                      {form?.availableTime?.from
-                        ? moment(form?.availableTime?.from).format('hh:mm A')
-                        : moment(fromTime).format('hh:mm A')}
+                      {
+                        form?.availableTime?.from
+                          ? moment(Number(form?.availableTime?.from)).format(
+                              'hh:mm A',
+                            ) // Convert to Number and format
+                          : moment(fromTime).format('hh:mm A') // Fallback to fromTime
+                      }
                     </CustomText>
                   </Button>
                   {showFromPicker && (
@@ -408,9 +407,13 @@ export default function EditProfile({route}) {
                     onPress={() => setShowToPicker(true)}>
                     <CustomText
                       style={[styles.label, {fontFamily: fonts.Regular}]}>
-                      {form?.availableTime?.to
-                        ? moment(form?.availableTime?.to).format('hh:mm A')
-                        : moment(toTime).format('hh:mm A')}
+                      {
+                        form?.availableTime?.to
+                          ? moment(Number(form?.availableTime?.to)).format(
+                              'hh:mm A',
+                            ) // Convert to Number and format
+                          : moment(toTime).format('hh:mm A') // Fallback to fromTime
+                      }
                     </CustomText>
                   </Button>
                   {showToPicker && (
@@ -424,6 +427,20 @@ export default function EditProfile({route}) {
                   )}
                 </View>
               </View>
+
+              {errors.availableTime && (
+                <CustomText
+                  style={[
+                    styles.errorText,
+                    {
+                      color: theme.colors.error,
+                      fontFamily: fonts.Light,
+                      top: 10,
+                    },
+                  ]}>
+                  {errors.availableTime}
+                </CustomText>
+              )}
             </View>
           ) : (
             <></>

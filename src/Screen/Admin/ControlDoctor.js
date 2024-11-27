@@ -18,15 +18,15 @@ import {useNavigation} from '@react-navigation/native';
 import {showToast} from '../../../utils/Toast';
 import {fonts} from '../../customText/fonts';
 import firestore from '@react-native-firebase/firestore';
-import { launchImageLibrary } from 'react-native-image-picker';
+import {launchImageLibrary} from 'react-native-image-picker';
 import ImageModal from '../../Component/Modal/ImageModal';
-import { Iconify } from 'react-native-iconify';
-import { uploadImageToCloudinary } from '../../cloudinary';
-import { useAuthContext } from '../../context/GlobaContext';
+import {Iconify} from 'react-native-iconify';
+import {uploadImageToCloudinary} from '../../cloudinary';
+import {useAuthContext} from '../../context/GlobaContext';
 
 export default function ControlDoctor({route}) {
   const {screenName, userData} = route.params || {};
-  const {Checknetinfo}=useAuthContext();
+  const {Checknetinfo} = useAuthContext();
   const theme = useTheme();
   let navigation = useNavigation();
   const [spinner, setSpinner] = useState(false);
@@ -112,10 +112,7 @@ export default function ControlDoctor({route}) {
             setSpinner(true);
             return;
           }
-        };
-
-
-
+        }
         //If Edit Screen then update the detail otherwise Add new user
         if (isEdit) {
           // await firestore().collection('users');
@@ -124,11 +121,12 @@ export default function ControlDoctor({route}) {
             .doc(userData?.id)
             .update(defaultData);
           showToast('Updated successfully ...');
+          await setSpinner(false);
         } else {
           await firestore().collection('users').add(defaultData);
           showToast('Doctor Added  ...');
+          await setSpinner(false);
         }
-        setSpinner(false);
         // navigation.goBack();
       }
     } catch (error) {
@@ -137,8 +135,6 @@ export default function ControlDoctor({route}) {
       console.log('Error is :', error);
     }
   };
-
-
 
   const [visible, setVisible] = useState(false);
   const opacityAnim = useRef(new Animated.Value(0)).current;
@@ -173,19 +169,16 @@ export default function ControlDoctor({route}) {
     });
   };
 
-  
-
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       style={{flex: 1, backgroundColor: theme.colors.background}}>
       <Header screenName={screenName} />
-      <ScrollView 
-      showsHorizontalScrollIndicator={false}
-      showsVerticalScrollIndicator={false}
-      contentContainerStyle={styles.container}>
-
-      <TouchableOpacity
+      <ScrollView
+        showsHorizontalScrollIndicator={false}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.container}>
+        <TouchableOpacity
           onPress={handlePrevImage}
           activeOpacity={0.8}
           style={styles.imageView}>
@@ -366,7 +359,6 @@ export default function ControlDoctor({route}) {
           opacityAnim={opacityAnim}
           setVisible={setVisible}
         />
-
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -389,6 +381,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     flexDirection: 'row',
     justifyContent: 'center',
+    marginBottom:25
   },
   errorText: {
     fontSize: 12,

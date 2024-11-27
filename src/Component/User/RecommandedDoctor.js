@@ -1,4 +1,4 @@
-import React, {useRef, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {
   Alert,
   Animated,
@@ -17,15 +17,50 @@ import {Divider, useTheme} from 'react-native-paper';
 import CustomText from '../../customText/CustomText';
 import {useAuthContext} from '../../context/GlobaContext';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import firestore from '@react-native-firebase/firestore';
 
 import {useNavigation} from '@react-navigation/native';
 import moment from 'moment';
 import ImageModal from '../Modal/ImageModal';
 
 const RecommandedDoctor = () => {
-  const {allDoctor} = useAuthContext();
+  const {allDoctor, setAllDoctor, setAllPatient} = useAuthContext();
   let theme = useTheme();
   let navigation = useNavigation();
+
+  const GetListDetail = async () => {
+    try {
+      const subscriber = firestore()
+        .collection('users')
+        .where('Status', '==', 'Active')
+        .onSnapshot(async snapshot => {
+          let alluser = snapshot.docs.map(snapdata => ({
+            id: snapdata.id,
+            ...snapdata.data(),
+          }));
+          const alldoctor = alluser?.filter(user => user?.role === 'doctor');
+          const allpatient = alluser?.filter(user => user?.role === 'user');
+          setAllDoctor(alldoctor); // Set the filtered list as needed
+          setAllPatient(allpatient); // Set the filtered list as needed
+        });
+      // Clean up the listener when the component unmounts
+      return () => subscriber();
+    } catch (error) {
+      console.log('Error is:', error);
+    }
+  };
+
+  useEffect(() => {
+    // Fetch appointments only if the user is not an admin
+    let unsubscribe = () => {}; // Default to a no-op function.
+    unsubscribe = GetListDetail();
+    // Clean up the listener on component unmount or dependency change.
+    return () => {
+      if (typeof unsubscribe === 'function') {
+        unsubscribe();
+      }
+    };
+  }, []);
 
   const handleCallPress = contactNumber => {
     const phoneURL = `tel:${contactNumber}`;
@@ -130,7 +165,7 @@ const RecommandedDoctor = () => {
                       color={
                         isFullStar || isHalfStar
                           ? theme.colors.rate
-                          : theme.colors.disabled
+                          : theme.colors.onBackground
                       } // Highlight or grey color
                     />
                   );
@@ -219,19 +254,19 @@ const RecommandedDoctor = () => {
           right: 0,
           position: 'absolute',
           bottom: 0,
-          backgroundColor: theme.colors.onlightGrey,
+          backgroundColor: theme.colors.transpgrey,
           borderRadius: 10,
         }}>
         <Iconify
           icon="mdi:email-fast"
           size={30}
-          color={theme.colors.background}
+          color={theme.colors.onBackground}
           onPress={() => handleEmailPress(item?.email)}
         />
         <Iconify
           icon="fluent:call-28-filled"
           size={30}
-          color={theme.colors.background}
+          color={theme.colors.onBackground}
           onPress={() => handleCallPress(item?.contact)}
         />
       </View>
@@ -249,7 +284,7 @@ const RecommandedDoctor = () => {
   return (
     <>
       <View style={styles.mainContainer}>
-        <CustomText style={[styles.apText, {fontFamily: fonts.Bold}]}>
+        <CustomText style={[styles.apText, {fontFamily: fonts.Medium}]}>
           Top Doctor for You
         </CustomText>
 
@@ -308,7 +343,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   apText: {
-    fontSize: 20,
+    fontSize: 19,
     marginBottom: 10,
   },
   RecommandedDoctorContainer: {
