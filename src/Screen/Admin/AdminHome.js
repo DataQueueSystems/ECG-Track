@@ -19,10 +19,15 @@ import moment from 'moment';
 import firestore from '@react-native-firebase/firestore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-
 export default function Home() {
   let theme = useTheme();
-  const {handleLogout, userDetail,setUserDetail, setAdminDoctors, setAdminPatient} = useAuthContext();
+  const {
+    handleLogout,
+    userDetail,
+    setUserDetail,
+    setAdminDoctors,
+    setAdminPatient,
+  } = useAuthContext();
   const isFocused = useIsFocused();
   const navigation = useNavigation();
   const backPressedOnce = useRef(false);
@@ -54,8 +59,6 @@ export default function Home() {
     navigation.navigate('SingleDetail');
   };
 
-  
-  
   const GetListofUser = async () => {
     try {
       const subscriber = firestore()
@@ -115,7 +118,7 @@ export default function Home() {
     let unsubscribe = () => {}; // Default to a no-op function.
     if (userDetail && userDetail?.role == 'admin') {
       unsubscribe = GetListofDoctor();
-    };
+    }
     // Clean up the listener on component unmount or dependency change.
     return () => {
       if (typeof unsubscribe === 'function') {
@@ -124,9 +127,6 @@ export default function Home() {
     };
   }, [userDetail]);
 
-
-
-  
   const GetUserDetail = async () => {
     const userToken = await AsyncStorage.getItem('token');
     if (!userToken) return;
@@ -155,7 +155,6 @@ export default function Home() {
     }
   }, []);
 
-  
   return (
     <>
       <View
@@ -187,10 +186,12 @@ export default function Home() {
 
             <View style={styles.NameDate}>
               <CustomText
+                numberOfLines={2}
                 style={[
                   {
                     fontFamily: fonts.SemiBold,
                     fontSize: 14,
+                    width: 200,
                   },
                 ]}>
                 Hi,{userDetail?.name}
@@ -284,9 +285,9 @@ const styles = StyleSheet.create({
     fontSize: 30,
   },
   image: {
-    width:50,
-    height:50,
-    borderRadius:100,
-    bottom:7
+    width: 50,
+    height: 50,
+    borderRadius: 100,
+    bottom: 7,
   },
 });
