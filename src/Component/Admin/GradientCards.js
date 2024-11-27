@@ -16,8 +16,8 @@ import {useNavigation} from '@react-navigation/native';
 import {useAuthContext} from '../../context/GlobaContext';
 
 const GradientCards = () => {
-  const {allDoctor, allpatient} = useAuthContext();
-
+  const {adminDoctors,adminPatient} = useAuthContext();
+  // const {allDoctor, allpatient} = useAuthContext();
   let iconsize = 40;
   let theme = useTheme();
   let navigation = useNavigation();
@@ -27,6 +27,7 @@ const GradientCards = () => {
   const handleNavigate = navigateScreen => {
     navigation.navigate(navigateScreen);
   };
+
   return (
     <View style={styles.container}>
       {/* Doctor Card */}
@@ -43,7 +44,7 @@ const GradientCards = () => {
             styles.countText,
             {fontFamily: fonts.Regular, color: theme.colors.onBackground},
           ]}>
-          {allDoctor?.length}
+          {adminDoctors?.length}
         </CustomText>
 
         <TouchableOpacity
@@ -69,7 +70,7 @@ const GradientCards = () => {
             styles.countText,
             {fontFamily: fonts.Regular, color: theme.colors.onBackground},
           ]}>
-          {allpatient?.length}
+          {adminPatient?.length}
         </CustomText>
         <TouchableOpacity
           onPress={() => handleNavigate('UserList')}

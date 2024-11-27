@@ -82,21 +82,20 @@ const DoctorList = () => {
     );
   };
 
-  const {allDoctor} = useAuthContext();
+  const {adminDoctors} = useAuthContext();
+  
   let theme = useTheme();
   let navigation = useNavigation();
   let themeColor = Appearance.getColorScheme();
   let screenName = 'Doctors';
   let iconColor = themeColor == 'dark' ? '#fff' : 'black';
   let iconsize = 40;
-
   const bottomSheetRef = useRef(null);
   const [selectedDoctor, setSelectedDoctor] = useState(null);
   const handlePress = async doctor => {
     bottomSheetRef.current?.expand(); // Use expand instead of open
     await setSelectedDoctor(doctor);
   };
-
   const renderAction = () => (
     <>
       <Appbar.Action
@@ -122,7 +121,7 @@ const DoctorList = () => {
       <View
         style={[styles.container, {backgroundColor: theme.colors.background}]}>
         {/* Doctor List */}
-        {allDoctor?.length == 0 ? (
+        {adminDoctors?.length == 0 ? (
           <>
             <View
               style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
@@ -141,7 +140,7 @@ const DoctorList = () => {
             <FlatList
               showsHorizontalScrollIndicator={false}
               showsVerticalScrollIndicator={false}
-              data={allDoctor}
+              data={adminDoctors}
               renderItem={({item}) =>
                 renderDoctorItem({item, iconColor, iconsize, handlePress})
               }

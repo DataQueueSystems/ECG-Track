@@ -57,7 +57,7 @@ const UserSheet = ({bottomSheetRef, user}) => {
       useNativeDriver: true,
     }).start();
   };
-
+  
   return (
     <>
       <Portal>
