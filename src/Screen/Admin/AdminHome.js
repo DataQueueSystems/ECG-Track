@@ -17,8 +17,6 @@ import GradientCards from '../../Component/Admin/GradientCards';
 import {useAuthContext} from '../../context/GlobaContext';
 import moment from 'moment';
 import firestore from '@react-native-firebase/firestore';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-
 export default function Home() {
   let theme = useTheme();
   const {
