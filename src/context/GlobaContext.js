@@ -195,7 +195,6 @@ const handleLogout = () => {
       GetUserDetail();
     }
   }, [count]);
-
   return (
     <Authcontext.Provider
       value={{
