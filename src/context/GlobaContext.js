@@ -215,15 +215,12 @@ const handleLogout = () => {
         setAllDoctor,
         allpatient,
         setAllPatient,
-
         setCount,
-
         adminDoctors,
         setAdminDoctors,
         adminPatient,
         setAdminPatient,
       }}>
-        
       {children}
     </Authcontext.Provider>
   );
