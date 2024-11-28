@@ -1,10 +1,8 @@
 
 
 import axios from 'axios';
-let cloudName = 'dfrbgixfs';
-let upload_preset = 'RFTProfiles';
-// let apiKey="499874854659752";
-// let cloudinaryApiSecret="f0gppNLK9pneFmENj0S-6mSbvTk"
+let cloudName = 'dkh8iurxw';
+let upload_preset = 'ECG-TRACK';
 
 export const uploadImageToCloudinary = async (
   userName,
