@@ -4,6 +4,7 @@ import NetInfo, {useNetInfoInstance} from '@react-native-community/netinfo';
 import firestore from '@react-native-firebase/firestore';
 import {showToast} from '../../utils/Toast.js';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import RNFS from 'react-native-fs';
 
 const Authcontext = createContext();
 export const AuthContextProvider = ({children}) => {
@@ -39,8 +40,8 @@ export const AuthContextProvider = ({children}) => {
 
   const handleLogout = () => {
     Alert.alert(
-      'Logout', //title
-      'Are you sure ,you want to logout ?', //message
+      'Logout', // Title
+      'Are you sure you want to logout?', // Message
       [
         {
           text: 'Cancel', // Cancel button
@@ -49,24 +50,66 @@ export const AuthContextProvider = ({children}) => {
         },
         {
           text: 'OK', // OK button
-          onPress: () => {
-            setIsLogin(true);
-            AsyncStorage.setItem('IsLogin', 'false');
-            AsyncStorage.clear();
-            setUserDetail(null);
-            showToast('Logout successfully!');
-            // some logic
+          onPress: async () => {
+            try {
+              // Clear cache and temporary files
+              const cacheDir = RNFS.CachesDirectoryPath;
+              const tempDir = RNFS.TemporaryDirectoryPath;
+
+              // Delete cache files
+              await RNFS.unlink(cacheDir).catch(err =>
+                console.warn('Cache clearing error:', err),
+              );
+              // Delete temporary files
+              await RNFS.unlink(tempDir).catch(err =>
+                console.warn('Temp clearing error:', err),
+              );
+              // Clear AsyncStorage
+              await AsyncStorage.clear();
+              // Update app state
+              setIsLogin(true);
+              AsyncStorage.setItem('IsLogin', 'false');
+              setUserDetail(null);
+              // Show success message
+              showToast('Logged out successfully!');
+            } catch (error) {
+              console.error('Error during logout:', error);
+              showToast('Failed to logout. Please try again!');
+            }
           },
         },
       ],
-      {cancelable: false}, // Optionally prevent dismissing by tapping outside the alert
+      {cancelable: false}, // Prevent dismissing by tapping outside the alert
     );
   };
 
- 
+  // const handleLogout = () => {
+  //   Alert.alert(
+  //     'Logout', //title
+  //     'Are you sure ,you want to logout ?', //message
+  //     [
+  //       {
+  //         text: 'Cancel', // Cancel button
+  //         onPress: () => console.log('Cancel Pressed'),
+  //         style: 'cancel',
+  //       },
+  //       {
+  //         text: 'OK', // OK button
+  //         onPress: () => {
+  //           setIsLogin(true);
+  //           AsyncStorage.setItem('IsLogin', 'false');
+  //           AsyncStorage.clear();
+  //           setUserDetail(null);
+  //           showToast('Logout successfully!');
+  //           // some logic
+  //         },
+  //       },
+  //     ],
+  //     {cancelable: false}, // Optionally prevent dismissing by tapping outside the alert
+  //   );
+  // };
 
   const [count, setCount] = useState(0);
- 
 
   const CheckDataBase = async (setSpinner, setErrors, form) => {
     setSpinner(true);
@@ -115,9 +158,36 @@ export const AuthContextProvider = ({children}) => {
 
   const [allDoctor, setAllDoctor] = useState([]);
   const [allpatient, setAllPatient] = useState([]);
-
   const [adminDoctors, setAdminDoctors] = useState([]);
   const [adminPatient, setAdminPatient] = useState([]);
+
+  const GetUserDetail = async () => {
+    const userToken = await AsyncStorage.getItem('token');
+    if (!userToken) return;
+    try {
+      const unsubscribe = firestore()
+        .collection('users') // Assuming agents are in the `users` collection
+        .doc(userToken)
+        .onSnapshot(async userDoc => {
+          if (!userDoc.exists) {
+            return;
+          }
+          const userData = {id: userDoc.id, ...userDoc.data()};
+          // Set user details if the account is active
+          await setUserDetail(userData);
+        });
+
+      // Clean up the listener when the component unmounts or userToken changes
+      return () => unsubscribe();
+    } catch (error) {
+      console.error('Error fetching user details:', error);
+    }
+  };
+  useEffect(() => {
+    if (userDetail && userDetail?.id) {
+      GetUserDetail();
+    }
+  }, []);
 
   return (
     <Authcontext.Provider

@@ -19,14 +19,12 @@ import {fonts} from '../../customText/fonts';
 import {useAuthContext} from '../../context/GlobaContext';
 import Icon from 'react-native-vector-icons/Ionicons'; // Use Ionicons
 import Appointment from '../../Component/Appointment';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const {width} = Dimensions.get('window');
 const cardWidth = width / 2 - 24; // For a two-column grid with padding
 
 export default function Home() {
-  const {handleLogout, userDetail, setUserDetail} = useAuthContext();
-
+  const {handleLogout, userDetail} = useAuthContext();
   let theme = useTheme();
   let navigation = useNavigation();
   const isFocused = useIsFocused();
@@ -124,34 +122,6 @@ export default function Home() {
       solution: 'Use prescribed inhalers and avoid allergens.',
     },
   ];
-
-  const GetUserDetail = async () => {
-    const userToken = await AsyncStorage.getItem('token');
-    if (!userToken) return;
-    try {
-      const unsubscribe = firestore()
-        .collection('users') // Assuming agents are in the `users` collection
-        .doc(userToken)
-        .onSnapshot(async userDoc => {
-          if (!userDoc.exists) {
-            return;
-          }
-          const userData = {id: userDoc.id, ...userDoc.data()};
-          // Set user details if the account is active
-          await setUserDetail(userData);
-        });
-
-      // Clean up the listener when the component unmounts or userToken changes
-      return () => unsubscribe();
-    } catch (error) {
-      console.error('Error fetching user details:', error);
-    }
-  };
-  useEffect(() => {
-    if (userDetail && userDetail?.id) {
-      GetUserDetail();
-    }
-  }, []);
 
   return (
     <>
