@@ -223,6 +223,7 @@ const handleLogout = () => {
         adminPatient,
         setAdminPatient,
       }}>
+        
       {children}
     </Authcontext.Provider>
   );
