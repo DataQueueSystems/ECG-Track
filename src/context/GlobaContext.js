@@ -6,6 +6,7 @@ import {showToast} from '../../utils/Toast.js';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import RNFS from 'react-native-fs';
 
+
 const Authcontext = createContext();
 export const AuthContextProvider = ({children}) => {
   const [isLogin, setIsLogin] = useState(false);
@@ -38,76 +39,82 @@ export const AuthContextProvider = ({children}) => {
     );
   };
 
-  const handleLogout = () => {
-    Alert.alert(
-      'Logout', // Title
-      'Are you sure you want to logout?', // Message
-      [
-        {
-          text: 'Cancel', // Cancel button
-          onPress: () => console.log('Cancel Pressed'),
-          style: 'cancel',
+  
+const handleLogout = () => {
+  Alert.alert(
+    'Logout', // Title
+    'Are you sure you want to logout?', // Message
+    [
+      {
+        text: 'Cancel', // Cancel button
+        onPress: () => console.log('Cancel Pressed'),
+        style: 'cancel',
+      },
+      {
+        text: 'OK', // OK button
+        onPress: async () => {
+          try {
+            
+            // Clear cache and temporary files
+            const cacheDir = RNFS.CachesDirectoryPath;
+            const tempDir = RNFS.TemporaryDirectoryPath;
+            
+            // Delete cache files
+            await RNFS.unlink(cacheDir).catch(err =>
+              console.warn('Cache clearing error:', err)
+            );
+            // Delete temporary files
+            await RNFS.unlink(tempDir).catch(err =>
+              console.warn('Temp clearing error:', err)
+            );
+            
+            // Clear AsyncStorage
+            await AsyncStorage.clear();
+            // Update app state
+            setIsLogin(true);
+            AsyncStorage.setItem('IsLogin', 'false');
+            setUserDetail(null);
+            // Show success message
+            showToast('App storage cleared and logged out successfully!');
+          } catch (error) {
+            console.error('Error during logout:', error);
+            showToast('Failed to logout. Please try again!');
+          }
         },
-        {
-          text: 'OK', // OK button
-          onPress: async () => {
-            try {
-              // Clear cache and temporary files
-              const cacheDir = RNFS.CachesDirectoryPath;
-              const tempDir = RNFS.TemporaryDirectoryPath;
+      },
+    ],
+    { cancelable: false }, // Prevent dismissing by tapping outside the alert
+  );
+};
 
-              // Delete cache files
-              await RNFS.unlink(cacheDir).catch(err =>
-                console.warn('Cache clearing error:', err),
-              );
-              // Delete temporary files
-              await RNFS.unlink(tempDir).catch(err =>
-                console.warn('Temp clearing error:', err),
-              );
-              // Clear AsyncStorage
-              await AsyncStorage.clear();
-              // Update app state
-              setIsLogin(true);
-              AsyncStorage.setItem('IsLogin', 'false');
-              setUserDetail(null);
-              // Show success message
-              showToast('Logged out successfully!');
-            } catch (error) {
-              console.error('Error during logout:', error);
-              showToast('Failed to logout. Please try again!');
-            }
-          },
-        },
-      ],
-      {cancelable: false}, // Prevent dismissing by tapping outside the alert
-    );
-  };
 
-  // const handleLogout = () => {
-  //   Alert.alert(
-  //     'Logout', //title
-  //     'Are you sure ,you want to logout ?', //message
-  //     [
-  //       {
-  //         text: 'Cancel', // Cancel button
-  //         onPress: () => console.log('Cancel Pressed'),
-  //         style: 'cancel',
-  //       },
-  //       {
-  //         text: 'OK', // OK button
-  //         onPress: () => {
-  //           setIsLogin(true);
-  //           AsyncStorage.setItem('IsLogin', 'false');
-  //           AsyncStorage.clear();
-  //           setUserDetail(null);
-  //           showToast('Logout successfully!');
-  //           // some logic
-  //         },
-  //       },
-  //     ],
-  //     {cancelable: false}, // Optionally prevent dismissing by tapping outside the alert
-  //   );
-  // };
+// const handleLogout = () => {
+//   Alert.alert(
+//     'Logout', //title
+//     'Are you sure ,you want to logout ?', //message
+//     [
+//       {
+//         text: 'Cancel', // Cancel button
+//         onPress: () => console.log('Cancel Pressed'),
+//         style: 'cancel',
+//       },
+//       {
+//         text: 'OK', // OK button
+//         onPress: () => {
+//           setIsLogin(true);
+//           AsyncStorage.setItem('IsLogin', 'false');
+//           AsyncStorage.clear();
+//           setUserDetail(null);
+//           showToast('Logout successfully!');
+//           // some logic
+//         },
+//       },
+//     ],
+//     {cancelable: false}, // Optionally prevent dismissing by tapping outside the alert
+//   );
+// };
+
+
 
   const [count, setCount] = useState(0);
 
@@ -161,7 +168,7 @@ export const AuthContextProvider = ({children}) => {
   const [adminDoctors, setAdminDoctors] = useState([]);
   const [adminPatient, setAdminPatient] = useState([]);
 
-  const GetUserDetail = async () => {
+   const GetUserDetail = async () => {
     const userToken = await AsyncStorage.getItem('token');
     if (!userToken) return;
     try {
@@ -187,8 +194,7 @@ export const AuthContextProvider = ({children}) => {
     if (userDetail && userDetail?.id) {
       GetUserDetail();
     }
-  }, []);
-
+  }, [count]);
   return (
     <Authcontext.Provider
       value={{
@@ -208,9 +214,7 @@ export const AuthContextProvider = ({children}) => {
         setAllDoctor,
         allpatient,
         setAllPatient,
-
         setCount,
-
         adminDoctors,
         setAdminDoctors,
         adminPatient,

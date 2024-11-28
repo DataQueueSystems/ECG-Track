@@ -18,8 +18,6 @@ import {useTheme} from 'react-native-paper';
 import {fonts} from '../../customText/fonts';
 import Appointment from '../../Component/Appointment';
 import RecommandedDoctor from '../../Component/User/RecommandedDoctor';
-import firestore from '@react-native-firebase/firestore';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function Home() {
   let theme = useTheme();
