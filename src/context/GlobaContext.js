@@ -5,6 +5,7 @@ import firestore from '@react-native-firebase/firestore';
 import {showToast} from '../../utils/Toast.js';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import RNFS from 'react-native-fs';
+import { useNavigation } from '@react-navigation/native';
 
 
 const Authcontext = createContext();
@@ -87,20 +88,40 @@ const handleLogout = () => {
   );
 };
 
-
 const [ipAddress, setIpAddress] = useState(null);
+const GetEndPoint = async () => {
+  try {
+    
+    const unsubscribe = firestore()
+        .collection('EndPoint') // Assuming agents are in the `users` collection
+        .doc("portNum")
+        .onSnapshot(async userDoc => {
+          if (!userDoc.exists) {
+            return;
+          };
+          const IpDetail = {id: userDoc.id, ...userDoc.data()};
+          setIpAddress(IpDetail?.ipAddress);
+        });
 
+    return unsubscribe;
+  } catch (error) {
+    console.error("Error fetching endpoint:", error);
+  }
+};
 // const GetEndPoint = async () => {
 //   try {
 //     // Initial fetch to get data once
 //     const docSnapshot = await firestore().collection('EndPoint').doc('portNum').get();
+//     console.log(docSnapshot,'docSnapshot');
+    
 //     if (docSnapshot.exists) {
 //       const IpDetail = docSnapshot.data().IpAddress;
+//       console.log(IpDetail,'IpDetail');
+      
 //       setIpAddress(IpDetail);
 //     } else {
 //       console.log('No matching document found');
 //     };
-
 //     // Setup onSnapshot to listen for real-time updates
 //     const unsubscribe = firestore()
 //       .collection('EndPoint')
@@ -120,18 +141,18 @@ const [ipAddress, setIpAddress] = useState(null);
 //   }
 // };
 
-// useEffect(() => {
-//   const initialize = async () => {
-//     let isConnected = await Checknetinfo();
-//     if (!isConnected) {
-//       showToast('No internet connection');
-//       return;
-//     }
-//     const unsubscribe = GetEndPoint();
-//     return () => unsubscribe && unsubscribe();
-//   };
-//   initialize();
-// }, []);
+useEffect(() => {
+  const initialize = async () => {
+    let isConnected = await Checknetinfo();
+    if (!isConnected) {
+      showToast('No internet connection');
+      return;
+    }
+    const unsubscribe = GetEndPoint();
+    return () => unsubscribe && unsubscribe();
+  };
+  initialize();
+}, []);
 
 // const handleLogout = () => {
 //   Alert.alert(
@@ -252,6 +273,12 @@ const [ipAddress, setIpAddress] = useState(null);
    };
    GetUserData()
   }, [count]);
+
+ 
+
+  const [formData,setFormData]=useState(null);
+
+
   return (
     <Authcontext.Provider
       value={{
@@ -276,8 +303,8 @@ const [ipAddress, setIpAddress] = useState(null);
         setAdminDoctors,
         adminPatient,
         setAdminPatient,
-
         ipAddress,
+        formData,setFormData
       }}>
       {children}
     </Authcontext.Provider>

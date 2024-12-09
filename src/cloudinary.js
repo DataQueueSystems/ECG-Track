@@ -43,8 +43,8 @@
 
 import axios from 'axios';
 import { showToast } from '../utils/Toast';
-let cloudName = 'dkh8iurxw';
-let upload_preset = 'ECG-TRACK';
+let cloudName = 'dfrbgixfs';
+let upload_preset = 'TRACK-TICKET';
 
 export const uploadImageToCloudinary = async selectedImage => {
   if (!selectedImage) {
@@ -78,4 +78,3 @@ export const uploadImageToCloudinary = async selectedImage => {
     return null; // Return null if there's an error
   }
 };
-

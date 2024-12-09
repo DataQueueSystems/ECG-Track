@@ -19,6 +19,7 @@ import SingleDoctor from './Screen/Doctor/SingleDoctor';
 import BookDoctor from './Screen/Doctor/BookDoctor';
 import UAProfile from './Screen/UAProfile';
 import HeartPredictionPage from './Screen/User/Prediction';
+import UploadForm from './Screen/User/UploadForm';
 const Stack = createNativeStackNavigator();
 
 export default function AppNavigator() {
@@ -98,6 +99,11 @@ export default function AppNavigator() {
             <Stack.Screen
               name="Prediction"
               component={HeartPredictionPage}
+              options={{headerShown: false}}
+            />
+            <Stack.Screen
+              name="FormUpload"
+              component={UploadForm}
               options={{headerShown: false}}
             />
             <Stack.Screen
