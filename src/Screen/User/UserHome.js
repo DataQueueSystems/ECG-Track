@@ -14,7 +14,7 @@ import {useIsFocused, useNavigation} from '@react-navigation/native';
 import {showToast} from '../../../utils/Toast';
 import {Iconify} from 'react-native-iconify';
 import CustomText from '../../customText/CustomText';
-import {useTheme} from 'react-native-paper';
+import {Button, useTheme} from 'react-native-paper';
 import {fonts} from '../../customText/fonts';
 import Appointment from '../../Component/Appointment';
 import RecommandedDoctor from '../../Component/User/RecommandedDoctor';
@@ -51,6 +51,8 @@ export default function Home() {
   const handleNavigate = () => {
     navigation.navigate('EditProfile', {fromuser: true, fromdoctor: false});
   };
+
+  
   return (
     <>
       <View
@@ -63,7 +65,7 @@ export default function Home() {
           <View style={{flexDirection: 'row', gap: 10, alignItems: 'center'}}>
             <TouchableOpacity
               activeOpacity={0.6}
-              onPress={() => navigation.navigate('SingleDetail')}>
+              onPress={() => navigation.navigate('Profile')}>
               {userDetail?.profile_image?.imageUri ? (
                 <Image
                   style={styles.image}
@@ -121,6 +123,10 @@ export default function Home() {
           showsVerticalScrollIndicator={false}>
           {/* User AppointMent */}
 
+
+<Button onPress={()=>navigation.navigate("Prediction")}>
+Prediction
+</Button>
           <Appointment fromUser={true} />
 
           {/* Recommanded Doctor */}
@@ -140,7 +146,7 @@ export default function Home() {
                 fontSize: 26,
                 textAlign: 'center',
               }}>
-              Health Tracking
+              Health Overview
             </CustomText>
             <CustomText
               style={{
@@ -149,7 +155,7 @@ export default function Home() {
                 textAlign: 'center',
                 top: -5,
               }}>
-              Track your walk, fitness and all activity you do!
+              Your personalized fitness and activity insights!
             </CustomText>
           </View>
 
@@ -165,7 +171,7 @@ export default function Home() {
                   fontFamily: fonts.SemiBold,
                   fontSize: 19,
                 }}>
-                Recommended
+                Daily Goals
               </CustomText>
               <CustomText
                 style={{
@@ -173,21 +179,16 @@ export default function Home() {
                   fontSize: 17,
                   top: -4,
                 }}>
-                activity
+                Achieve your best!
               </CustomText>
             </View>
             <View style={{flexDirection: 'row', alignItems: 'center', gap: 4}}>
-              <Iconify
-                icon="wi:time-8"
-                size={20}
-                color={theme.colors.onBackground}
-              />
               <CustomText
                 style={{
                   fontFamily: fonts.SemiBold,
                   fontSize: 12,
                 }}>
-                Time activity
+                Suggested Activity
               </CustomText>
             </View>
             <View
@@ -199,24 +200,24 @@ export default function Home() {
               }}>
               <CustomText
                 style={{
-                  fontFamily: fonts.SemiBold,
+                  fontFamily: fonts.Regular,
                   fontSize: 12,
                 }}>
-                - 60m
+                - Morning Walk: 45 mins
               </CustomText>
               <CustomText
                 style={{
-                  fontFamily: fonts.SemiBold,
+                  fontFamily: fonts.Regular,
                   fontSize: 12,
                 }}>
-                - 30m
+                - Yoga: 30 mins
               </CustomText>
               <CustomText
                 style={{
-                  fontFamily: fonts.SemiBold,
+                  fontFamily: fonts.Regular,
                   fontSize: 12,
                 }}>
-                - 30m
+                - Evening Jog: 20 mins
               </CustomText>
             </View>
 

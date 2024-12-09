@@ -77,52 +77,44 @@ export default function Home() {
       </CustomText>
     </View>
   );
-
   const cards = [
     {
-      id: '1',
-      title: 'Fever',
-      icon: 'thermometer-outline',
-      description: 'Common viral fever with remedies to stay hydrated.',
-      solution: 'Drink fluids and rest.',
+      id: '7',
+      title: 'Coronary Artery Disease',
+      icon: 'heart-dislike-outline',
+      description: 'Narrowing or blockage of coronary arteries, often due to plaque buildup.',
+      solution: 'Follow a heart-healthy diet, exercise, and consult your doctor.',
     },
     {
-      id: '2',
-      title: 'Headache',
-      icon: 'headset-outline',
-      description: 'Tension headaches or migraines with common triggers.',
-      solution: 'Avoid stress and take prescribed medication.',
+      id: '8',
+      title: 'Heart Attack',
+      icon: 'warning-outline',
+      description: 'Sudden blockage in blood flow to the heart, causing damage.',
+      solution: 'Seek emergency medical attention and follow prescribed treatment.',
     },
     {
-      id: '3',
-      title: 'Diabetes',
+      id: '9',
+      title: 'Congestive Heart Failure',
       icon: 'water-outline',
-      description: 'Monitor blood sugar and maintain a balanced diet.',
-      solution: 'Regular exercise and prescribed insulin.',
+      description: 'Condition where the heart doesn’t pump blood effectively.',
+      solution: 'Monitor fluid intake, reduce salt, and adhere to prescribed medications.',
     },
     {
-      id: '4',
-      title: 'Heart Disease',
-      icon: 'heart-outline',
-      description: 'Early symptoms include chest pain or breathlessness.',
-      solution: 'Maintain a low-fat diet and regular check-ups.',
+      id: '10',
+      title: 'Arrhythmia',
+      icon: 'pulse-outline',
+      description: 'Irregular or abnormal heartbeat that can affect blood flow.',
+      solution: 'Regular check-ups, medication, or procedures as recommended by a doctor.',
     },
     {
-      id: '5',
-      title: 'Flu',
-      icon: 'bug-outline',
-      description: 'Seasonal flu with symptoms like cough and cold.',
-      solution: 'Get enough rest and avoid cold environments.',
-    },
-    {
-      id: '6',
-      title: 'Asthma',
-      icon: 'cloud-outline',
-      description: 'Difficulty in breathing caused by inflamed airways.',
-      solution: 'Use prescribed inhalers and avoid allergens.',
+      id: '11',
+      title: 'Valvular Heart Disease',
+      icon: 'shield-outline',
+      description: 'Damage or defect in one of the heart valves affecting blood flow.',
+      solution: 'Follow medical advice for surgery or medication if required.',
     },
   ];
-
+  
   return (
     <>
       <View

@@ -88,6 +88,51 @@ const handleLogout = () => {
 };
 
 
+const [ipAddress, setIpAddress] = useState(null);
+
+// const GetEndPoint = async () => {
+//   try {
+//     // Initial fetch to get data once
+//     const docSnapshot = await firestore().collection('EndPoint').doc('portNum').get();
+//     if (docSnapshot.exists) {
+//       const IpDetail = docSnapshot.data().IpAddress;
+//       setIpAddress(IpDetail);
+//     } else {
+//       console.log('No matching document found');
+//     };
+
+//     // Setup onSnapshot to listen for real-time updates
+//     const unsubscribe = firestore()
+//       .collection('EndPoint')
+//       .doc('portNum')
+//       .onSnapshot(snapshot => {
+//         if (snapshot.exists) {
+//           const IpDetail = snapshot.data().IpAddress;
+//           setIpAddress(IpDetail);
+//         } else {
+//           console.log('No matching documents found');
+//         }
+//       });
+
+//     return unsubscribe;
+//   } catch (error) {
+//     console.error("Error fetching endpoint:", error);
+//   }
+// };
+
+// useEffect(() => {
+//   const initialize = async () => {
+//     let isConnected = await Checknetinfo();
+//     if (!isConnected) {
+//       showToast('No internet connection');
+//       return;
+//     }
+//     const unsubscribe = GetEndPoint();
+//     return () => unsubscribe && unsubscribe();
+//   };
+//   initialize();
+// }, []);
+
 // const handleLogout = () => {
 //   Alert.alert(
 //     'Logout', //title
@@ -170,6 +215,8 @@ const handleLogout = () => {
 
    const GetUserDetail = async () => {
     const userToken = await AsyncStorage.getItem('token');
+    console.log(userToken,'userToken');
+    
     if (!userToken) return;
     try {
       const unsubscribe = firestore()
@@ -178,8 +225,9 @@ const handleLogout = () => {
         .onSnapshot(async userDoc => {
           if (!userDoc.exists) {
             return;
-          }
+          };
           const userData = {id: userDoc.id, ...userDoc.data()};
+          console.log(userData,'userData');
           // Set user details if the account is active
           await setUserDetail(userData);
         });
@@ -191,9 +239,18 @@ const handleLogout = () => {
     }
   };
   useEffect(() => {
-    if (userDetail && userDetail?.id) {
-      GetUserDetail();
-    }
+    console.log(userDetail,'userDetail');
+   const GetUserData=async()=>{
+    const userToken = await AsyncStorage.getItem('token');
+    console.log(userToken,'userToken');
+    console.log(userDetail,'userDetail');
+
+    //  if (userDetail && userDetail?.id) {
+      await GetUserDetail();
+    console.log(userDetail,'userDetail');
+    // }
+   };
+   GetUserData()
   }, [count]);
   return (
     <Authcontext.Provider
@@ -219,6 +276,8 @@ const handleLogout = () => {
         setAdminDoctors,
         adminPatient,
         setAdminPatient,
+
+        ipAddress,
       }}>
       {children}
     </Authcontext.Provider>

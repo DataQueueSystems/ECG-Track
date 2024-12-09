@@ -50,7 +50,7 @@ export default function Home() {
       },
     );
     return () => backHandler.remove();
-  }, []);
+  }, [isFocused]);
 
   let todaysDate = moment().format('ddd ,DD MMM');
   const handleNavigate = () => {

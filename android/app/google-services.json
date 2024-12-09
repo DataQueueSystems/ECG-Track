@@ -1,21 +1,22 @@
+
 {
   "project_info": {
-    "project_number": "717347121385",
-    "project_id": "ecg-track",
-    "storage_bucket": "ecg-track.firebasestorage.app"
+    "project_number": "1083800735419",
+    "project_id": "safe-circle-87a37",
+    "storage_bucket": "safe-circle-87a37.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:717347121385:android:6f00dd6defb879c8c26878",
+        "mobilesdk_app_id": "1:1083800735419:android:87292ca7503e7a0943239e",
         "android_client_info": {
-          "package_name": "com.ecgtrack"
+           "package_name": "com.ecgtrack"
         }
       },
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyAbC1w4D7DkGaG6GGzT_-ptZ31mJjLkBo4"
+          "current_key": "AIzaSyBLnNDnYPotbvIpvDawAnXdjx74g6WW91o"
         }
       ],
       "services": {

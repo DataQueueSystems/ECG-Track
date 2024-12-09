@@ -4,7 +4,7 @@ import {Appbar, Button, Divider, Menu, TextInput} from 'react-native-paper';
 import {useTheme} from 'react-native-paper';
 import {View, StyleSheet} from 'react-native';
 
-const Header = ({screenName,renderAction}) => {
+const Header = ({screenName,renderAction,isUser}) => {
   let theme = useTheme();
   let navigation = useNavigation();
   const BackNavigation = () => {
@@ -14,11 +14,16 @@ const Header = ({screenName,renderAction}) => {
   return (
     <View style={styles.container}>
       <Appbar.Header>
+        {isUser==false||isUser==undefined?(
         <Appbar.BackAction
           // color={theme.colors.blackGrey}
           color={theme.colors.onBackground}
           onPress={BackNavigation}
         />
+      ):(
+        <></>
+      )}
+
         <Appbar.Content
           title={screenName}
           titleStyle={{
