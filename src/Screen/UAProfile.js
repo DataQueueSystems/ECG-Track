@@ -53,9 +53,12 @@ export default function UAProfile() {
     }).start();
   };
 
+  let isUser=userDetail?.role=="user"?true:false
+  console.log(isUser,'isUser');
+  
   return (
     <>
-      <Header screenName={screenName} renderAction={renderAction} />
+      <Header screenName={screenName} renderAction={renderAction} isUser={isUser} />
       <View
         style={[
           styles.maincontainer,
