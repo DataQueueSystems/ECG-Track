@@ -188,6 +188,31 @@ export default function Home() {
           </View>
         </View>
 
+
+        <View  >
+            <CustomText style={[{fontFamily: fonts.Medium, fontSize: 16,color:theme.colors.appColor}]}>
+              Welcome to ECG - Track
+            </CustomText>
+            <CustomText style={[{fontFamily: fonts.Regular, fontSize: 14}]}>
+              Our app is designed to bring you closer to the services and
+              features you care about. Explore our mission, values, and the
+              people behind the scenes who make it all possible.
+            </CustomText>
+            <TouchableOpacity
+              activeOpacity={0.6}
+              onPress={() => navigation.navigate('AboutUs')}>
+              <CustomText
+                style={[
+                  {
+                    fontFamily: fonts.Regular,
+                    textDecorationLine: 'underline',
+                    color: theme.colors.appColor,
+                  },
+                ]}>
+                For more About Us
+              </CustomText>
+            </TouchableOpacity>
+          </View>
         {/* MainHead Text */}
         <View style={styles.manageView}>
           <View style={styles.manageExplore}>
@@ -226,6 +251,7 @@ const styles = StyleSheet.create({
   headerView: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    marginBottom:10
   },
   userProfile: {
     flexDirection: 'row',

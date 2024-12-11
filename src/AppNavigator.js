@@ -20,6 +20,7 @@ import BookDoctor from './Screen/Doctor/BookDoctor';
 import UAProfile from './Screen/UAProfile';
 import HeartPredictionPage from './Screen/User/Prediction';
 import UploadForm from './Screen/User/UploadForm';
+import AboutPage from './Screen/About';
 const Stack = createNativeStackNavigator();
 
 export default function AppNavigator() {
@@ -142,6 +143,11 @@ export default function AppNavigator() {
             <Stack.Screen
               name="SingleDetail"
               component={UAProfile}
+              options={{headerShown: false}}
+            />
+            <Stack.Screen
+              name="AboutUs"
+              component={AboutPage}
               options={{headerShown: false}}
             />
           </>

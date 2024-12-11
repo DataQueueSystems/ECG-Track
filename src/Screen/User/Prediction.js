@@ -142,11 +142,9 @@ const HeartPredictionPage = () => {
   const FormPredictionTab = () => (
     <ScrollView
       showsVerticalScrollIndicator={false}
-      showsHorizontalScrollIndicator={false}>
-      <View
-        style={[
-          {backgroundColor: theme.colors.background, padding: 10, flex: 1},
-        ]}>
+      showsHorizontalScrollIndicator={false}
+      style={{flex: 1, backgroundColor: theme.colors.background}}>
+      <View style={[{padding: 10}]}>
         <TouchableOpacity onPress={handleNavigate}>
           <CustomText
             style={[

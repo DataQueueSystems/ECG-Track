@@ -82,39 +82,47 @@ export default function Home() {
       id: '7',
       title: 'Coronary Artery Disease',
       icon: 'heart-dislike-outline',
-      description: 'Narrowing or blockage of coronary arteries, often due to plaque buildup.',
-      solution: 'Follow a heart-healthy diet, exercise, and consult your doctor.',
+      description:
+        'Narrowing or blockage of coronary arteries, often due to plaque buildup.',
+      solution:
+        'Follow a heart-healthy diet, exercise, and consult your doctor.',
     },
     {
       id: '8',
       title: 'Heart Attack',
       icon: 'warning-outline',
-      description: 'Sudden blockage in blood flow to the heart, causing damage.',
-      solution: 'Seek emergency medical attention and follow prescribed treatment.',
+      description:
+        'Sudden blockage in blood flow to the heart, causing damage.',
+      solution:
+        'Seek emergency medical attention and follow prescribed treatment.',
     },
     {
       id: '9',
       title: 'Congestive Heart Failure',
       icon: 'water-outline',
       description: 'Condition where the heart doesn’t pump blood effectively.',
-      solution: 'Monitor fluid intake, reduce salt, and adhere to prescribed medications.',
+      solution:
+        'Monitor fluid intake, reduce salt, and adhere to prescribed medications.',
     },
     {
       id: '10',
       title: 'Arrhythmia',
       icon: 'pulse-outline',
-      description: 'Irregular or abnormal heartbeat that can affect blood flow.',
-      solution: 'Regular check-ups, medication, or procedures as recommended by a doctor.',
+      description:
+        'Irregular or abnormal heartbeat that can affect blood flow.',
+      solution:
+        'Regular check-ups, medication, or procedures as recommended by a doctor.',
     },
     {
       id: '11',
       title: 'Valvular Heart Disease',
       icon: 'shield-outline',
-      description: 'Damage or defect in one of the heart valves affecting blood flow.',
+      description:
+        'Damage or defect in one of the heart valves affecting blood flow.',
       solution: 'Follow medical advice for surgery or medication if required.',
     },
   ];
-  
+
   return (
     <>
       <View
@@ -194,6 +202,39 @@ export default function Home() {
           ListHeaderComponent={
             <>
               <View style={{}}>
+                <View>
+                  <CustomText
+                    style={[
+                      {
+                        fontFamily: fonts.Medium,
+                        fontSize: 16,
+                        color: theme.colors.appColor,
+                      },
+                    ]}>
+                    Welcome to ECG - Track
+                  </CustomText>
+                  <CustomText
+                    style={[{fontFamily: fonts.Regular, fontSize: 14}]}>
+                    Our app is designed to bring you closer to the services and
+                    features you care about. Explore our mission, values, and
+                    the people behind the scenes who make it all possible.
+                  </CustomText>
+                  <TouchableOpacity
+                    activeOpacity={0.6}
+                    onPress={() => navigation.navigate('AboutUs')}>
+                    <CustomText
+                      style={[
+                        {
+                          fontFamily: fonts.Regular,
+                          textDecorationLine: 'underline',
+                          color: theme.colors.appColor,
+                        },
+                      ]}>
+                      For more About Us
+                    </CustomText>
+                  </TouchableOpacity>
+                </View>
+
                 <Appointment />
               </View>
             </>
