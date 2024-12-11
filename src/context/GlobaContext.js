@@ -105,7 +105,7 @@ const GetEndPoint = async () => {
 
     return unsubscribe;
   } catch (error) {
-    console.error("Error fetching endpoint:", error);
+    // console.error("Error fetching endpoint:", error);
   }
 };
 // const GetEndPoint = async () => {
@@ -276,7 +276,6 @@ useEffect(() => {
 
  
 
-  const [formData,setFormData]=useState(null);
 
 
   return (
@@ -304,7 +303,6 @@ useEffect(() => {
         adminPatient,
         setAdminPatient,
         ipAddress,
-        formData,setFormData
       }}>
       {children}
     </Authcontext.Provider>
