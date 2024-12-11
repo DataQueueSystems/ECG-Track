@@ -7,6 +7,7 @@ import {
   StyleSheet,
   FlatList,
   ScrollView,
+  ActivityIndicator,
 } from 'react-native';
 import axios from 'axios';
 import {createMaterialTopTabNavigator} from '@react-navigation/material-top-tabs';
@@ -18,18 +19,23 @@ import DocumentPicker from 'react-native-document-picker';
 import {useAuthContext} from '../../context/GlobaContext';
 import {showToast} from '../../../utils/Toast';
 import {useNavigation} from '@react-navigation/native';
+import moment from 'moment';
 const Tab = createMaterialTopTabNavigator();
 
 const HeartPredictionPage = () => {
   let theme = useTheme();
-  const {ipAddress, formData, setFormData} = useAuthContext();
+  const {ipAddress} = useAuthContext();
   const [loading, setLoading] = useState(false);
-  const [response, setResponse] = useState(null);
+  const [isformError, setFormError] = useState(null);
+
   const [csvData, setCsvData] = useState(null);
-  const [file, setFile] = useState(null);
+  // console.log(csvData,'csvData');
+
+  const [formPrediction, setFormPrediction] = useState(null);
   let navigation = useNavigation();
 
   const handleFileUpload = async () => {
+    setLoading(true);
     setCsvData(null);
     try {
       // Open document picker to select a CSV file
@@ -37,13 +43,9 @@ const HeartPredictionPage = () => {
         type: [DocumentPicker.types.allFiles], // Allow all file types (adjust as needed)
       });
 
-      console.log('Selected file URI:', res[0].uri);
-      setFile(res[0].uri); // Store the file URI in state
-
       // Generate a file name (for example, based on timestamp)
       const randomNum = Date.now(); // Generate random number for unique file name
       const fileName = `ECG${randomNum}.csv`; // Example file name
-
       // Prepare FormData for the API request
       const formData = new FormData();
       formData.append('file', {
@@ -51,10 +53,6 @@ const HeartPredictionPage = () => {
         type: 'text/csv', // MIME type for CSV
         name: fileName, // Name of the file being uploaded
       });
-
-      // Log FormData (to verify what is being sent)
-      console.log('FormData:', formData);
-
       // Send the form data to your backend
       const response = await axios.post(`${ipAddress}/upload`, formData, {
         headers: {
@@ -62,173 +60,233 @@ const HeartPredictionPage = () => {
         },
       });
 
-      console.log('Backend Response:', response.data);
-
       // Check backend response status
       let status = response.data.status === 'success';
       if (status) {
         let csvData = response.data.records;
         setCsvData(csvData);
         showToast('Success '); // If the status is success, show success toast
+        setLoading(false);
       }
     } catch (err) {
       // Log the error object to understand the issue
       if (err.response) {
         // Backend error response
         const errorMessage = err.response.data.error || 'Something went wrong';
-        // console.error('Response Data:', err.response.data);
-        // console.error('Response Status:', err.response.status);
-        // console.error('Response Headers:', err.response.headers);
-
         // Show the backend error message in a toast
         showToast(errorMessage);
       } else if (err.request) {
-        // The request was made but no response was received
-        // console.error('Request Error:', err.request);
         // Show a generic toast for no response
         showToast('No response from server');
       } else {
-        // Something happened in setting up the request that triggered an error
-        // console.error('General Error:', err.message);
         // Show the general error message in a toast
         showToast(err.message);
       }
+      setLoading(false);
     }
   };
 
-  const [formValues, setFormValues] = useState({
-    age: '',
-    gender: '',
-    chestpain: '',
-    restingBP: '',
-    serumcholestrol: '',
-    fastingbloodsugar: '',
-    electrocardiographic: '',
-    maxheartrate: '',
-    exerciseangia: '',
-    oldpeak: '',
-    slope: '',
-    noofmajorvessels: '',
-  });
-
   const handleSubmit = async () => {
-    const defaultData = {
-      age: 25, // Example age
-      gender: 'Male', // Example gender
-      chestpain: 'Typical Angina', // Example chest pain type
-      restingBP: 120, // Resting blood pressure in mmHg
-      serumcholestrol: 200, // Serum cholesterol in mg/dL
-      fastingbloodsugar: 0, // 1 if fasting blood sugar > 120 mg/dL, else 0
-      electrocardiographic: 1, // Resting electrocardiographic results (e.g., 0, 1, 2)
-      maxheartrate: 150, // Maximum heart rate achieved
-      exerciseangia: 0, // 1 for Yes, 0 for No
-      oldpeak: 1.5, // ST depression induced by exercise relative to rest
-      slope: 2, // The slope of the peak exercise ST segment (e.g., 0, 1, 2)
-      noofmajorvessels: 0, // Number of major vessels colored by fluoroscopy (0-3)
-    };
-
-    setLoading(true); // Show loading state
-    setResponse(null); // Clear previous response
-
+    setFormError('');
+    // Example Data
+    // const defaultData = {
+    //   age: 40,
+    //   gender: 1,
+    //   chestpain: 0,
+    //   restingBP: 94,
+    //   serumcholestrol: 229,
+    //   fastingbloodsugar: 0,
+    //   restingrelectro: 1,
+    //   maxheartrate: 115,
+    //   exerciseangia: 0,
+    //   oldpeak: 3.7,
+    //   slope: 1,
+    //   noofmajorvessels: 1,
+    //   electrocardiographic: 0,
+    // };
+    // Convert string values to numbers
+    const convertedFormData = Object.fromEntries(
+      Object.entries(formData).map(([key, value]) => [key, parseFloat(value)]),
+    );
     try {
-      console.log('Submitting data:', defaultData);
-
-      // Make the API request to upload the default data
-      const response = await axios.post(`${ipAddress}/upload`, defaultData, {
-        headers: {
-          'Content-Type': 'application/json', // Indicate that we're sending JSON
-        },
-      });
-
-      console.log('Backend Response:', response.data);
-
-      // Handle the response
-      let status = response.data.status === 'success';
-      if (status) {
-        let responseData = response.data.records;
-        setResponse(responseData); // Set the response data
-        showToast('Data submitted successfully!');
-      } else {
-        showToast('Submission failed. Please try again.');
-      }
+      // Send the data as a POST request to the backend
+      const response = await axios.post(
+        `${ipAddress}/predict`,
+        convertedFormData,
+      );
+      // console.log('Backend Response:', response.data);
+      setFormPrediction(response.data);
     } catch (err) {
-      console.error('Error submitting data:', err);
-
-      // Handle errors and display relevant messages
       if (err.response) {
-        const errorMessage = err.response.data.error || 'Something went wrong';
-        showToast(errorMessage);
+        // console.error('Error Response:', err.response.data);
+        const errorMessage = err.response.data;
+        showToast(errorMessage?.error);
+        setFormError(errorMessage?.error);
       } else if (err.request) {
-        showToast('No response from server');
+        // console.error('No response from server:', err.request);
+        // showToast('No response from server');
+        showToast('Something went wrong ...');
       } else {
         showToast(err.message);
       }
-    } finally {
-      setLoading(false); // Hide loading state
     }
   };
-
+  const [formData, setFormData] = useState(null);
   const handleNavigate = () => {
-    // setFormData(null)
-    navigation.navigate('FormUpload', {formValues, setFormValues});
+    setFormError(null);
+    setFormPrediction(null);
+    setFormData(null);
+    navigation.navigate('FormUpload', {setFormData});
   };
   // Form Prediction Tab Content
   const FormPredictionTab = () => (
-    <View
-      style={[
-        {backgroundColor: theme.colors.background, padding: 10, flex: 1},
-      ]}>
-      <TouchableOpacity onPress={handleNavigate}>
+    <ScrollView
+      showsVerticalScrollIndicator={false}
+      showsHorizontalScrollIndicator={false}>
+      <View
+        style={[
+          {backgroundColor: theme.colors.background, padding: 10, flex: 1},
+        ]}>
+        <TouchableOpacity onPress={handleNavigate}>
+          <CustomText
+            style={[
+              {
+                fontFamily: fonts.SemiBold,
+                fontSize: 16,
+                color: theme.colors.primary,
+              },
+            ]}>
+            Upload your Form
+          </CustomText>
+        </TouchableOpacity>
         <CustomText
           style={[
             {
-              fontFamily: fonts.SemiBold,
-              fontSize: 16,
-              color: theme.colors.primary,
+              fontFamily: fonts.Regular,
+              fontSize: 14,
+              marginTop: 5,
+              color: theme.colors.onSurface,
             },
           ]}>
-          Upload your Form
+          Complete your form upload process by navigating to the Form Upload
+          page.
         </CustomText>
-      </TouchableOpacity>
-      <CustomText
-        style={[
-          {
-            fontFamily: fonts.Regular,
-            fontSize: 14,
-            marginTop: 5,
-            color: theme.colors.onSurface,
-          },
-        ]}>
-        Complete your form upload process by navigating to the Form Upload page.
-      </CustomText>
-      {/* Dynamically display all form data */}
-      {formData &&
-        Object.keys(formData).map((key, index) => (
-          <CustomText
-            key={index}
-            style={[{fontFamily: fonts.Regular, marginVertical: 5}]}>
-            {`${key.charAt(0).toUpperCase() + key.slice(1)}: ${formData[key]}`}
-          </CustomText>
-        ))}
-      {formData && (
-        <>
-          <TouchableOpacity
-            style={[
-              styles.button,
-              {backgroundColor: theme.colors.onBackground},
-            ]}
-            onPress={handleSubmit}>
-            <CustomText
+        {/* Dynamically display all form data */}
+        {/* Dynamically display all form data in two columns with wrap */}
+        {formData && (
+          <View style={styles.formDataContainer}>
+            {Object.keys(formData).map((key, index) => (
+              <View key={index} style={styles.formItemContainer}>
+                <CustomText
+                  style={[
+                    {fontFamily: fonts.Regular, marginVertical: 5}, // Key in black
+                  ]}>
+                  {key.charAt(0).toUpperCase() + key.slice(1)}:
+                  <CustomText
+                    style={[
+                      {fontFamily: fonts.Regular, color: theme.colors.appColor}, // Value in green
+                    ]}>
+                    {' '}
+                    {key === 'gender'
+                      ? formData[key] === '0'
+                        ? 'Male'
+                        : 'Female'
+                      : key === 'chestpain'
+                      ? {
+                          0: 'Typical Angina',
+                          1: 'Atypical Angina',
+                          2: 'Non-Anginal Pain',
+                          3: 'Asymptomatic',
+                        }[formData[key]]
+                      : key === 'electrocardiographic'
+                      ? {
+                          0: 'Normal',
+                          1: 'ST-T Wave Abnormality',
+                          2: 'Probable/Definite Left Ventricular Hypertrophy',
+                        }[formData[key]]
+                      : key === 'slope'
+                      ? {
+                          1: 'Upsloping',
+                          2: 'Flat',
+                          3: 'Downsloping',
+                        }[formData[key]]
+                      : formData[key]}
+                  </CustomText>
+                </CustomText>
+              </View>
+            ))}
+          </View>
+        )}
+
+        {formData && (
+          <>
+            <TouchableOpacity
               style={[
-                {fontFamily: fonts.SemiBold, color: theme.colors.background},
-              ]}>
-              Predict
+                styles.button,
+                {backgroundColor: theme.colors.onBackground},
+              ]}
+              onPress={handleSubmit}>
+              <CustomText
+                style={[
+                  {fontFamily: fonts.SemiBold, color: theme.colors.background},
+                ]}>
+                Predict
+              </CustomText>
+            </TouchableOpacity>
+          </>
+        )}
+        {isformError && (
+          <CustomText
+            style={[
+              {
+                color: theme.colors.error,
+                fontFamily: fonts.Regular,
+                marginVertical: 10,
+              },
+            ]}>
+            {isformError}
+          </CustomText>
+        )}
+        {formPrediction && (
+          <View style={styles.predictionContainer}>
+            {/* Heading */}
+            <CustomText style={styles.predictionHeading}>
+              Heart Disease Prediction Results
             </CustomText>
-          </TouchableOpacity>
-        </>
-      )}
-    </View>
+            {/* Prediction Text */}
+            <CustomText style={styles.predictionText}>
+              {formPrediction?.prediction_text}
+            </CustomText>
+          </View>
+        )}
+      </View>
+    </ScrollView>
   );
+  const notation_mapping = {
+    N: 'Normal', // Normal heartbeat
+    V: 'Ventricular', // Ventricular contraction
+    A: 'Atrial', // Atrial contraction
+    F: 'Fusion', // Fusion beat
+    L: 'Left bundle', // Left bundle branch block
+    R: 'Right bundle', // Right bundle branch block
+    J: 'Junctional', // Junctional escape beat
+    E: 'Ventricular paced', // Ventricular paced beat
+    '/': 'Unknown', // Unknown rhythm
+    Q: 'Abnormal', // Abnormal beat
+    S: 'Supraventricular', // Supraventricular premature beat
+    '+': 'Rhythm change', // Rhythm change
+    x: 'Non-conducted', // Non-conducted P wave
+    '|': 'Pause', // Isolated segment
+    '~': 'Noise', // Signal noise
+    '[': 'Start vent event', // Start of ventricular event
+    ']': 'End vent event', // End of ventricular event
+    '!': 'Ventricular bigeminy', // Ventricular bigeminy
+    '"': 'Ventricular trigeminy', // Ventricular trigeminy
+    a: 'Atrial premature', // Atrial premature beat
+    e: 'Aberrated premature', // Aberrated premature beat
+    f: 'Fusion abnormal', // Fusion of ventricular and normal beat
+    j: 'Nodal', // Nodal beat
+  };
 
   // CSV Upload Tab Content
   const CSVUploadTab = () => (
@@ -249,15 +307,21 @@ const HeartPredictionPage = () => {
             <View style={styles.tableRow}>
               <CustomText
                 style={[styles.tableCell, {fontFamily: fonts.Regular}]}>
-                {item?.annotation}
+                {item?.annotation ? notation_mapping[item.annotation] : ''}
               </CustomText>
               <CustomText
                 style={[styles.tableCell, {fontFamily: fonts.Regular}]}>
-                {item?.ds}
+                <CustomText
+                  style={[styles.tableCell, {fontFamily: fonts.Regular}]}>
+                  {/* {item?.ds } */}
+                  {item?.ds
+                    ? moment(item.ds).format('YYYY-MM-DD HH:mm:ss')
+                    : ''}
+                </CustomText>
               </CustomText>
               <CustomText
                 style={[styles.tableCell, {fontFamily: fonts.Regular}]}>
-                {item?.ecg_value}
+                {item?.ecg_value ? item?.ecg_value?.toFixed(5) : ''}
               </CustomText>
             </View>
           )}
@@ -276,16 +340,20 @@ const HeartPredictionPage = () => {
                   styles.button,
                   {backgroundColor: theme.colors.onBackground},
                 ]}
-                onPress={handleFileUpload}>
-                <CustomText
-                  style={[
-                    {
-                      fontFamily: fonts.SemiBold,
-                      color: theme.colors.background,
-                    },
-                  ]}>
-                  Upload CSV
-                </CustomText>
+                onPress={loading ? () => {} : handleFileUpload}>
+                {loading ? (
+                  <ActivityIndicator color={theme.colors.background} />
+                ) : (
+                  <CustomText
+                    style={[
+                      {
+                        fontFamily: fonts.SemiBold,
+                        color: theme.colors.background,
+                      },
+                    ]}>
+                    Upload CSV
+                  </CustomText>
+                )}
               </TouchableOpacity>
 
               {csvData ? (
@@ -440,6 +508,41 @@ const styles = StyleSheet.create({
     fontSize: 14,
     flex: 1,
     textAlign: 'center',
+  },
+  formDataContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    padding: 10,
+  },
+  formItemContainer: {
+    width: '48%', // Each item takes almost half of the width
+    marginBottom: 10, // Space between items
+  },
+  predictionContainer: {
+    padding: 20,
+    backgroundColor: '#f8f8f8', // Light background for better contrast
+    borderRadius: 10,
+    marginHorizontal: 2, // Add horizontal margin for spacing
+    marginVertical: 10, // Add vertical margin to separate from other content
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    elevation: 5, // Add elevation for Android shadow effect
+  },
+  predictionHeading: {
+    fontFamily: fonts.SemiBold,
+    fontSize: 18,
+    color: '#333', // Dark text color for the heading
+    marginBottom: 10, // Add space below the heading
+  },
+  predictionText: {
+    fontFamily: fonts.Regular,
+    fontSize: 16,
+    color: '#666', // Lighter text color for the prediction content
+    lineHeight: 22, // Add line height for better readability
+    textAlign: 'justify', // Justify text for a clean look
   },
 });
 
