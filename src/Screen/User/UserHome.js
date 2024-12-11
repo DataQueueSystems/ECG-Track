@@ -52,7 +52,6 @@ export default function Home() {
     navigation.navigate('EditProfile', {fromuser: true, fromdoctor: false});
   };
 
-  
   return (
     <>
       <View
@@ -121,14 +120,35 @@ export default function Home() {
         <ScrollView
           showsHorizontalScrollIndicator={false}
           showsVerticalScrollIndicator={false}>
+          <View  >
+            <CustomText style={[{fontFamily: fonts.Medium, fontSize: 16,color:theme.colors.appColor}]}>
+              Welcome to ECG - Track
+            </CustomText>
+            <CustomText style={[{fontFamily: fonts.Regular, fontSize: 14}]}>
+              Our app is designed to bring you closer to the services and
+              features you care about. Explore our mission, values, and the
+              people behind the scenes who make it all possible.
+            </CustomText>
+            <TouchableOpacity
+              activeOpacity={0.6}
+              onPress={() => navigation.navigate('AboutUs')}>
+              <CustomText
+                style={[
+                  {
+                    fontFamily: fonts.Regular,
+                    textDecorationLine: 'underline',
+                    color: theme.colors.appColor,
+                  },
+                ]}>
+                For more About Us
+              </CustomText>
+            </TouchableOpacity>
+          </View>
+
           {/* User AppointMent */}
           <Appointment fromUser={true} />
 
-          {/* Recommanded Doctor */}
           <RecommandedDoctor />
-
-       
-       
         </ScrollView>
       </View>
     </>
@@ -188,5 +208,13 @@ const styles = StyleSheet.create({
     height: 50,
     borderRadius: 100,
     bottom: 7,
+  },
+  button: {
+    backgroundColor: 'red',
+    padding: 10,
+    borderRadius: 10,
+  },
+  buttonText: {
+    fontSize: 16,
   },
 });

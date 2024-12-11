@@ -330,10 +330,10 @@ export default function SingleDoctor({route}) {
               <View>
                 <View>
                   <CustomText style={{fontFamily: fonts.Medium, fontSize: 19}}>
-                    {singleDoctor?.averageRating?.toFixed(1)} Rating
+                    {singleDoctor?.averageRating?singleDoctor?.averageRating?.toFixed(1):0} Rating
                   </CustomText>
                   <CustomText style={{fontFamily: fonts.Light, fontSize: 12}}>
-                    Based on {singleDoctor?.feedback?.length} rate
+                    Based on {singleDoctor?.feedback?.length?singleDoctor?.feedback?.length:0} rate
                   </CustomText>
                 </View>
               </View>
