@@ -126,7 +126,7 @@ export default function SingleDoctor({route}) {
         feedback: updatedFeedback,
         averageRating: averageRating, // Store the calculated average rating
       });
-      showToast('Booking confirmed successfully!');
+      showToast('Rating sent successfully!');
       // Navigate to the confirmation screen or back to previous screen
       setRateSpinner(false);
     } catch (error) {

@@ -41,6 +41,7 @@ export default function Login() {
       const snapShot = await firestore().collection('users').get();
       if (snapShot.empty) {
         showToast('No user found');
+     await setSpinner(false);
         return;
       }
       let userDoc = snapShot.docs.find(doc => {

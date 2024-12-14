@@ -1,30 +1,56 @@
-import React from 'react';
-import {View, Dimensions, StyleSheet} from 'react-native';
+import React, { useEffect, useState } from 'react';
+import {View, Dimensions, StyleSheet, ActivityIndicator} from 'react-native';
 import Onboarding from 'react-native-onboarding-swiper';
 import {Button, useTheme} from 'react-native-paper';
-import {useAuthContext} from '../../context/GlobaContext';
 import {useNavigation} from '@react-navigation/native';
-import {showToast} from '../../../utils/Toast';
 import CustomText from '../../customText/CustomText';
 import {Iconify} from 'react-native-iconify';
 import {fonts} from '../../customText/fonts';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { showToast } from '../../../utils/Toast';
 
 const OnboardingScreen = ({}) => {
   let navigation = useNavigation();
-
-  const {isLogin} = useAuthContext();
   let theme = useTheme();
-
   const handleBtnPress = () => {
-    if (isLogin) {
-      showToast('Login First');
-      navigation.navigate('Login');
-    } else {
-      navigation.navigate('Home');
-    }
+    navigation.navigate('Login');
   };
-
   let iconSize = 210;
+
+  const [isLoading, setIsLoading] = useState(true);
+
+
+
+  useEffect(() => {
+    const checkFirstScreen = async () => {
+      try {
+        await AsyncStorage.setItem('firstScreen', 'login');
+        const firstScreen = await AsyncStorage.getItem('firstScreen');
+        // console.log(firstScreen,'firstScreenfirstScreen');
+        setTimeout(() => {
+          setIsLoading(false); // Hide spinner after 5 seconds
+          if (firstScreen === 'login') {
+            navigation.navigate('Login');
+          }
+        }, 50); // 5-second delay
+      } catch (error) {
+        showToast('Error retrieving first screen setting');
+        setIsLoading(false);
+      }
+    };
+
+    checkFirstScreen();
+  }, [navigation]);
+
+  if (isLoading) {
+    return (
+      <View style={{flex:1,backgroundColor:theme.colors.background,justifyContent:'center',alignItems:'center'}}>
+        <ActivityIndicator size="large" color={theme.colors.appColor} />
+      </View>
+    );
+  }
+
+
   return (
     <Onboarding
       skipLabel={

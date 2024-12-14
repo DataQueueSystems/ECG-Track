@@ -1,5 +1,5 @@
 import {StyleSheet, Text, View} from 'react-native';
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import onBoardingScreen from './Screen/onBoarding/onBoardingScreen';
@@ -24,25 +24,38 @@ import AboutPage from './Screen/About';
 const Stack = createNativeStackNavigator();
 
 export default function AppNavigator() {
-  const {isLogin, setIsLogin} = useAuthContext();
+  const {isLogin, userDetail} = useAuthContext();
   let theme = useTheme();
+  const [initialScreen,setInitialScreen]=useState("Onboarding")
+
   useEffect(() => {
-    AsyncStorage.getItem('IsLogin').then(value => {
-      if (!value) {
-        setIsLogin(true);
+    const checkLogoutStatus = async () => {
+      try {
+        const value = await AsyncStorage.getItem('logout');
+        if (value) {
+          setInitialScreen("Login");
+        }
+      } catch (error) {
+        console.error('Error reading AsyncStorage', error);
       }
-    });
+    };
+  
+    checkLogoutStatus();
   }, []);
+  
 
   const Spinner = ({navigation}) => {
     // const navigation = useNavigation();
     useEffect(() => {
-      const timer = setTimeout(() => {
+      const timer = setTimeout(async() => {
+      //  let data= await AsyncStorage.setItem('logout', 'true');
+      //  console.log(data,'data');
         navigation.navigate('Parent');
       }, 100);
       // Clean up the timer if the component unmounts before the delay
       return () => clearTimeout(timer);
     }, [navigation]);
+
     return (
       <>
         <SafeAreaView style={[styles.container]}>
@@ -58,19 +71,20 @@ export default function AppNavigator() {
 
   return (
     <NavigationContainer>
-      <Stack.Navigator>
-        {isLogin ? (
+      <Stack.Navigator initialRouteName={initialScreen}>
+        {isLogin || userDetail == null ? (
           <>
+           <Stack.Screen
+              name="Login"
+              component={Login}
+              options={{headerShown: false}}
+            />
             <Stack.Screen
               name="Onboarding"
               component={onBoardingScreen}
               options={{headerShown: false}}
             />
-            <Stack.Screen
-              name="Login"
-              component={Login}
-              options={{headerShown: false}}
-            />
+           
             <Stack.Screen
               name="Register"
               component={Register}

@@ -63,7 +63,7 @@ export default function Home() {
       <Icon
         name={item.icon}
         size={40}
-        color={theme.colors.onBackground}
+        color={theme.colors.appColor}
         style={styles.cardIcon}
       />
       <CustomText style={[styles.cardTitle, {fontFamily: fonts.Black}]}>

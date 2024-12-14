@@ -196,7 +196,7 @@ const UserSheet = ({bottomSheetRef, user}) => {
                   styles.infoValue,
                   {color: theme.colors.onBackground, fontFamily: fonts.Regular},
                 ]}>
-                {user?.address || '123 Clinic Street, New York, NY'}
+                {user?.address || "N/A"}
               </CustomText>
             </View>
           </View>

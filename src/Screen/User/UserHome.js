@@ -96,25 +96,7 @@ export default function Home() {
               </CustomText>
             </View>
           </View>
-          {/* ProfileDetail */}
-          <View style={styles.userProfile}>
-            <View style={styles.profileImage}>
-              <Iconify
-                icon="mynaui:edit"
-                size={28}
-                color={theme.colors.onBackground}
-                onPress={handleNavigate}
-              />
-            </View>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
-              <Iconify
-                icon="majesticons:logout-half-circle-line"
-                size={30}
-                color={theme.colors.onBackground}
-                onPress={handleLogout}
-              />
-            </View>
-          </View>
+        
         </View>
 
         <ScrollView
