@@ -550,6 +550,7 @@ const HeartPredictionPage = () => {
             fontFamily: 'Poppins-Medium',
           },
         }}>
+
           
         <Tab.Screen name="Prediction" component={FormPredictionTab} />
         <Tab.Screen name="CSVUpload" component={CSVUploadTab} />
