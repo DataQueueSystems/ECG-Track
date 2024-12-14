@@ -5,7 +5,6 @@ import firestore from '@react-native-firebase/firestore';
 import {showToast} from '../../utils/Toast.js';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import RNFS from 'react-native-fs';
-import { useNavigation } from '@react-navigation/native';
 
 const Authcontext = createContext();
 export const AuthContextProvider = ({children}) => {
@@ -13,7 +12,7 @@ export const AuthContextProvider = ({children}) => {
   const [userDetail, setUserDetail] = useState(null);
   useEffect(() => {
     AsyncStorage.getItem('IsLogin').then(value => {
-      console.log(value,'value');
+      // console.log(value,'value');
       if (!value) {
         setIsLogin(true);
       }

@@ -469,55 +469,55 @@ const HeartPredictionPage = () => {
     </>
   );
 
-  const UploadECG = () => (
-    <View
-      style={[
-        styles.tableContainer,
-        {backgroundColor: theme.colors.background, flex: 1},
-      ]}>
-      <CustomText
-        style={[
-          {fontSize: 16, marginVertical: 16, textAlign: 'center'},
-          {fontFamily: fonts.Medium},
-        ]}>
-        Please upload an ECG image to receive a heart disease prediction. Ensure
-        the image is clear and the content is legible.
-      </CustomText>
+  // const UploadECG = () => (
+  //   <View
+  //     style={[
+  //       styles.tableContainer,
+  //       {backgroundColor: theme.colors.background, flex: 1},
+  //     ]}>
+  //     <CustomText
+  //       style={[
+  //         {fontSize: 16, marginVertical: 16, textAlign: 'center'},
+  //         {fontFamily: fonts.Medium},
+  //       ]}>
+  //       Please upload an ECG image to receive a heart disease prediction. Ensure
+  //       the image is clear and the content is legible.
+  //     </CustomText>
 
-      {/* Upload Button */}
-      <TouchableOpacity
-        style={[styles.button, {backgroundColor: theme.colors.onBackground}]}
-        onPress={loading2 ? () => {} : handleUploadImage}>
-        {loading2 ? (
-          <ActivityIndicator color={theme.colors.background} />
-        ) : (
-          <CustomText
-            style={[
-              {
-                fontFamily: fonts.SemiBold,
-                color: theme.colors.background,
-                fontSize: 16,
-              },
-            ]}>
-            Upload ECG Picture
-          </CustomText>
-        )}
-      </TouchableOpacity>
-      {responseECG && (
-          <View style={styles.predictionContainer}>
-            <CustomText style={styles.predictionHeading}>
-              ECG Prediction Results
-            </CustomText>
-            <CustomText style={[styles.predictionText,{color:theme.colors.appColor,fontFamily:fonts.SemiBold,fontSize:16}]}>
-              {responseECG?.class_name}
-            </CustomText>
-            <CustomText style={styles.predictionText}>
-              {responseECG?.definition}
-            </CustomText>
-          </View>
-        )}
-    </View>
-  );
+  //     {/* Upload Button */}
+  //     <TouchableOpacity
+  //       style={[styles.button, {backgroundColor: theme.colors.onBackground}]}
+  //       onPress={loading2 ? () => {} : handleUploadImage}>
+  //       {loading2 ? (
+  //         <ActivityIndicator color={theme.colors.background} />
+  //       ) : (
+  //         <CustomText
+  //           style={[
+  //             {
+  //               fontFamily: fonts.SemiBold,
+  //               color: theme.colors.background,
+  //               fontSize: 16,
+  //             },
+  //           ]}>
+  //           Upload ECG Picture
+  //         </CustomText>
+  //       )}
+  //     </TouchableOpacity>
+  //     {responseECG && (
+  //         <View style={styles.predictionContainer}>
+  //           <CustomText style={styles.predictionHeading}>
+  //             ECG Prediction Results
+  //           </CustomText>
+  //           <CustomText style={[styles.predictionText,{color:theme.colors.appColor,fontFamily:fonts.SemiBold,fontSize:16}]}>
+  //             {responseECG?.class_name}
+  //           </CustomText>
+  //           <CustomText style={styles.predictionText}>
+  //             {responseECG?.definition}
+  //           </CustomText>
+  //         </View>
+  //       )}
+  //   </View>
+  // );
 
   return (
     <View style={{flex: 1, backgroundColor: theme.colors.background}}>
@@ -550,9 +550,10 @@ const HeartPredictionPage = () => {
             fontFamily: 'Poppins-Medium',
           },
         }}>
+          
         <Tab.Screen name="Prediction" component={FormPredictionTab} />
         <Tab.Screen name="CSVUpload" component={CSVUploadTab} />
-        <Tab.Screen name="Upload ECG" component={UploadECG} />
+        {/* <Tab.Screen name="Upload ECG" component={UploadECG} /> */}
       </Tab.Navigator>
     </View>
   );
