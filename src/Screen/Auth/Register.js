@@ -190,7 +190,7 @@ export default function Register() {
             />
 
             {errors.name && (
-              <CustomText style={[styles.errorText, {color: theme.colors.red}]}>
+              <CustomText style={[styles.errorText, {color: theme.colors.error}]}>
                 {errors.name}
               </CustomText>
             )}
@@ -211,7 +211,7 @@ export default function Register() {
             />
 
             {errors.email && (
-              <CustomText style={[styles.errorText, {color: theme.colors.red}]}>
+              <CustomText style={[styles.errorText, {color: theme.colors.error}]}>
                 {errors.email}
               </CustomText>
             )}
@@ -231,7 +231,7 @@ export default function Register() {
             />
 
             {errors.contact && (
-              <CustomText style={[styles.errorText, {color: theme.colors.red}]}>
+              <CustomText style={[styles.errorText, {color: theme.colors.error}]}>
                 {errors.contact}
               </CustomText>
             )}
@@ -252,7 +252,7 @@ export default function Register() {
             />
 
             {errors.password && (
-              <CustomText style={[styles.errorText, {color: theme.colors.red}]}>
+              <CustomText style={[styles.errorText, {color: theme.colors.error}]}>
                 {errors.password}
               </CustomText>
             )}
@@ -339,6 +339,7 @@ const styles = StyleSheet.create({
   errorText: {
     fontSize: 12,
     bottom: 10,
+    fontFamily:'Poppins-Light'
   },
   image: {
     width: 70,

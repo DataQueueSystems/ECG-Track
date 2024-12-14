@@ -7,11 +7,18 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import RNFS from 'react-native-fs';
 import { useNavigation } from '@react-navigation/native';
 
-
 const Authcontext = createContext();
 export const AuthContextProvider = ({children}) => {
   const [isLogin, setIsLogin] = useState(false);
   const [userDetail, setUserDetail] = useState(null);
+  useEffect(() => {
+    AsyncStorage.getItem('IsLogin').then(value => {
+      console.log(value,'value');
+      if (!value) {
+        setIsLogin(true);
+      }
+    });
+  }, []);
 
   const Checknetinfo = async () => {
     const state = await NetInfo.fetch(); // Get the current network state
@@ -68,13 +75,12 @@ const handleLogout = () => {
             await RNFS.unlink(tempDir).catch(err =>
               console.warn('Temp clearing error:', err)
             );
-            
+            setUserDetail(null);
             // Clear AsyncStorage
             await AsyncStorage.clear();
-            // Update app state
-            setIsLogin(true);
-            AsyncStorage.setItem('IsLogin', 'false');
-            setUserDetail(null);
+            // // Update app state
+            // AsyncStorage.setItem('IsLogin', 'false');
+            AsyncStorage.setItem('logout', 'true');
             // Show success message
             showToast('App storage cleared and logged out successfully!');
           } catch (error) {
@@ -108,38 +114,7 @@ const GetEndPoint = async () => {
     // console.error("Error fetching endpoint:", error);
   }
 };
-// const GetEndPoint = async () => {
-//   try {
-//     // Initial fetch to get data once
-//     const docSnapshot = await firestore().collection('EndPoint').doc('portNum').get();
-//     console.log(docSnapshot,'docSnapshot');
-    
-//     if (docSnapshot.exists) {
-//       const IpDetail = docSnapshot.data().IpAddress;
-//       console.log(IpDetail,'IpDetail');
-      
-//       setIpAddress(IpDetail);
-//     } else {
-//       console.log('No matching document found');
-//     };
-//     // Setup onSnapshot to listen for real-time updates
-//     const unsubscribe = firestore()
-//       .collection('EndPoint')
-//       .doc('portNum')
-//       .onSnapshot(snapshot => {
-//         if (snapshot.exists) {
-//           const IpDetail = snapshot.data().IpAddress;
-//           setIpAddress(IpDetail);
-//         } else {
-//           console.log('No matching documents found');
-//         }
-//       });
 
-//     return unsubscribe;
-//   } catch (error) {
-//     console.error("Error fetching endpoint:", error);
-//   }
-// };
 
 useEffect(() => {
   const initialize = async () => {
@@ -153,6 +128,7 @@ useEffect(() => {
   };
   initialize();
 }, []);
+
 
 // const handleLogout = () => {
 //   Alert.alert(

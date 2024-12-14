@@ -22,7 +22,7 @@ export default function UAProfile() {
   let theme = useTheme();
   let navigation = useNavigation();
   let screenName = 'Profile Detail';
-  const {userDetail} = useAuthContext();
+  const {userDetail, handleLogout} = useAuthContext();
   let iconsize = 26;
   let contentSize = 15;
 
@@ -35,6 +35,18 @@ export default function UAProfile() {
           <Iconify icon="mynaui:edit" size={28} color={theme.colors.green} />
         )}
       />
+      {userDetail?.role == 'user' && (
+        <>
+          <View style={{flexDirection: 'row', alignItems: 'center'}}>
+            <Iconify
+              icon="majesticons:logout-half-circle-line"
+              size={30}
+              color={theme.colors.onBackground}
+              onPress={handleLogout}
+            />
+          </View>
+        </>
+      )}
     </>
   );
 
@@ -53,12 +65,14 @@ export default function UAProfile() {
     }).start();
   };
 
-  let isUser=userDetail?.role=="user"?true:false
-  console.log(isUser,'isUser');
-  
+  let isUser = userDetail?.role == 'user' ? true : false;
   return (
     <>
-      <Header screenName={screenName} renderAction={renderAction} isUser={isUser} />
+      <Header
+        screenName={screenName}
+        renderAction={renderAction}
+        isUser={isUser}
+      />
       <View
         style={[
           styles.maincontainer,
@@ -97,7 +111,7 @@ export default function UAProfile() {
             ) : (
               <View style={styles.imageview}>
                 <Iconify
-                icon="fa-solid:user"
+                  icon="fa-solid:user"
                   size={90}
                   color={theme.colors.onBackground}
                 />
