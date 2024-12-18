@@ -131,7 +131,6 @@ export default function ControlDoctor({route}) {
       }
     } catch (error) {
       setSpinner(false);
-
       console.log('Error is :', error);
     }
   };

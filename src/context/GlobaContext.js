@@ -12,7 +12,6 @@ export const AuthContextProvider = ({children}) => {
   const [userDetail, setUserDetail] = useState(null);
   useEffect(() => {
     AsyncStorage.getItem('IsLogin').then(value => {
-      // console.log(value,'value');
       if (!value) {
         setIsLogin(true);
       }
@@ -46,116 +45,109 @@ export const AuthContextProvider = ({children}) => {
     );
   };
 
-  
-const handleLogout = () => {
-  Alert.alert(
-    'Logout', // Title
-    'Are you sure you want to logout?', // Message
-    [
-      {
-        text: 'Cancel', // Cancel button
-        onPress: () => console.log('Cancel Pressed'),
-        style: 'cancel',
-      },
-      {
-        text: 'OK', // OK button
-        onPress: async () => {
-          try {
-            
-            // Clear cache and temporary files
-            const cacheDir = RNFS.CachesDirectoryPath;
-            const tempDir = RNFS.TemporaryDirectoryPath;
-            
-            // Delete cache files
-            await RNFS.unlink(cacheDir).catch(err =>
-              console.warn('Cache clearing error:', err)
-            );
-            // Delete temporary files
-            await RNFS.unlink(tempDir).catch(err =>
-              console.warn('Temp clearing error:', err)
-            );
-            setUserDetail(null);
-            // Clear AsyncStorage
-            await AsyncStorage.clear();
-            // // Update app state
-            // AsyncStorage.setItem('IsLogin', 'false');
-            AsyncStorage.setItem('logout', 'true');
-            // Show success message
-            showToast('App storage cleared and logged out successfully!');
-          } catch (error) {
-            console.error('Error during logout:', error);
-            showToast('Failed to logout. Please try again!');
-          }
+  const handleLogout = () => {
+    Alert.alert(
+      'Logout', // Title
+      'Are you sure you want to logout?', // Message
+      [
+        {
+          text: 'Cancel', // Cancel button
+          onPress: () => console.log('Cancel Pressed'),
+          style: 'cancel',
         },
-      },
-    ],
-    { cancelable: false }, // Prevent dismissing by tapping outside the alert
-  );
-};
+        {
+          text: 'OK', // OK button
+          onPress: async () => {
+            try {
+              // Clear cache and temporary files
+              const cacheDir = RNFS.CachesDirectoryPath;
+              const tempDir = RNFS.TemporaryDirectoryPath;
 
-const [ipAddress, setIpAddress] = useState(null);
-const GetEndPoint = async () => {
-  try {
-    
-    const unsubscribe = firestore()
+              // Delete cache files
+              await RNFS.unlink(cacheDir).catch(err =>
+                console.warn('Cache clearing error:', err),
+              );
+              // Delete temporary files
+              await RNFS.unlink(tempDir).catch(err =>
+                console.warn('Temp clearing error:', err),
+              );
+              await AsyncStorage.clear();
+              setUserDetail(null);
+              // Clear AsyncStorage
+              // // Update app state
+              // AsyncStorage.setItem('IsLogin', 'false');
+              AsyncStorage.setItem('logout', 'true');
+              // Show success message
+              showToast('App storage cleared and logged out successfully!');
+            } catch (error) {
+              console.error('Error during logout:', error);
+              showToast('Failed to logout. Please try again!');
+            }
+          },
+        },
+      ],
+      {cancelable: false}, // Prevent dismissing by tapping outside the alert
+    );
+  };
+
+  const [ipAddress, setIpAddress] = useState(null);
+  const GetEndPoint = async () => {
+    try {
+      const unsubscribe = firestore()
         .collection('EndPoint') // Assuming agents are in the `users` collection
-        .doc("portNum")
+        .doc('portNum')
         .onSnapshot(async userDoc => {
           if (!userDoc.exists) {
             return;
-          };
+          }
           const IpDetail = {id: userDoc.id, ...userDoc.data()};
           setIpAddress(IpDetail?.ipAddress);
         });
 
-    return unsubscribe;
-  } catch (error) {
-    // console.error("Error fetching endpoint:", error);
-  }
-};
-
-
-useEffect(() => {
-  const initialize = async () => {
-    let isConnected = await Checknetinfo();
-    if (!isConnected) {
-      showToast('No internet connection');
-      return;
+      return unsubscribe;
+    } catch (error) {
+      // console.error("Error fetching endpoint:", error);
     }
-    const unsubscribe = GetEndPoint();
-    return () => unsubscribe && unsubscribe();
   };
-  initialize();
-}, []);
 
+  useEffect(() => {
+    const initialize = async () => {
+      let isConnected = await Checknetinfo();
+      if (!isConnected) {
+        showToast('No internet connection');
+        return;
+      }
+      const unsubscribe = GetEndPoint();
+      return () => unsubscribe && unsubscribe();
+    };
+    initialize();
+  }, []);
 
-// const handleLogout = () => {
-//   Alert.alert(
-//     'Logout', //title
-//     'Are you sure ,you want to logout ?', //message
-//     [
-//       {
-//         text: 'Cancel', // Cancel button
-//         onPress: () => console.log('Cancel Pressed'),
-//         style: 'cancel',
-//       },
-//       {
-//         text: 'OK', // OK button
-//         onPress: () => {
-//           setIsLogin(true);
-//           AsyncStorage.setItem('IsLogin', 'false');
-//           AsyncStorage.clear();
-//           setUserDetail(null);
-//           showToast('Logout successfully!');
-//           // some logic
-//         },
-//       },
-//     ],
-//     {cancelable: false}, // Optionally prevent dismissing by tapping outside the alert
-//   );
-// };
-
-
+  // const handleLogout = () => {
+  //   Alert.alert(
+  //     'Logout', //title
+  //     'Are you sure ,you want to logout ?', //message
+  //     [
+  //       {
+  //         text: 'Cancel', // Cancel button
+  //         onPress: () => console.log('Cancel Pressed'),
+  //         style: 'cancel',
+  //       },
+  //       {
+  //         text: 'OK', // OK button
+  //         onPress: () => {
+  //           setIsLogin(true);
+  //           AsyncStorage.setItem('IsLogin', 'false');
+  //           AsyncStorage.clear();
+  //           setUserDetail(null);
+  //           showToast('Logout successfully!');
+  //           // some logic
+  //         },
+  //       },
+  //     ],
+  //     {cancelable: false}, // Optionally prevent dismissing by tapping outside the alert
+  //   );
+  // };
 
   const [count, setCount] = useState(0);
 
@@ -209,10 +201,8 @@ useEffect(() => {
   const [adminDoctors, setAdminDoctors] = useState([]);
   const [adminPatient, setAdminPatient] = useState([]);
 
-   const GetUserDetail = async () => {
+  const GetUserDetail = async () => {
     const userToken = await AsyncStorage.getItem('token');
-    console.log(userToken,'userToken');
-    
     if (!userToken) return;
     try {
       const unsubscribe = firestore()
@@ -221,9 +211,8 @@ useEffect(() => {
         .onSnapshot(async userDoc => {
           if (!userDoc.exists) {
             return;
-          };
+          }
           const userData = {id: userDoc.id, ...userDoc.data()};
-          console.log(userData,'userData');
           // Set user details if the account is active
           await setUserDetail(userData);
         });
@@ -235,23 +224,13 @@ useEffect(() => {
     }
   };
   useEffect(() => {
-    console.log(userDetail,'userDetail');
-   const GetUserData=async()=>{
-    const userToken = await AsyncStorage.getItem('token');
-    console.log(userToken,'userToken');
-    console.log(userDetail,'userDetail');
-
-    //  if (userDetail && userDetail?.id) {
+    const GetUserData = async () => {
+      //  if (userDetail && userDetail?.id) {
       await GetUserDetail();
-    console.log(userDetail,'userDetail');
-    // }
-   };
-   GetUserData()
+      // }
+    };
+    GetUserData();
   }, [count]);
-
- 
-
-
 
   return (
     <Authcontext.Provider

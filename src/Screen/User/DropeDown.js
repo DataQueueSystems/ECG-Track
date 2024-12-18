@@ -49,7 +49,7 @@ export default function CustomDropdown({ label, options, value, onChange }) {
               )}
             />
             <TouchableOpacity
-              style={[styles.closeButton, { backgroundColor: theme.colors.error }]}
+              style={[styles.closeButton, { backgroundColor: theme.colors.appColor }]}
               onPress={() => setIsVisible(false)}>
               <CustomText style={[styles.closeButtonCustomText,{fontFamily:fonts.SemiBold}]}>Close</CustomText>
             </TouchableOpacity>
