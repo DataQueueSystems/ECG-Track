@@ -27,7 +27,7 @@ export default function UploadForm({route}) {
     restingBP: '',
     serumcholestrol: '',
     fastingbloodsugar: '',
-    electrocardiographic: '',
+    restingrelectro: '',
     maxheartrate: '',
     exerciseangia: '',
     oldpeak: '',
@@ -59,14 +59,12 @@ export default function UploadForm({route}) {
       newErrors.serumcholestrol = 'Serum Cholesterol is required';
     if (!formValues.fastingbloodsugar)
       newErrors.fastingbloodsugar = 'Fasting Blood Sugar is required';
-    if (!formValues.electrocardiographic)
-      newErrors.electrocardiographic =
-        'Electrocardiographic Results are required';
     if (!formValues.maxheartrate)
       newErrors.maxheartrate = 'Max Heart Rate is required';
     if (!formValues.exerciseangia)
       newErrors.exerciseangia = 'Exercise Induced Angina is required';
     if (!formValues.oldpeak) newErrors.oldpeak = 'Old Peak is required';
+    if (!formValues.restingrelectro) newErrors.restingrelectro = 'restingrelectro is required';
     if (!formValues.slope) newErrors.slope = 'Slope of Peak is required';
     if (!formValues.noofmajorvessels)
       newErrors.noofmajorvessels = 'Number of Major Vessels is required';
@@ -213,23 +211,24 @@ export default function UploadForm({route}) {
               </CustomText>
             )}
             
-            <CustomDropdown
-  label="Electrocardiographic Results"
-  options={[
-    { value: '0', label: 'Normal' },
-    { value: '1', label: 'ST-T Wave Abnormality' },
-    { value: '2', label: 'Probable/Definite Left Ventricular Hypertrophy' },
-  ]}
-  value={formValues.electrocardiographic}
-  onChange={(value) => handleChange('electrocardiographic', value)}
-/>
-{errors.electrocardiographic && (
-  <CustomText
-    style={[styles.errorText, { color: theme.colors.error }]}>
-    {errors.electrocardiographic}
-  </CustomText>
-)}
-
+            {/* Fasting Blood Sugar Input */}
+            <TextInput
+              mode="outlined"
+              style={styles.input}
+              placeholder="Enter Fasting Blood Sugar (0 or 1)"
+              value={formValues.restingrelectro}
+              onChangeText={value => handleChange('restingrelectro', value)}
+              keyboardType="numeric"
+              label={'Restingrelectro'}
+            />
+            {errors.restingrelectro && (
+              <CustomText
+                style={[styles.errorText, {color: theme.colors.error}]}>
+                {errors.restingrelectro}
+              </CustomText>
+            )}
+            
+            
 
             {/* Max Heart Rate Input */}
             <TextInput

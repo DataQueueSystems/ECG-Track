@@ -80,35 +80,47 @@ const DoctorSheet = ({bottomSheetRef, doctor, fromApt, selectedaptDetail}) => {
       showToast(`Rating is Required`);
       return;
     }
+  
     const isConnected = await Checknetinfo();
     if (!isConnected) {
       setSpinner(false);
       return; // Do not proceed if there is no internet connection
     }
+  
     let data = {
       userId: userDetail?.id,
       doctorId: doctor?.id,
       aptId: selectedaptDetail?.id,
       rating,
     };
-    const currentFeedback = doctor?.feedback || [];
+  
+    const currentFeedback = doctor?.feedback || []; // Ensure feedback is an array, even if it's undefined.
+    
     // Add the new rating data to the feedback array
     const updatedFeedback = [...currentFeedback, data];
+  
     // Calculate the average rating from the updated feedback (sum of ratings)
     const total = updatedFeedback.reduce(
       (sum, feedback) => sum + feedback.rating,
-      0,
+      0
     ); // Sum of rating values
     const averageRating = total / updatedFeedback.length;
+  
     try {
       // Update the doctor's feedback array and average rating
       await firestore().collection('users').doc(doctor?.id).update({
         feedback: updatedFeedback,
         averageRating: averageRating, // Store the calculated average rating
       });
-      showToast('Booking confirmed successfully!');
-      // Navigate to the confirmation screen or back to previous screen
-      // navigation.navigate('Parent'); // or navigation.goBack() if going back
+  
+      showToast('Review submitted successfully!');
+      
+      // Navigate to the confirmation screen or back to the previous screen
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Parent' }],
+      });
+  
       setSpinner(false);
     } catch (error) {
       console.error('Error saving booking:', error);
@@ -116,7 +128,7 @@ const DoctorSheet = ({bottomSheetRef, doctor, fromApt, selectedaptDetail}) => {
       setSpinner(false);
     }
   };
-
+  
   const [rating, setRating] = useState(0);
   const handleStarPress = index => {
     setRating(index + 1);

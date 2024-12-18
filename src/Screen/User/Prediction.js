@@ -8,6 +8,7 @@ import {
   FlatList,
   ScrollView,
   ActivityIndicator,
+  Alert,
 } from 'react-native';
 import axios from 'axios';
 import {createMaterialTopTabNavigator} from '@react-navigation/material-top-tabs';
@@ -31,7 +32,6 @@ const HeartPredictionPage = () => {
 
   const [csvData, setCsvData] = useState(null);
   const [responseECG, setResponseECG] = useState(null);
-  // console.log(csvData,'csvData');
 
   const [formPrediction, setFormPrediction] = useState(null);
   let navigation = useNavigation();
@@ -88,33 +88,81 @@ const HeartPredictionPage = () => {
     }
   };
 
+  const handleUploadImage = async () => {
+    setResponseECG(null);
+    setLoading2(true);
+    try {
+      // Open document picker to select an image file
+      const res = await DocumentPicker.pick({
+        type: [DocumentPicker.types.images], // Allow image file types
+      });
+
+      // Generate a file name (for example, based on timestamp)
+      const randomNum = Date.now(); // Generate a random number for unique file name
+      const fileName = `ECG${randomNum}.png`; // Example file name with PNG extension
+
+      // Prepare FormData for the API request
+      const formData = new FormData();
+      formData.append('image', {
+        uri: res[0].uri, // Use the selected file URI
+
+        type: 'image/png', // Set the file type correctly
+        name: fileName, // Name of the file being uploaded
+      });
+
+      // Send the form data to your backend
+      const response = await axios.post(
+        `${ipAddress}/predict-image`,
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        },
+      );
+      setResponseECG(response?.data.prediction);
+      showToast('Success'); // Show success toast if the status is success
+      setLoading2(false); // Hide the loading spinner
+    } catch (err) {
+      // console.log(err, "err");
+      // Handle errors more gracefully
+      if (err.response) {
+        // If there's a response error from the server
+        const errorMessage = err.response.data.error || 'Something went wrong';
+        showToast(errorMessage);
+      } else if (err.request) {
+        // No response from the server
+        showToast('No response from server');
+      } else {
+        // Any other kind of error
+        showToast(err.message);
+      }
+      setLoading2(false); // Hide loading spinner on error
+    }
+  };
+
+  const [formData, setFormData] = useState(null);
+  const handleNavigate = () => {
+    setFormError(null);
+    setFormPrediction(null);
+    setFormData(null);
+    navigation.navigate('FormUpload', {setFormData});
+  };
+
   const handleSubmit = async () => {
     setFormError('');
-    // Example Data
-    // const defaultData = {
-    //   age: 40,
-    //   gender: 1,
-    //   chestpain: 0,
-    //   restingBP: 94,
-    //   serumcholestrol: 229,
-    //   fastingbloodsugar: 0,
-    //   restingrelectro: 1,
-    //   maxheartrate: 115,
-    //   exerciseangia: 0,
-    //   oldpeak: 3.7,
-    //   slope: 1,
-    //   noofmajorvessels: 1,
-    //   electrocardiographic: 0,
-    // };
-    // Convert string values to numbers
     const convertedFormData = Object.fromEntries(
       Object.entries(formData).map(([key, value]) => [key, parseFloat(value)]),
     );
     try {
-      // Send the data as a POST request to the backend
       const response = await axios.post(
         `${ipAddress}/predict`,
         convertedFormData,
+        {
+          headers: {
+            'Content-Type': 'application/json', // Set JSON content type
+          },
+        },
       );
       // console.log('Backend Response:', response.data);
       setFormPrediction(response.data);
@@ -134,65 +182,6 @@ const HeartPredictionPage = () => {
     }
   };
 
-  const handleUploadImage = async () => {
-    setResponseECG(null)
-    setLoading2(true);
-    try {
-      // Open document picker to select an image file
-      const res = await DocumentPicker.pick({
-        type: [DocumentPicker.types.images], // Allow image file types
-      });
-      
-      // Generate a file name (for example, based on timestamp)
-      const randomNum = Date.now(); // Generate a random number for unique file name
-      const fileName = `ECG${randomNum}.png`; // Example file name with PNG extension
-
-      // Prepare FormData for the API request
-      const formData = new FormData();
-      formData.append('image', {
-        uri: res[0].uri, // Use the selected file URI
-
-        type: 'image/png', // Set the file type correctly
-        name: fileName, // Name of the file being uploaded
-      });
-
-      // Send the form data to your backend
-      const response = await axios.post(`${ipAddress}/predict-image`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-      // console.log(response?.data.prediction,'response?.data.prediction');
-      setResponseECG(response?.data.prediction)
-        showToast('Success'); // Show success toast if the status is success
-        setLoading2(false);  // Hide the loading spinner
-    
-    } catch (err) {
-      // console.log(err, "err");
-      // Handle errors more gracefully
-      if (err.response) {
-        // If there's a response error from the server
-        const errorMessage = err.response.data.error || 'Something went wrong';
-        showToast(errorMessage);
-      } else if (err.request) {
-        // No response from the server
-        showToast('No response from server');
-      } else {
-        // Any other kind of error
-        showToast(err.message);
-      }
-      setLoading2(false);  // Hide loading spinner on error
-    }
-  };
-
-
-  const [formData, setFormData] = useState(null);
-  const handleNavigate = () => {
-    setFormError(null);
-    setFormPrediction(null);
-    setFormData(null);
-    navigation.navigate('FormUpload', {setFormData});
-  };
   // Form Prediction Tab Content
   const FormPredictionTab = () => (
     <ScrollView
@@ -200,12 +189,9 @@ const HeartPredictionPage = () => {
       showsHorizontalScrollIndicator={false}
       style={{flex: 1, backgroundColor: theme.colors.background}}>
       <View style={[{padding: 10}]}>
-        <TouchableOpacity onPress={handleNavigate}
-        style={[
-          styles.button,
-          {backgroundColor: theme.colors.onBackground},
-        ]}
-        >
+        <TouchableOpacity
+          onPress={handleNavigate}
+          style={[styles.button, {backgroundColor: theme.colors.onBackground}]}>
           <CustomText
             style={[
               {
@@ -329,22 +315,21 @@ const HeartPredictionPage = () => {
     '/': 'Unknown', // Unknown rhythm
   };
 
-
   function getAnnotation(ecgValue) {
-    if (ecgValue >= 0.030 && ecgValue <= 0.032) {
-      return notationMapping['N'];  // Normal
+    if (ecgValue >= 0.03 && ecgValue <= 0.032) {
+      return notationMapping['N']; // Normal
     } else if (ecgValue > 0.035 || ecgValue < 0.025) {
-      return notationMapping['Q'];  // Abnormal
+      return notationMapping['Q']; // Abnormal
     } else if (ecgValue >= 0.035 && ecgValue <= 0.045) {
-      return notationMapping['V'];  // Ventricular
-    } else if (ecgValue > 0.030 && ecgValue < 0.035) {
-      return notationMapping['A'];  // Atrial
-    } else if (ecgValue > 0.040) {
-      return notationMapping['~'];  // Noise
+      return notationMapping['V']; // Ventricular
+    } else if (ecgValue > 0.03 && ecgValue < 0.035) {
+      return notationMapping['A']; // Atrial
+    } else if (ecgValue > 0.04) {
+      return notationMapping['~']; // Noise
     } else if (ecgValue > 0.035 && ecgValue < 0.045) {
-      return notationMapping['!'];  // Ventricular bigeminy
+      return notationMapping['!']; // Ventricular bigeminy
     }
-    return notationMapping['/'];  // Unknown
+    return notationMapping['/']; // Unknown
   }
 
   // CSV Upload Tab Content
@@ -366,7 +351,7 @@ const HeartPredictionPage = () => {
             <View style={styles.tableRow}>
               <CustomText
                 style={[styles.tableCell, {fontFamily: fonts.Regular}]}>
-                {item?.annotation?getAnnotation(item?.ecg_value):""}
+                {item?.annotation ? getAnnotation(item?.ecg_value) : ''}
               </CustomText>
               <CustomText
                 style={[styles.tableCell, {fontFamily: fonts.Regular}]}>
@@ -469,55 +454,63 @@ const HeartPredictionPage = () => {
     </>
   );
 
-  // const UploadECG = () => (
-  //   <View
-  //     style={[
-  //       styles.tableContainer,
-  //       {backgroundColor: theme.colors.background, flex: 1},
-  //     ]}>
-  //     <CustomText
-  //       style={[
-  //         {fontSize: 16, marginVertical: 16, textAlign: 'center'},
-  //         {fontFamily: fonts.Medium},
-  //       ]}>
-  //       Please upload an ECG image to receive a heart disease prediction. Ensure
-  //       the image is clear and the content is legible.
-  //     </CustomText>
+  const UploadECG = () => (
+    <View
+      style={[
+        styles.tableContainer,
+        {backgroundColor: theme.colors.background, flex: 1},
+      ]}>
+      <CustomText
+        style={[
+          {fontSize: 16, marginVertical: 16, textAlign: 'center'},
+          {fontFamily: fonts.Medium},
+        ]}>
+        Please upload an ECG image to receive a heart disease prediction. Ensure
+        the image is clear and the content is legible.
+      </CustomText>
 
-  //     {/* Upload Button */}
-  //     <TouchableOpacity
-  //       style={[styles.button, {backgroundColor: theme.colors.onBackground}]}
-  //       onPress={loading2 ? () => {} : handleUploadImage}>
-  //       {loading2 ? (
-  //         <ActivityIndicator color={theme.colors.background} />
-  //       ) : (
-  //         <CustomText
-  //           style={[
-  //             {
-  //               fontFamily: fonts.SemiBold,
-  //               color: theme.colors.background,
-  //               fontSize: 16,
-  //             },
-  //           ]}>
-  //           Upload ECG Picture
-  //         </CustomText>
-  //       )}
-  //     </TouchableOpacity>
-  //     {responseECG && (
-  //         <View style={styles.predictionContainer}>
-  //           <CustomText style={styles.predictionHeading}>
-  //             ECG Prediction Results
-  //           </CustomText>
-  //           <CustomText style={[styles.predictionText,{color:theme.colors.appColor,fontFamily:fonts.SemiBold,fontSize:16}]}>
-  //             {responseECG?.class_name}
-  //           </CustomText>
-  //           <CustomText style={styles.predictionText}>
-  //             {responseECG?.definition}
-  //           </CustomText>
-  //         </View>
-  //       )}
-  //   </View>
-  // );
+      {/* Upload Button */}
+      <TouchableOpacity
+        style={[styles.button, {backgroundColor: theme.colors.onBackground}]}
+        onPress={loading2 ? () => {} : handleUploadImage}>
+        {loading2 ? (
+          <ActivityIndicator color={theme.colors.background} />
+        ) : (
+          <CustomText
+            style={[
+              {
+                fontFamily: fonts.SemiBold,
+                color: theme.colors.background,
+                fontSize: 16,
+              },
+            ]}>
+            Upload ECG Picture
+          </CustomText>
+        )}
+      </TouchableOpacity>
+      {responseECG && (
+        <View style={styles.predictionContainer}>
+          <CustomText style={styles.predictionHeading}>
+            ECG Prediction Results
+          </CustomText>
+          <CustomText
+            style={[
+              styles.predictionText,
+              {
+                color: theme.colors.appColor,
+                fontFamily: fonts.SemiBold,
+                fontSize: 16,
+              },
+            ]}>
+            {responseECG?.class_name}
+          </CustomText>
+          <CustomText style={styles.predictionText}>
+            {responseECG?.definition}
+          </CustomText>
+        </View>
+      )}
+    </View>
+  );
 
   return (
     <View style={{flex: 1, backgroundColor: theme.colors.background}}>
@@ -550,11 +543,9 @@ const HeartPredictionPage = () => {
             fontFamily: 'Poppins-Medium',
           },
         }}>
-
-          
         <Tab.Screen name="Prediction" component={FormPredictionTab} />
         <Tab.Screen name="CSVUpload" component={CSVUploadTab} />
-        {/* <Tab.Screen name="Upload ECG" component={UploadECG} /> */}
+        <Tab.Screen name="Upload ECG" component={UploadECG} />
       </Tab.Navigator>
     </View>
   );
